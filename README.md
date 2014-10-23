@@ -1,10 +1,6 @@
 H4TestBeam
 ==========
 
-Original from 
-
-    https://github.com/ShashlikTBH4/H4LySO
-
 Description:
 
     converter of the spill information from H4DAQ/H4DQM format to TBSpill + TBTree
