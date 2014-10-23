@@ -1,13 +1,9 @@
-H4TestBeam
-==========
-
-Original from 
-
-    https://github.com/ShashlikTBH4/H4LySO
+H4LySO
+======
 
 Description:
 
-    converter of the spill information from H4DAQ/H4DQM format to TBSpill + TBTree
+    converter of the spill information from H4DAQ/H4DQM format to TBspill
     
 Install:
 
@@ -15,14 +11,12 @@ Install:
     git clone   https://github.com/ShashlikTB/T1041.git
     cd T1041
     make 
-    cd ../H4TestBeam/
+    cd ../H4LySO/
     make soLib
     
 
 
 Where:
 
-    /home/amassiro/Cern/Code/ECAL/TB/H4TestBeam
-
-
+    /home/amassiro/Cern/Code/ECAL/TB/H4LySO
 
