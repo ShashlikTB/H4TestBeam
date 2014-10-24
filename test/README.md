@@ -22,3 +22,6 @@ To create root file from raw H4DQM
     ./bin/readBinary -f ../data/12.raw  -o test.root
 
     
+To create tbspill:
+
+    ./bin/H4data2text --input_file blabla.root --output_file test.txt
