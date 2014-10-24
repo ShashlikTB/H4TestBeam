@@ -2,11 +2,14 @@
 #include "TTree.h"
 #include "TFile.h"
 
+#include <iostream>
+#include <fstream>
+
 
 //---- from TBtree Shashlik ----
 #include "include/TBEvent.h"
 
-
+//---- boost
 #include "boost/program_options.hpp"
 #include "boost/program_options/options_description.hpp"
 
@@ -73,6 +76,19 @@ int main(int argc, char**argv){
   std::cout << " v_spillNumber[" << i << "] = " << v_spillNumber[i] << " --- ";
   std::cout << " v_evtNumber  [" << i << "] = " << v_evtNumber[i] << std::endl;
  }
+ 
+  
+ ofstream myfile;
+ myfile.open (output_file);
+ myfile << "Writing this to a file.\n";
+ for (int i=0; i<nEntries; i++) {
+  myfile << " v_runNumber  [" << i << "] = " << v_runNumber[i] << " --- ";
+  myfile << " v_spillNumber[" << i << "] = " << v_spillNumber[i] << " --- ";
+  myfile << " v_evtNumber  [" << i << "] = " << v_evtNumber[i] << std::endl;
+ }
+ myfile.close(); 
+ 
+ 
  
 }
 
