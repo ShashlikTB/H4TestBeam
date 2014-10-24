@@ -61,15 +61,17 @@ int main(int argc, char**argv){
  TTree* H4tree = (TTree*) fileIn->Get("H4tree");
  
  
- int nEntries = H4tree->Draw("evtTime:evtNumber:evtTimeDist","","para goff");
-//  int nEntries = H4tree->Draw("runNumber:spillNumber:evtNumber:evtTimeDist","","para goff");
- Double_t *v_evtTime = H4tree->GetV1();
- Double_t *v_evtNumber = H4tree->GetV2();
+//  int nEntries = H4tree->Draw("evtTime:evtNumber:evtTimeDist","","para goff");
+ int nEntries = H4tree->Draw("runNumber:spillNumber:evtNumber:evtTimeDist","","para goff");
+ Double_t *v_runNumber = H4tree->GetV1();
+ Double_t *v_spillNumber = H4tree->GetV2();
+ Double_t *v_evtNumber = H4tree->GetV3();
  
  std::cout << " nEntries = " << nEntries << std::endl;
  for (int i=0; i<nEntries; i++) {
-//   std::cout << " v_evtTime[" << i << "]   = " << v_evtTime[i] << std::endl;
-  std::cout << " v_evtNumber[" << i << "] = " << v_evtNumber[i] << std::endl;
+  std::cout << " v_runNumber  [" << i << "] = " << v_runNumber[i] << " --- ";
+  std::cout << " v_spillNumber[" << i << "] = " << v_spillNumber[i] << " --- ";
+  std::cout << " v_evtNumber  [" << i << "] = " << v_evtNumber[i] << std::endl;
  }
  
 }
