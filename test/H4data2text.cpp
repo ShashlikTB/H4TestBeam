@@ -17,6 +17,8 @@ int main(int argc, char**argv){
 
  std::string input_file;
  std::string output_file;
+
+ //---- configuration
  
  // Declare the supported options.
  po::options_description desc("Allowed options");
@@ -48,22 +50,17 @@ int main(int argc, char**argv){
  }
  
  
- TBSpill tbspill;
+ //---- configuration (end)
  
- std::cout << "ciao 1!" << std::endl;
+//  -- in case we move directly to tbspill
+//  TBSpill tbspill;
+ 
  
  //---- read file
  TFile* fileIn = new TFile (input_file.c_str(), "READ");
  TTree* H4tree = (TTree*) fileIn->Get("H4tree");
  
-//  H4tree->SetEntryList(0);
-//  H4tree->Draw(">> myList","1","entrylist");
-// //  H4tree->Draw(">> myList",globalCut.Data(),"entrylist");
-//  TEntryList *myList = (TEntryList*) gDirectory->Get("myList");
-//  H4tree->Draw("runNumber:spillNumber:evtNumber:evtTimeDist","","para goff");
-//  int nEntries = myList->GetN();
  
- std::cout << "ciao!" << std::endl;
  int nEntries = H4tree->Draw("evtTime:evtNumber:evtTimeDist","","para goff");
 //  int nEntries = H4tree->Draw("runNumber:spillNumber:evtNumber:evtTimeDist","","para goff");
  Double_t *v_evtTime = H4tree->GetV1();
