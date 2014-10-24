@@ -12,9 +12,13 @@ Install:
     cd T1041
     make 
     cd ../H4TestBeam/
-    make soLib
+    make
     
 
+To run:
+
+    ./bin/H4data2text --input_file blabla.root --output_file test.txt
+    
 
 Where:
 
