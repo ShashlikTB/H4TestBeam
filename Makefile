@@ -2,7 +2,7 @@ INC_DIR = ./
 CXX		=g++
 LD		=g++
 CXXFLAGS	=-O2 -ggdb -std=gnu++0x -Wall
-LDFLAGS		=-lz -lm
+LDFLAGS		=-lz -lm  -Wl,--no-as-needed
 SOFLAGS		=-fPIC -shared 
 SHELL		=bash
 ###
@@ -22,7 +22,7 @@ Packages=$(patsubst test/%.$(SrcSuf),%,$(CppTestFiles) )
 CppSrcFiles=$(wildcard src/*.$(SrcSuf))
 Objects=$(patsubst src/%.$(SrcSuf),%,$(CppSrcFiles))
 
-LibName		=H4LySO
+LibName		=H4TestBeam
 
 ### ----- OPTIONS ABOVE ----- ####
 
@@ -33,6 +33,8 @@ BASEDIR=$(shell pwd)
 BINDIR=$(BASEDIR)/bin
 SRCDIR = $(BASEDIR)/src
 HDIR = $(BASEDIR)/include
+EXTHDIR = $(BASEDIR)/../T1041/
+EXTLIBDIR = -L$(BASEDIR)/../T1041/build/lib/ -lTB
 
 ### Main Target, first
 .PHONY: all
@@ -40,13 +42,15 @@ all: info $(Packages) | $(BINDIR)
 
 CXXFLAGS	+=`root-config --cflags`
 LDFLAGS 	+=`root-config --libs`
-LDFLAGS         +=-L/usr/lib/x86_64-linux-gnu/ -lboost_program_options
+
+LDFLAGS 	+= $(EXTLIBDIR)
+LDBOOSTFLAGS 	=-lboost_program_options
 
 BINOBJ	=$(patsubst %,$(BINDIR)/%.$(ObjSuf),$(Objects) )
 SRCFILES=$(patsubst %,$(SRCDIR)/%.$(SrcSuf),$(Objects) )
 HFILES	=$(patsubst %,$(HDIR)/%.$(HeadSuf),$(Objects) )
-StatLib		=$(BINDIR)/H4LySO.$(StatSuf)
-SoLib		=$(BINDIR)/H4LySO.$(DllSuf)
+StatLib		=$(BINDIR)/H4TestBeam.$(StatSuf)
+SoLib		=$(BINDIR)/H4TestBeam.$(DllSuf)
 
 .PRECIOUS:*.ObjSuf *.DepSuf *.DllSuf
 
@@ -80,7 +84,7 @@ $(Packages): % : $(BINDIR)/% | $(BINDIR)
 #$(BINDIR)/$(Packages): $(BINDIR)/% : $(BASEDIR)/test/%.$(SrcSuf) $(StatLib) | $(BINDIR)
 $(addprefix $(BINDIR)/,$(Packages)): $(BINDIR)/% : $(BASEDIR)/test/%.$(SrcSuf) $(StatLib) | $(BINDIR)
 	@echo $(call InfoLine , $@ )
-	$(CXX) $(CXXFLAGS) -o $@ $< $(StatLib) -I$(INC_DIR) -I$(HDIR) $(LDFLAGS) 
+	$(CXX) $(CXXFLAGS) -o $@ $< $(StatLib) -I$(INC_DIR) -I$(HDIR) $(LDBOOSTFLAGS)  -I$(EXTHDIR) $(LDFLAGS)
 
 #make this function of $(Packages)
 #.PHONY: controller
@@ -106,12 +110,12 @@ clean:
 #.o
 $(BINDIR)/%.$(ObjSuf): $(SRCDIR)/%.$(SrcSuf) $(HDIR)/%.$(HeadSuf)
 	@echo $(call InfoLine , $@ )
-	$(CXX) $(CXXFLAGS) -c -o $@ $(SRCDIR)/$*.$(SrcSuf) -I$(INC_DIR) -I$(HDIR)  $(LDFLAGS)
+	$(CXX) $(CXXFLAGS) -c -o $@ $(SRCDIR)/$*.$(SrcSuf) -I$(INC_DIR) -I$(HDIR) -I$(EXTHDIR) $(LDFLAGS)  $(LDBOOSTFLAGS) 
 
 #.d
 $(BINDIR)/%.$(DepSuf): $(SRCDIR)/%.$(SrcSuf) $(HDIR)/%.$(HeadSuf)
 	@echo $(call InfoLine , $@ )
-	$(CXX) $(CXXFLAGS) -M -o $@ $(SRCDIR)/$*.$(SrcSuf) -I$(INC_DIR) -I$(HDIR) $(LDFLAGS)
+	$(CXX) $(CXXFLAGS) -M -o $@ $(SRCDIR)/$*.$(SrcSuf) -I$(INC_DIR) -I$(HDIR) -I$(EXTHDIR) $(LDFLAGS)  $(LDBOOSTFLAGS) 
 	sed -i'' "s|^.*:|& Makefile $(BINDIR)/&|g" $@
 
 #-include $(Deps)
