@@ -25,3 +25,10 @@ To create root file from raw H4DQM
 To create tbspill:
 
     ./bin/H4data2text --input_file blabla.root --output_file test.txt
+
+    
+    
+To create Hodoscope text file:
+
+    ./bin/Hodo2text --input_file blabla.root --output_file test_hs.txt
+    ./bin/Hodo2text --input_file blabla.root --output_file test_hs.txt --maxEvents 4
