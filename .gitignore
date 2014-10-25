@@ -1,0 +1,11 @@
+tmp/
+build/
+wcdb.txt
+*pyc
+*.d
+*.so
+*~
+*.gch
+*.root
+rec_capture*
+data/test_hs.txt
