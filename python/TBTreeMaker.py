@@ -17,8 +17,8 @@ from datetime import *
 
 ##### Parameter block #####
 
-DEBUG_LEVEL = 1
-NMAX = 1000000   # stop after NMAX events
+DEBUG_LEVEL = 1   # set to 0 for normal running
+NMAX = 1000000    # max events to process.  Note: this is approximate, b/c processing occurs by spill
 MASTERID = 16
 MAXPERSPILL=1000  # do not process more that this many events per spill ( mem overwrite issue )
 
@@ -146,10 +146,11 @@ def filler(padeDat, beamDat, NEventLimit=NMAX):
             padeSpill=ParsePadeSpillHeader(padeline)
             nSpills=nSpills+1;
 
-            tbspill.SetSpillData(padeSpill['number'],long(padeSpill['pctime']),
-                                 padeSpill['nTrigWC'],long(padeSpill['wcTime']),
+            tbspill.SetSpillData(padeSpill['number'],padeSpill['pcTime'],
+                                 padeSpill['nTrigWC'],padeSpill['wcTime'],
                                  pdgId,momentum,tableX,tableY,angle)
-
+            if DEBUG_LEVEL>0: 
+                tbspill.Dump()
             continue  # finished w/ spill header read next line in PADE file
 
         # begin reading at next spill header (triggered by certain errors)
@@ -241,7 +242,31 @@ def filler(padeDat, beamDat, NEventLimit=NMAX):
             # search for WC spill info
             # find matching spill and event in Hodoscope file
             if fBeam!=0:
-                logger.Info("Looking up beam data.  Spill:",padeSpill['number'],"Event",padeEvent)
+                if padeEvent==0:
+                    logger.Info("Looking up beam data.  Spill:",padeSpill['number'],"Event",padeEvent)
+                while 1:
+                    beamline=fBeam.readline().rstrip()
+                    if not beamline:    # end of file
+                        break
+                    if "spillNumber" in beamline:
+                        beamspill=int(beamline.split()[1])+1  # spill number starts from 1 on PADE
+                        beamline=fBeam.readline().rstrip()
+                        beamevt=int(beamline.split()[1])
+                        evtTimeDist=fBeam.readline()
+                        evtTimeStart=fBeam.readline()
+                        nEvtTimes=fBeam.readline()
+                        evtTime = fBeam.readline()
+                        evtTimeBoard = fBeam.readline()
+                        nAdcChannels = fBeam.readline()
+                        adcBoard = fBeam.readline()
+                        adcChannel = fBeam.readline()
+                        adcData = fBeam.readline().split()
+                        adcVals=array("i",[0]*32)
+                        for i in range(32): adcVals[i]=int(adcData[i+1])
+                        print "Found spill",beamspill,"event",beamevt,evtTime
+                        print beamspill,beamevt,adcVals
+                        eventDict[padeEvent].SetHodoScopeData(beamspill,beamevt,adcVals)
+
             #!!! This code needs to be written  
             #!!! Fetch all data from fBeam for this event
 

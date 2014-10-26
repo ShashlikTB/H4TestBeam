@@ -115,29 +115,13 @@ def ParsePadeData(padeline):
     return (pade_ts,pade_transfer_size,pade_board_id,
             pade_hw_counter,pade_ch_number,eventNumber,waveform)
 
+# version for H4, ignore FNAL WC info
 def ParsePadeSpillHeader(padeline):
     spill = { 'number':0, 'pctime':0, 'nTrigWC':0, 'wcTime':0, 'status':0 }
- # check for fake run or # WC time stamp missing
-    haveWCtime = True
-    if padeline.endswith("time =") or padeline.endswith("time = 0") or padeline.endswith("time unknown"): haveWCtime=False
     padeline=padeline.split()
-
-    # hacky special case error checks
-    if len(padeline)==18:
-        spill['status']=-1 #error type 1
-        return spill
-    elif len(padeline)==14:
-        spill['status']=-2 #error type 2
-        return spill
-
     spill['number']=int(padeline[4])
     pcTime=padeline[7]+" "+padeline[8]+" "+padeline[9]
-    spill['pcTime']=time.mktime(time.strptime(pcTime, "%m/%d/%Y %H:%M:%S %p"))
-    
-    # ignore WC information in PADE spill header
-    spill['nTrigWC']=0
-    spill['wcTime']=0
-
+    spill['pcTime']=long(time.mktime(time.strptime(pcTime, "%m/%d/%Y %H:%M:%S %p")))
     return spill
 
 

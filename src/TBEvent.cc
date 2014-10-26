@@ -112,8 +112,10 @@ void TBSpill::Dump() const {
   cout << "### TBSpill Dump ###" << endl;
   cout << "Spill Number: " << _spillNumber << endl;
   cout << "PC Time : " << _pcTime << endl;
-  cout << "####################";
+  cout << "####################"<<endl;
 }
+
+
 
 // warning: assume we only deal w/ WC1 and WC2! _tdcnum<=4
 // float WCChannel::GetX(){
@@ -144,4 +146,10 @@ TBEvent::TBRun TBEvent::GetRunPeriod() const{
   if (NPadeChan()>0) 
     return GetRunPeriod(GetPadeChan(0).GetTimeStamp());
   else return TBUndef;
+}
+
+void TBEvent::SetHodoScopeData(Int_t spillNumber, Int_t eventNum, Int_t *adcData){
+  hodoscope.SetSpill(spillNumber);
+  hodoscope.SetEvent(eventNum);
+  hodoscope.SetADCData(adcData);
 }
