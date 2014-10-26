@@ -1,6 +1,47 @@
 H4TestBeam
 ==========
 
+Code for H4 test H4TestBeam
+
+    source setupTB.csh
+    source setupTB.sh
+    
+    make -f Makefile_lib
+
+Compile exe
+
+    make 
+
+Remove exe
+
+    make clean
+ 
+
+To run (example):
+
+    ./bin/H4data2text --input_file blabla.root --output_file test.txt
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+OLD
+====
+
 Description:
 
     converter of the spill information from H4DAQ/H4DQM format to TBSpill + TBTree
