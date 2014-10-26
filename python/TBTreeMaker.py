@@ -247,6 +247,8 @@ def filler(padeDat, beamDat, NEventLimit=NMAX):
                 while 1:
                     beamline=fBeam.readline().rstrip()
                     if not beamline:    # end of file
+                        logger.Warn("End of file reading beam data.  Wrong beam file or sync problem.")
+                        fBeam=0
                         break
                     if "spillNumber" in beamline:
                         beamspill=int(beamline.split()[1])+1  # spill number starts from 1 on PADE
@@ -259,13 +261,14 @@ def filler(padeDat, beamDat, NEventLimit=NMAX):
                         evtTimeBoard = fBeam.readline()
                         nAdcChannels = fBeam.readline()
                         adcBoard = fBeam.readline()
-                        adcChannel = fBeam.readline()
+                        adcChannel = fBeam.readline().split()
+                        adcChannel_a=array("i",[0]*32)
+                        for i in range(32):  adcChannel_a[i]=int(adcChannel[i+1])
                         adcData = fBeam.readline().split()
-                        adcVals=array("i",[0]*32)
-                        for i in range(32): adcVals[i]=int(adcData[i+1])
-                        print "Found spill",beamspill,"event",beamevt,evtTime
-                        print beamspill,beamevt,adcVals
-                        eventDict[padeEvent].SetHodoScopeData(beamspill,beamevt,adcVals)
+                        adcData_a=array("i",[0]*32)
+                        for i in range(32): adcData_a[i]=int(adcData[i+1])
+                        if DEBUG_LEVEL>0: print "Found beam data for spill",beamspill,"event",beamevt
+                        eventDict[padeEvent].SetHodoScopeData(beamspill,beamevt,adcChannel_a,adcData_a)
 
             #!!! This code needs to be written  
             #!!! Fetch all data from fBeam for this event

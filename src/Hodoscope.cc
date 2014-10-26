@@ -10,10 +10,14 @@ Hodoscope::Hodoscope(){
 void Hodoscope::Reset(){
   _spillNum=-1;
   _eventNum=-1;
-  for (int i=0; i<32;i++) _adcData[i]=0;
+  for (int i=0; i<32;i++) {
+    _adcChannel[i]=99;
+    _adcData[i]=0;
+  }
 }
 
-void Hodoscope::SetADCData(Int_t *adcData){
+void Hodoscope::SetADCData(Int_t * adcChannel, Int_t *adcData){
+  for (int i=0; i<32;i++) _adcChannel[i]=adcChannel[i];
   for (int i=0; i<32;i++) _adcData[i]=adcData[i];
 }
 

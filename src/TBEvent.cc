@@ -148,8 +148,8 @@ TBEvent::TBRun TBEvent::GetRunPeriod() const{
   else return TBUndef;
 }
 
-void TBEvent::SetHodoScopeData(Int_t spillNumber, Int_t eventNum, Int_t *adcData){
+void TBEvent::SetHodoScopeData(Int_t spillNumber, Int_t eventNum, Int_t * adcChannel, Int_t *adcData){
   hodoscope.SetSpill(spillNumber);
   hodoscope.SetEvent(eventNum);
-  hodoscope.SetADCData(adcData);
+  hodoscope.SetADCData(adcChannel,adcData);
 }

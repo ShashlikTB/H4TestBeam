@@ -9,7 +9,7 @@ class Hodoscope : public TObject {
   Hodoscope();
   void SetSpill(Int_t spillNum){_spillNum=spillNum;}
   void SetEvent(Int_t eventNum){_eventNum=eventNum;}
-  void SetADCData(Int_t *adcData);
+  void SetADCData(Int_t * adcChannel, Int_t *adcData);
   Int_t GetSpill() const {return _spillNum;}
   Int_t GetEvent() const {return _eventNum;} 
 
@@ -20,6 +20,7 @@ class Hodoscope : public TObject {
   Int_t     _spillNum;
   Int_t     _eventNum;
   ULong_t   _evtTime[3];
+  UShort_t  _adcChannel[32];
   UShort_t  _adcData[32];
 };
 
