@@ -12,6 +12,10 @@
 
 using namespace std;
 
+
+TBEvent::TBEvent(){
+}
+
 void TBEvent::Reset(){
   padeChannel.clear();
   //wc.clear();

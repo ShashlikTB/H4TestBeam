@@ -153,6 +153,9 @@ class TBEvent : public TObject {
   static const ULong64_t PULSESHAPE_T4=635437953000000000L;  
 
 
+  TBEvent();
+  
+  
   void Reset();    // clear data
 
   // getters (tbd - return (const) references, not copies, where appopriate)
@@ -178,7 +181,7 @@ class TBEvent : public TObject {
   
 
  private:
-  vector<PadeChannel> padeChannel;
+  std::vector<PadeChannel> padeChannel;
   // vector<WCChannel> wc; //replace w/ hodoscope data
   Hodoscope hodoscope;  // the hodoscope data
 };

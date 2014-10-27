@@ -4,8 +4,11 @@
 #include "TObject.h"
 
 
-#define nPlanesHodo 4
-#define nFibersHodo 64
+// #define nPlanesHodo 4
+// #define nFibersHodo 64
+
+// #define nPlanesSmallHodo 2
+// #define nFibersSmallHodo 8
 
 #define hodoX1 0
 #define hodoY1 1
@@ -13,9 +16,9 @@
 #define hodoY2 3
 
 
-
 class Hodoscope : public TObject {
   ClassDef(Hodoscope,1); 
+  
  public:
   Hodoscope();
   void SetSpill(Int_t spillNum){_spillNum=spillNum;}
@@ -44,8 +47,11 @@ class Hodoscope : public TObject {
 //   UShort_t  _adcChannel[32]; //---- patternChannel
   unsigned int     _nAdcChannels;
   
-  bool _fibersOn[nPlanesHodo][nFibersHodo];
-  //   unsigned int _patternChannel[16]; //MAX_PATTERNS 16
+  bool _fibersOn[4][64];
+//   bool _fibersOn[nPlanesHodo][nFibersHodo];
+  
+  bool _fibersOnSmall[2][8];
+//   bool _fibersOnSmall[nPlanesSmallHodo][nFibersSmallHodo];
   
   std::vector<int> _fiberOrderA;
   std::vector<int> _fiberOrderB;

@@ -28,12 +28,12 @@ void Hodoscope::SetADCData(unsigned int *adcData, unsigned int * adcBoard, unsig
 }
 
 void Hodoscope::Dump() const{
- std::cout << "Hodoscope Data:: Spill " <<  _spillNum << " Event " << _eventNum << std::endl << "adcChannel :: adcData ";
+//  std::cout << "Hodoscope Data:: Spill " <<  _spillNum << " Event " << _eventNum << std::endl << "adcChannel :: adcData ";
   for (int i=0; i<32;i++) std::cout << _adcChannel[i] << " :: " << _adcData[i] << " ";
   std::cout << std::endl;
   
   for (int ipos = 0; ipos<4; ipos++) {
-   std::cout << " ipos = " << ipos << std::endl;
+//    std::cout << " ipos = " << ipos << std::endl;
    for (unsigned int j=0; j<32; j++){
     std::cout << " " << _fibersOn[ipos][j]; // FIXME j
    }
@@ -47,12 +47,33 @@ void Hodoscope::Dump() const{
 
 void Hodoscope::FillHodo(){
  
- for(int i=0;i<nPlanesHodo;++i){
-  for(int j=0;j<nFibersHodo;++j){
-   _fibersOn[i][j]=0;
+//  std::cout << " Hodoscope::FillHodo " << std::endl;
+//  
+//  for(int i=0; i<nPlanesHodo; ++i){
+//   for(int j=0; j<nFibersHodo; ++j){
+//    _fibersOn[i][j] = 0;
+//   }
+//  }
+ 
+ for(int i=0; i<4; ++i){
+  for(int j=0; j<64; ++j){
+   _fibersOn[i][j] = 0;
   }
  }
-  
+ 
+//  for(int i =0 ; i <nPlanesSmallHodo;++i){
+//   for(int j=0; j<nFibersSmallHodo;j++){
+//    _fibersOnSmall[i][j] = 0;
+//   }
+//  }
+ for(int i =0 ; i <2;++i){
+  for(int j=0; j<8;j++){
+   _fibersOnSmall[i][j] = 0;
+  }
+ }
+ 
+ 
+ 
  for(unsigned int i=0;i<_nAdcChannels;++i){
   
   if(_adcBoard[i]==0x08030001 || _adcBoard[i]==0x08030002){
@@ -68,10 +89,10 @@ void Hodoscope::FillHodo(){
    
    for (unsigned int j=0; j<32; j++){
     bool thisfibon = (_adcData[i]>>j)&0b1;
-    std::cout << " j = " << j << " thisfibon = " << thisfibon  << " [fiberorder->size() = " << fiberorder->size() <<   "]" << std::endl;
+//     std::cout << " j = " << j << " thisfibon = " << thisfibon  << " [fiberorder->size() = " << fiberorder->size() <<   "]" << std::endl;
 //     std::cout << " fiberorder->size() = " << fiberorder->size() << std::endl;
     if (fiberorder->size() >= j) { //---- FIXME check
-     _fibersOn[pos][fiberorder->at(j)-1]=thisfibon;
+     _fibersOn[pos][fiberorder->at(j)-1] = thisfibon;
     }
    }
    
@@ -80,14 +101,18 @@ void Hodoscope::FillHodo(){
    
    if(_adcChannel[i]!=0) continue;
    
-//    WORD wordX=(treeStruct_.pattern[i]& 0x0000FF00)>>8;
-//    WORD wordY= (treeStruct_.pattern[i] & 0x000000FF);
-//    
-//    for(int j=0;j<8;j++){
-//     fibersOnSmall_[0][j]=(bool)((wordX>>j)&0b1);
-//     fibersOnSmall_[1][j]=(bool)((wordY>>j)&0b1);
-//     //      std::cout<<fibersOnSmall_[0][i]<<" "<<fibersOnSmall_[1][i]<<"----";
-//    }
+   unsigned int wordX =(_adcBoard[i]& 0x0000FF00)>>8;
+   unsigned int wordY = (_adcBoard[i] & 0x000000FF);   
+//    WORD wordX=(_adcBoard[i]& 0x0000FF00)>>8;
+//    WORD wordY= (_adcBoard[i] & 0x000000FF);
+   
+//    std::cout << " fibersOnSmall :: " ;
+   for(int j=0;j<8;j++){
+    _fibersOnSmall[0][j]=(bool)((wordX>>j)&0b1);
+    _fibersOnSmall[1][j]=(bool)((wordY>>j)&0b1);
+//     std::cout<<fibersOnSmall[0][i]<<" "<<fibersOnSmall[1][i]<<"----";
+   }
+//    std::cout << std::endl;
   }
   
  }
