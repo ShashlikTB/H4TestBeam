@@ -19,15 +19,27 @@ Remove exe
 
 To run (example):
 
-    ./bin/H4data2text --input_file blabla.root --output_file test.txt
+    ./bin/H4data2text.exe --input_file blabla.root --output_file test.txt
 
 
 
 
 
 
+TBTree
+====
 
+To make a tree, do;
 
+    TBTreeMaker.py -P rec_capture_20141024_195701.txt.bz2
+    
+    TBTreeMaker.py -P  data/rec_capture_20141023_202536.txt -B data/test_hs.txt
+
+    root -l test/rootLogon.C   latest.root
+     
+To get a visual about which channels are present, do
+
+    calDisplay.py
 
 
 
