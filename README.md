@@ -26,7 +26,7 @@ To run (example):
 
     ./bin/Hodo2text.exe --input_file data/1.raw.fromMarini.raw.root   --output_file data/test_1_Marini.txt --maxEvents 307
 
-
+    
 
 
 
@@ -40,6 +40,8 @@ To make a tree, do;
     TBTreeMaker.py -P  data/rec_capture_20141023_202536.txt -B data/test_hs.txt
 
     TBTreeMaker.py -P  data/rec_capture_20141023_202536.txt -B data/test_1_Marini.txt
+
+    TBTreeMaker.py -P  ~/Downloads/rec_capture_20141025_155121.txt  -B data/test_1_Marini.txt
 
     root -l test/rootLogon.C   latest.root
      

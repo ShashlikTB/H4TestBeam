@@ -20,6 +20,7 @@ To create root file from raw H4DQM
 
     cd H4DQM
     ./bin/readBinary -f ../data/12.raw  -o test.root
+    ./bin/readBinary -f ../H4TestBeam/data/1.raw.fromMarini.raw  -o ../H4TestBeam/data/1.raw.fromMarini.raw.root
 
     
 To create tbspill:
