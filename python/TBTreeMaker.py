@@ -245,37 +245,59 @@ def filler(padeDat, beamDat, NEventLimit=NMAX):
                 if padeEvent==0:
                     logger.Info("Looking up beam data.  Spill:",padeSpill['number'],"Event",padeEvent)
                 while 1:
-                    beamline=fBeam.readline().rstrip()
-                    if not beamline:    # end of file
+                    #beamline = fBeam.readline().rstrip()
+                    #if not beamline:    # end of file
+                    beamline = fBeam.readline().lstrip()
+                    #print " (beamline.split()[0]) = ", (beamline.split()[0])
+                    if len(beamline.split()) == 0 or (beamline.split()[0]) != 'Event':    # end of file
                         logger.Warn("End of file reading beam data.  Wrong beam file or sync problem.")
                         fBeam=0
                         break
-                    if "spillNumber" in beamline:
+                    if "Event" in beamline:
+                    #if "spillNumber" in beamline:  
+                    
+                        beamEvent = int(beamline.split()[1])
+                        
+                        beamline = fBeam.readline().rstrip()
+                        beamrunNumber=int(beamline.split()[1])
+                        
                         beamspill=int(beamline.split()[1])+1  # spill number starts from 1 on PADE
-                        beamline=fBeam.readline().rstrip()
-                        beamevt=int(beamline.split()[1])
-                        evtTimeDist=fBeam.readline()
-                        evtTimeStart=fBeam.readline()
-                        nEvtTimes=fBeam.readline()
+                        
+                        beamline=fBeam.readline().rstrip()                        
+                        beamevt = int(beamline.split()[1])
+                        evtTimeDist = fBeam.readline()
+                        evtTimeStart = fBeam.readline()
+                        nEvtTimes = fBeam.readline()
                         evtTime = fBeam.readline()
                         evtTimeBoard = fBeam.readline()
                         
-                        tempLine = fBeam.readline()
-                        tempLine_noSpace = tempLine.lstrip()
-                        if tempLine_noSpace.startswith('nPatterns') :
-                          print " >>> hodoscope "
-                          nAdcChannels = ( tempLine_noSpace.split() )[1] # --> nPatterns 12345
+                        if DEBUG_LEVEL>1: print " Event:Spill ", beamEvent, " ", beamspill
+                        
+                        # get to the "nPatterns"
+                        tempLine = fBeam.readline().lstrip()
+                        tempLine_split = tempLine.split()
+                        while (tempLine_split[0] != "nPatterns") :
+                          tempLine = fBeam.readline().lstrip()
+                          tempLine_split = tempLine.split()
+
+                        if tempLine.startswith('nPatterns') :
+                          if DEBUG_LEVEL>1: print " >>> hodoscope "
+                          nAdcChannels = int(( tempLine_split )[1]) # --> nPatterns 12345
 
                           pattern = fBeam.readline().split() # --> pattern
-                          pattern_a=array("i",[0]*32)
-                          for i in range(32):  pattern_a[i]=int(pattern[i+1])
+                          if DEBUG_LEVEL>1: print "pattern = ",pattern
+                          pattern_a = array ("I",[0]*32)
+                          if DEBUG_LEVEL>1: print "pattern_a = ",pattern_a
+                          for i in range(nAdcChannels): pattern_a[i] = long(pattern[i+1])
+                          #pattern_a[i]=123456789
                           
                           adcBoard = fBeam.readline().split() # --> patternBoard
-                          adcBoard_a=array("i",[0]*32)
-                          for i in range(32):  adcBoard_a[i]=int(adcBoard[i+1])
+                          adcBoard_a = array("I",[0]*32)
+                          for i in range(nAdcChannels):  adcBoard_a[i] = long(adcBoard[i+1])
                           adcChannel = fBeam.readline().split() # --> patternChannel
-                          adcChannel_a=array("i",[0]*32)
-                          for i in range(32): adcChannel_a[i]=int(adcChannel[i+1])
+                          adcChannel_a = array("I",[0]*32)
+                          for i in range(nAdcChannels): adcChannel_a[i] = long(adcChannel[i+1])
+                          
                           if DEBUG_LEVEL>0: print "Found beam data for spill",beamspill,"event",beamevt
                           eventDict[padeEvent].SetHodoScopeData(beamspill,beamevt,pattern_a,adcBoard_a,adcChannel_a,nAdcChannels)
 
@@ -288,6 +310,10 @@ def filler(padeDat, beamDat, NEventLimit=NMAX):
                           #for i in range(32): adcData_a[i]=int(adcData[i+1])
                           #if DEBUG_LEVEL>0: print "Found beam data for spill",beamspill,"event",beamevt
                           #eventDict[padeEvent].SetHodoScopeData(beamspill,beamevt,adcChannel_a,adcData_a)
+
+                        tempLine_split = fBeam.readline().rstrip().split()
+                        while (tempLine_split[0] != "End" and tempLine_split[1] != "Event") :
+                          tempLine_split = fBeam.readline().rstrip().split()
 
 
             #!!! This code needs to be written  
