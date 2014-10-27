@@ -19,8 +19,12 @@ Remove exe
 
 To run (example):
 
-    ./bin/H4data2text.exe --input_file blabla.root --output_file test.txt
+    cd H4DQM
+    ./bin/readBinary -f ../H4TestBeam/data/1.raw.fromMarini.raw  -o ../H4TestBeam/data/1.raw.fromMarini.raw.root
+    
+    ./bin/Hodo2text.exe --input_file data/1.raw.fromMarini.raw.root   --output_file data/test_1_Marini.txt --maxEvents 4
 
+    ./bin/Hodo2text.exe --input_file data/1.raw.fromMarini.raw.root   --output_file data/test_1_Marini.txt --maxEvents 307
 
 
 
@@ -34,6 +38,8 @@ To make a tree, do;
     TBTreeMaker.py -P rec_capture_20141024_195701.txt.bz2
     
     TBTreeMaker.py -P  data/rec_capture_20141023_202536.txt -B data/test_hs.txt
+
+    TBTreeMaker.py -P  data/rec_capture_20141023_202536.txt -B data/test_1_Marini.txt
 
     root -l test/rootLogon.C   latest.root
      

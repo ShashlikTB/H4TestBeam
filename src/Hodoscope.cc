@@ -23,6 +23,8 @@ void Hodoscope::SetADCData(unsigned int *adcData, unsigned int * adcBoard, unsig
  for (int i=0; i<32;i++) _adcChannel[i] = adcChannel[i];
  for (int i=0; i<32;i++) _adcData[i] = adcData[i];
  _nAdcChannels = nAdcChannels;
+ 
+ FillHodo();
 }
 
 void Hodoscope::Dump() const{
@@ -66,6 +68,7 @@ void Hodoscope::FillHodo(){
    
    for (unsigned int j=0; j<32; j++){
     bool thisfibon = (_adcData[i]>>j)&0b1;
+    std::cout << " j = " << j << " thisfibon = " << thisfibon  << " [fiberorder->size() = " << fiberorder->size() <<   "]" << std::endl;
 //     std::cout << " fiberorder->size() = " << fiberorder->size() << std::endl;
     if (fiberorder->size() >= j) { //---- FIXME check
      _fibersOn[pos][fiberorder->at(j)-1]=thisfibon;
