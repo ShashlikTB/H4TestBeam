@@ -55,8 +55,8 @@ int main(int argc, char**argv){
  
  //---- configuration (end)
  
- //---- in case we move directly to tbspill
  TBSpill tbspill;
+ TBEvent tbevent;
  
  
  //---- read file
@@ -90,8 +90,9 @@ int main(int argc, char**argv){
  
  
  TFile* output_file_root = new TFile ("out.root","RECREATE");
- TTree* outtree = new TTree("outtree","outtree");
+ TTree* outtree = new TTree("t1041","t1041");
  outtree->Branch("tbspill", "TBSpill", &tbspill, 64000, 0);
+ outtree->Branch("tbevent", "TBEvent", &tbevent, 64000, 0);
  
  for (int i=0; i<nEntries; i++) {
   tbspill.SetSpillData(v_spillNumber[i], 0, 0, 0);

@@ -173,8 +173,9 @@ class TBEvent : public TObject {
 		       UShort_t  board_id, UInt_t hw_counter, 
 		       UInt_t ch_number,  UInt_t eventnum, Int_t *wform, Bool_t isLaser=false);
   // void AddWCHit(UChar_t num, UChar_t wire, UShort_t count);
-  void SetHodoScopeData(Int_t spillNumber, Int_t eventNum, Int_t * adcChannel, Int_t *adcData);
-
+//   void SetHodoScopeData(Int_t spillNumber, Int_t eventNum, Int_t * adcChannel, Int_t *adcData);
+  void SetHodoScopeData(Int_t spillNumber, Int_t eventNum,  unsigned int *adcData,  unsigned int *adcBoard,  unsigned int * adcChannel, Int_t nAdcChannels);
+  
 
  private:
   vector<PadeChannel> padeChannel;

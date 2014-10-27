@@ -259,21 +259,41 @@ def filler(padeDat, beamDat, NEventLimit=NMAX):
                         nEvtTimes=fBeam.readline()
                         evtTime = fBeam.readline()
                         evtTimeBoard = fBeam.readline()
-                        nAdcChannels = fBeam.readline()
-                        adcBoard = fBeam.readline()
-                        adcChannel = fBeam.readline().split()
-                        adcChannel_a=array("i",[0]*32)
-                        for i in range(32):  adcChannel_a[i]=int(adcChannel[i+1])
-                        adcData = fBeam.readline().split()
-                        adcData_a=array("i",[0]*32)
-                        for i in range(32): adcData_a[i]=int(adcData[i+1])
-                        if DEBUG_LEVEL>0: print "Found beam data for spill",beamspill,"event",beamevt
-                        eventDict[padeEvent].SetHodoScopeData(beamspill,beamevt,adcChannel_a,adcData_a)
+                        
+                        tempLine = fBeam.readline()
+                        tempLine_noSpace = tempLine.lstrip()
+                        if tempLine_noSpace.startswith('nPatterns') :
+                          print " >>> hodoscope "
+                          nAdcChannels = ( tempLine_noSpace.split() )[1] # --> nPatterns 12345
+
+                          pattern = fBeam.readline().split() # --> pattern
+                          pattern_a=array("i",[0]*32)
+                          for i in range(32):  pattern_a[i]=int(pattern[i+1])
+                          
+                          adcBoard = fBeam.readline().split() # --> patternBoard
+                          adcBoard_a=array("i",[0]*32)
+                          for i in range(32):  adcBoard_a[i]=int(adcBoard[i+1])
+                          adcChannel = fBeam.readline().split() # --> patternChannel
+                          adcChannel_a=array("i",[0]*32)
+                          for i in range(32): adcChannel_a[i]=int(adcChannel[i+1])
+                          if DEBUG_LEVEL>0: print "Found beam data for spill",beamspill,"event",beamevt
+                          eventDict[padeEvent].SetHodoScopeData(beamspill,beamevt,pattern_a,adcBoard_a,adcChannel_a,nAdcChannels)
+
+                          #adcBoard = fBeam.readline()
+                          #adcChannel = fBeam.readline().split()
+                          #adcChannel_a=array("i",[0]*32)
+                          #for i in range(32):  adcChannel_a[i]=int(adcChannel[i+1])
+                          #adcData = fBeam.readline().split()
+                          #adcData_a=array("i",[0]*32)
+                          #for i in range(32): adcData_a[i]=int(adcData[i+1])
+                          #if DEBUG_LEVEL>0: print "Found beam data for spill",beamspill,"event",beamevt
+                          #eventDict[padeEvent].SetHodoScopeData(beamspill,beamevt,adcChannel_a,adcData_a)
+
 
             #!!! This code needs to be written  
             #!!! Fetch all data from fBeam for this event
 
-        else: # new event in a slave
+        else: # new event in a slavereadline
             if not padeEvent in eventDict:
                 logger.Warn("Event number mismatch. Slave:",
                             pade_board_id,"reports event not present in master.")
