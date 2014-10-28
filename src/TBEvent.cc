@@ -152,9 +152,19 @@ TBEvent::TBRun TBEvent::GetRunPeriod() const{
   else return TBUndef;
 }
 
-// void TBEvent::SetHodoScopeData(Int_t spillNumber, Int_t eventNum, Int_t * adcChannel, Int_t *adcData){
 void TBEvent::SetHodoScopeData(Int_t spillNumber, Int_t eventNum,  unsigned int *adcData,  unsigned int *adcBoard,  unsigned int * adcChannel, Int_t nAdcChannels){
   hodoscope.SetSpill(spillNumber);
   hodoscope.SetEvent(eventNum);
   hodoscope.SetADCData(adcData, adcBoard, adcChannel, nAdcChannels);
 }
+
+void TBEvent::SetWireChambersData(Int_t spillNumber, Int_t eventNum, unsigned int *tdcData,  unsigned int *tdcBoard,  unsigned int * tdcChannel, Int_t nTdcChannels){
+ hodoscope.SetSpill(spillNumber);
+ hodoscope.SetEvent(eventNum);
+ hodoscope.SetTDCData(tdcData, tdcBoard, tdcChannel, nTdcChannels);
+}
+
+
+
+
+

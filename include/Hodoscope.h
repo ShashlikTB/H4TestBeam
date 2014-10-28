@@ -3,7 +3,6 @@
 
 #include "TObject.h"
 
-
 // #define nPlanesHodo 4
 // #define nFibersHodo 64
 
@@ -15,22 +14,39 @@
 #define hodoX2 2
 #define hodoY2 3
 
+// static const UInt_t MaxTdcChannels = 4;
+static const UInt_t MaxTdcChannels = 32;
+static const UInt_t MaxTdcReadings = 20;
+
+
+
+//schema to be checked: Xleft, Xright, Ydown, Yup
+#define wcXl 0
+#define wcXr 1
+#define wcYd 3
+#define wcYu 2
+
+#include <algorithm>
 
 class Hodoscope : public TObject {
   ClassDef(Hodoscope,1); 
   
  public:
   Hodoscope();
-  void SetSpill(Int_t spillNum){_spillNum=spillNum;}
-  void SetEvent(Int_t eventNum){_eventNum=eventNum;}
+  ~Hodoscope();
+  void SetSpill(Int_t spillNum){_spillNum=spillNum;};
+  void SetEvent(Int_t eventNum){_eventNum=eventNum;};
   void SetADCData(unsigned int *adcData, unsigned int * adcBoard, unsigned int *adcChannel, Int_t nAdcChannels);
-  
+  void SetTDCData(unsigned int *tdcData, unsigned int * tdcBoard, unsigned int *tdcChannel, Int_t nTdcChannels);
+   
   
   void FillHodo();
   void FillFiberOrder();
   
-  Int_t GetSpill() const {return _spillNum;}
-  Int_t GetEvent() const {return _eventNum;} 
+  void FillWC();
+   
+  Int_t GetSpill() const {return _spillNum;};
+  Int_t GetEvent() const {return _eventNum;} ;
 
   
   void Reset();
@@ -50,8 +66,20 @@ class Hodoscope : public TObject {
   bool _fibersOn[4][64];
 //   bool _fibersOn[nPlanesHodo][nFibersHodo];
   
-  bool _fibersOnSmall[2][8];
-//   bool _fibersOnSmall[nPlanesSmallHodo][nFibersSmallHodo];
+  
+  
+  //---- wire chambers
+  unsigned int _nTdcChannels;
+  unsigned int  _tdcBoard[MaxTdcChannels];
+  unsigned int  _tdcChannel[MaxTdcChannels];
+  unsigned int  _tdcData[MaxTdcChannels];
+    
+    
+    
+  //tdc readings
+  std::vector<float> _tdc_readings[MaxTdcChannels];
+  float _tdc_recox, _tdc_recoy;
+  
   
   std::vector<int> _fiberOrderA;
   std::vector<int> _fiberOrderB;

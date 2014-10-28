@@ -13,7 +13,7 @@ class PadeHeader : public TObject{
   ClassDef(PadeHeader,1); 
  public:
   PadeHeader(){;}
- PadeHeader(Bool_t master, UShort_t board, UShort_t stat,
+  PadeHeader(Bool_t master, UShort_t board, UShort_t stat,
 	    UShort_t tstat, UShort_t events, UShort_t mreg,
 	    UShort_t pTrg, UShort_t pTmp, UShort_t sTmp, UShort_t gain):
   _isMaster(master), _boardID(board), _status(stat), _trgStatus(tstat), 
@@ -154,6 +154,8 @@ class TBEvent : public TObject {
 
 
   TBEvent();
+
+  ~TBEvent(){};
   
   
   void Reset();    // clear data
@@ -177,13 +179,17 @@ class TBEvent : public TObject {
 		       UInt_t ch_number,  UInt_t eventnum, Int_t *wform, Bool_t isLaser=false);
   // void AddWCHit(UChar_t num, UChar_t wire, UShort_t count);
 //   void SetHodoScopeData(Int_t spillNumber, Int_t eventNum, Int_t * adcChannel, Int_t *adcData);
-  void SetHodoScopeData(Int_t spillNumber, Int_t eventNum,  unsigned int *adcData,  unsigned int *adcBoard,  unsigned int * adcChannel, Int_t nAdcChannels);
+  void SetHodoScopeData   (Int_t spillNumber, Int_t eventNum,  unsigned int *adcData,  unsigned int *adcBoard,  unsigned int * adcChannel, Int_t nAdcChannels);
+  void SetWireChambersData(Int_t spillNumber, Int_t eventNum,  unsigned int *tdcData,  unsigned int *tdcBoard,  unsigned int * tdcChannel, Int_t nTdcChannels);
   
+                   
 
- private:
+  private:
   std::vector<PadeChannel> padeChannel;
   // vector<WCChannel> wc; //replace w/ hodoscope data
+//   std::vector<Hodoscope> hodoscope;  // the hodoscope data
   Hodoscope hodoscope;  // the hodoscope data
+ 
 };
 
 

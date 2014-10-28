@@ -18,6 +18,7 @@ from datetime import *
 ##### Parameter block #####
 
 DEBUG_LEVEL = 1   # set to 0 for normal running
+#DEBUG_LEVEL = 4   # set to 0 for normal running
 NMAX = 1000000    # max events to process.  Note: this is approximate, b/c processing occurs by spill
 MASTERID = 16
 MAXPERSPILL=1000  # do not process more that this many events per spill ( mem overwrite issue )
@@ -90,9 +91,11 @@ def filler(padeDat, beamDat, NEventLimit=NMAX):
     logger.Info("Writing to output file",outFile)
 
     BeamTree = [TTree("t1041", "T1041")] # ugly python hack to pass a reference
+    #print "1!"
     BeamTree[0].Branch("tbevent", "TBEvent", AddressOf(tbevent), 64000, 0)
+    #print "2!"
     BeamTree[0].Branch("tbspill", "TBSpill", AddressOf(tbspill), 64000, 0)
-
+    #print "3!"
 
     if (NEventLimit<NMAX):
         logger.Info("Stop at end of spill after reading at least",NEventLimit,"events")
@@ -191,6 +194,8 @@ def filler(padeDat, beamDat, NEventLimit=NMAX):
             skipToNextSpill=True
             continue
 
+        #print "4!"
+
         # check for non-sequential events
         if newEvent and (padeEvent-lastEvent)!=1:
             if logger.Warn("Nonsequential event #, delta=",padeEvent-lastEvent,
@@ -206,6 +211,8 @@ def filler(padeDat, beamDat, NEventLimit=NMAX):
                            pade_hw_counter-lastPacket,"Board:",pade_board_id,"channel:",pade_ch_number):
                 if DEBUG_LEVEL>0: logger.Info("line number",linesread)
         lastPacket=pade_hw_counter
+
+        #print "5!"
 
         # fetch ADC samples (to do: clear event from here on error)
         samples=array("i",[0xFFF]*padeChannel.__DATASIZE())
@@ -226,6 +233,8 @@ def filler(padeDat, beamDat, NEventLimit=NMAX):
                 samples[i]=int(waveform[i],16)
 
         writeChan=True   # assume channel is good to write, until proven bad
+
+        #print "6!"
 
         # new event condition in master
         # NOTE: the code implicitly assumes that the MASTER is the board with LOWEST board ID
@@ -253,6 +262,9 @@ def filler(padeDat, beamDat, NEventLimit=NMAX):
                         logger.Warn("End of file reading beam data.  Wrong beam file or sync problem.")
                         fBeam=0
                         break
+                    
+                    #print "7!"
+
                     if "Event" in beamline:
                     #if "spillNumber" in beamline:  
                     
@@ -273,6 +285,36 @@ def filler(padeDat, beamDat, NEventLimit=NMAX):
                         
                         if DEBUG_LEVEL>1: print " Event:Spill ", beamEvent, " ", beamspill
                         
+                        
+                        # get to the "nTdcChannels"
+                        tempLine = fBeam.readline().lstrip()
+                        tempLine_split = tempLine.split()
+                        while (tempLine_split[0] != "nTdcChannels") :
+                          tempLine = fBeam.readline().lstrip()
+                          tempLine_split = tempLine.split()
+
+                        if tempLine.startswith('nTdcChannels') :
+                          if DEBUG_LEVEL>1: print " >>> hodoscope wire chambers"
+                          nTdcChannels = int(( tempLine_split )[1]) # --> nPatterns 12345
+                          
+                          tdcBoard = fBeam.readline().split() # --> patternBoard
+                          tdcBoard_a = array("I",[0]*max(32,nTdcChannels))
+                          for i in range(nTdcChannels):  tdcBoard_a[i] = long(tdcBoard[i+1])
+                          tdcChannel = fBeam.readline().split() # --> patternChannel
+                          tdcChannel_a = array("I",[0]*max(32,nTdcChannels))
+                          for i in range(nTdcChannels): tdcChannel_a[i] = long(tdcChannel[i+1])
+
+                          tdcData = fBeam.readline().split() # --> tdcData
+                          if DEBUG_LEVEL>1: print "tdcData = ",tdcData
+                          tdcData_a = array ("I",[0]*max(32,nTdcChannels))
+                          if DEBUG_LEVEL>1: print "tdcData_a = ",tdcData_a
+                          for i in range(nTdcChannels): tdcData_a[i] = long(tdcData[i+1])
+                          #tdcData_a[i]=123456789
+                          
+                          if DEBUG_LEVEL>0: print "Found beam tdcData for spill",beamspill,"event",beamevt
+                          eventDict[padeEvent].SetWireChambersData(beamspill,beamevt,tdcData_a,tdcBoard_a,tdcChannel_a,nTdcChannels)
+                          
+                        
                         # get to the "nPatterns"
                         tempLine = fBeam.readline().lstrip()
                         tempLine_split = tempLine.split()
@@ -286,31 +328,21 @@ def filler(padeDat, beamDat, NEventLimit=NMAX):
 
                           pattern = fBeam.readline().split() # --> pattern
                           if DEBUG_LEVEL>1: print "pattern = ",pattern
-                          pattern_a = array ("I",[0]*32)
+                          pattern_a = array ("I",[0]*max(32,nAdcChannels))
                           if DEBUG_LEVEL>1: print "pattern_a = ",pattern_a
                           for i in range(nAdcChannels): pattern_a[i] = long(pattern[i+1])
                           #pattern_a[i]=123456789
                           
                           adcBoard = fBeam.readline().split() # --> patternBoard
-                          adcBoard_a = array("I",[0]*32)
+                          adcBoard_a = array("I",[0]*max(32,nAdcChannels))
                           for i in range(nAdcChannels):  adcBoard_a[i] = long(adcBoard[i+1])
                           adcChannel = fBeam.readline().split() # --> patternChannel
-                          adcChannel_a = array("I",[0]*32)
+                          adcChannel_a = array("I",[0]*max(32,nAdcChannels))
                           for i in range(nAdcChannels): adcChannel_a[i] = long(adcChannel[i+1])
                           
-                          if DEBUG_LEVEL>0: print "Found beam data for spill",beamspill,"event",beamevt
+                          if DEBUG_LEVEL>0: print "Found beam adcData for spill",beamspill,"event",beamevt
                           eventDict[padeEvent].SetHodoScopeData(beamspill,beamevt,pattern_a,adcBoard_a,adcChannel_a,nAdcChannels)
-
-                          #adcBoard = fBeam.readline()
-                          #adcChannel = fBeam.readline().split()
-                          #adcChannel_a=array("i",[0]*32)
-                          #for i in range(32):  adcChannel_a[i]=int(adcChannel[i+1])
-                          #adcData = fBeam.readline().split()
-                          #adcData_a=array("i",[0]*32)
-                          #for i in range(32): adcData_a[i]=int(adcData[i+1])
-                          #if DEBUG_LEVEL>0: print "Found beam data for spill",beamspill,"event",beamevt
-                          #eventDict[padeEvent].SetHodoScopeData(beamspill,beamevt,adcChannel_a,adcData_a)
-
+                          
                         tempLine_split = fBeam.readline().rstrip().split()
                         while (tempLine_split[0] != "End" and tempLine_split[1] != "Event") :
                           tempLine_split = fBeam.readline().rstrip().split()
@@ -384,7 +416,8 @@ if __name__ == '__main__':
     #  Declare data containers                                  #
     #===========================================================#
     LoadLibs("TBLIB","libTB.so")
-
+    print "lib loaded"
+    
     filler(PadeFile,BeamFile,NEventLimit)
 
     print "Exiting" 

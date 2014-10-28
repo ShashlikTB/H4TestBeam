@@ -8,6 +8,9 @@ Hodoscope::Hodoscope(){
   FillFiberOrder(); //---- once and for all
 }
 
+Hodoscope::~Hodoscope(){
+}
+
 void Hodoscope::Reset(){
   _spillNum=-1;
   _eventNum=-1;
@@ -16,24 +19,43 @@ void Hodoscope::Reset(){
     _adcBoard[i]   = 0;
     _adcData[i]    = 0;
   }
+  
+  for (unsigned int j=0; j<MaxTdcChannels; j++){
+   _tdc_readings[j].clear();
+  }
+  _tdc_recox=-999;
+  _tdc_recoy=-999;
+  
 }
 
 void Hodoscope::SetADCData(unsigned int *adcData, unsigned int * adcBoard, unsigned int *adcChannel, Int_t nAdcChannels){
- for (int i=0; i<32;i++) _adcBoard[i]   = adcBoard[i];
- for (int i=0; i<32;i++) _adcChannel[i] = adcChannel[i];
- for (int i=0; i<32;i++) _adcData[i] = adcData[i];
  _nAdcChannels = nAdcChannels;
+ for (int i=0; i<32; i++) _adcBoard[i]   = adcBoard[i];
+ for (int i=0; i<32; i++) _adcChannel[i] = adcChannel[i];
+ for (int i=0; i<32; i++) _adcData[i] = adcData[i];
  
  FillHodo();
 }
 
+
+void Hodoscope::SetTDCData(unsigned int *tdcData, unsigned int * tdcBoard, unsigned int *tdcChannel, Int_t nTdcChannels){
+ _nTdcChannels = nTdcChannels;
+ for (int i=0; i<32; i++) _tdcBoard[i]   = tdcBoard[i];
+ for (int i=0; i<32; i++) _tdcChannel[i] = tdcChannel[i];
+ for (int i=0; i<32; i++) _tdcData[i] = tdcData[i];
+ 
+ FillWC();
+}
+
+
+
 void Hodoscope::Dump() const{
-//  std::cout << "Hodoscope Data:: Spill " <<  _spillNum << " Event " << _eventNum << std::endl << "adcChannel :: adcData ";
+ std::cout << "Hodoscope Data:: Spill " <<  _spillNum << " Event " << _eventNum << std::endl << "adcChannel :: adcData ";
   for (int i=0; i<32;i++) std::cout << _adcChannel[i] << " :: " << _adcData[i] << " ";
   std::cout << std::endl;
   
   for (int ipos = 0; ipos<4; ipos++) {
-//    std::cout << " ipos = " << ipos << std::endl;
+   std::cout << " ipos = " << ipos << std::endl;
    for (unsigned int j=0; j<32; j++){
     std::cout << " " << _fibersOn[ipos][j]; // FIXME j
    }
@@ -60,17 +82,7 @@ void Hodoscope::FillHodo(){
    _fibersOn[i][j] = 0;
   }
  }
- 
-//  for(int i =0 ; i <nPlanesSmallHodo;++i){
-//   for(int j=0; j<nFibersSmallHodo;j++){
-//    _fibersOnSmall[i][j] = 0;
-//   }
-//  }
- for(int i =0 ; i <2;++i){
-  for(int j=0; j<8;j++){
-   _fibersOnSmall[i][j] = 0;
-  }
- }
+
  
  
  
@@ -97,28 +109,36 @@ void Hodoscope::FillHodo(){
    }
    
   }
-  else if(_adcBoard[i]==0x08010001){
-   
-   if(_adcChannel[i]!=0) continue;
-   
-   unsigned int wordX =(_adcBoard[i]& 0x0000FF00)>>8;
-   unsigned int wordY = (_adcBoard[i] & 0x000000FF);   
-//    WORD wordX=(_adcBoard[i]& 0x0000FF00)>>8;
-//    WORD wordY= (_adcBoard[i] & 0x000000FF);
-   
-//    std::cout << " fibersOnSmall :: " ;
-   for(int j=0;j<8;j++){
-    _fibersOnSmall[0][j]=(bool)((wordX>>j)&0b1);
-    _fibersOnSmall[1][j]=(bool)((wordY>>j)&0b1);
-//     std::cout<<fibersOnSmall[0][i]<<" "<<fibersOnSmall[1][i]<<"----";
-   }
-//    std::cout << std::endl;
-  }
-  
+    
  }
  
 }
 
+
+
+
+
+void Hodoscope::FillWC(){
+ 
+ for (unsigned int i=0; i<_nTdcChannels; i++){
+  if (_tdcBoard[i]==0x07030001 && _tdcChannel[i]<MaxTdcChannels){
+   _tdc_readings[_tdcChannel[i]].push_back((float)_tdcData[i]);
+  }
+ }
+ if (_tdc_readings[wcXl].size()!=0 && _tdc_readings[wcXr].size()!=0){
+  float TXl = *std::min_element(_tdc_readings[wcXl].begin(),_tdc_readings[wcXl].begin()+_tdc_readings[wcXl].size());
+  float TXr = *std::min_element(_tdc_readings[wcXr].begin(),_tdc_readings[wcXr].begin()+_tdc_readings[wcXr].size());
+  float X = (TXr-TXl)*0.005; // = /40./5./10. //position in cm 0.2mm/ns with 25ps LSB TDC
+  _tdc_recox = X;
+ }
+ if (_tdc_readings[wcYd].size()!=0 && _tdc_readings[wcYu].size()!=0){
+  float TYd = *std::min_element(_tdc_readings[wcYd].begin(),_tdc_readings[wcYd].begin()+_tdc_readings[wcYd].size());
+  float TYu = *std::min_element(_tdc_readings[wcYu].begin(),_tdc_readings[wcYu].begin()+_tdc_readings[wcYu].size());
+  float Y = (TYu-TYd)*0.005; // = /40./5./10. //position in cm 0.2mm/ns with 25ps LSB TDC
+  _tdc_recoy = Y;
+ }
+ 
+}
 
 
 
