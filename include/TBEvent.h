@@ -164,6 +164,7 @@ class TBEvent : public TObject {
   Int_t NPadeChan() const {return padeChannel.size();}
   PadeChannel GetPadeChan(const int idx) const {return padeChannel[idx];}
   PadeChannel GetLastPadeChan() const {return padeChannel.back();}
+  Hodoscope GetHSChan() {return hodoscope;}
   //WCChannel GetWCChan(const int idx) {return wc[idx];}
   //Int_t GetWCHits() const {return wc.size();}
   //vector<WCChannel> GetWChitsX(Int_t wc, Int_t *min=0, Int_t* max=0) const;

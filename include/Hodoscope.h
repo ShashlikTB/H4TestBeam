@@ -3,6 +3,8 @@
 
 #include "TObject.h"
 
+#include <map>
+
 // #define nPlanesHodo 4
 // #define nFibersHodo 64
 
@@ -48,6 +50,7 @@ class Hodoscope : public TObject {
   Int_t GetSpill() const {return _spillNum;};
   Int_t GetEvent() const {return _eventNum;} ;
 
+  std::map<std::pair<int,int>, int > GetFibers();
   
   void Reset();
   void Dump() const;
@@ -63,7 +66,7 @@ class Hodoscope : public TObject {
 //   UShort_t  _adcChannel[32]; //---- patternChannel
   unsigned int     _nAdcChannels;
   
-  bool _fibersOn[4][64];
+  int _fibersOn[4][64];
 //   bool _fibersOn[nPlanesHodo][nFibersHodo];
   
   

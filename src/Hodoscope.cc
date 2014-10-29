@@ -26,6 +26,13 @@ void Hodoscope::Reset(){
   _tdc_recox=-999;
   _tdc_recoy=-999;
   
+  
+  for(int i=0; i<4; i++){
+   for(int j=0; j<64; j++){
+    _fibersOn[i][j] = 0;
+   }
+  }
+  
 }
 
 void Hodoscope::SetADCData(unsigned int *adcData, unsigned int * adcBoard, unsigned int *adcChannel, Int_t nAdcChannels){
@@ -77,13 +84,7 @@ void Hodoscope::FillHodo(){
 //   }
 //  }
  
- for(int i=0; i<4; ++i){
-  for(int j=0; j<64; ++j){
-   _fibersOn[i][j] = 0;
-  }
- }
-
- 
+  
  
  
  for(unsigned int i=0;i<_nAdcChannels;++i){
@@ -104,7 +105,8 @@ void Hodoscope::FillHodo(){
 //     std::cout << " j = " << j << " thisfibon = " << thisfibon  << " [fiberorder->size() = " << fiberorder->size() <<   "]" << std::endl;
 //     std::cout << " fiberorder->size() = " << fiberorder->size() << std::endl;
     if (fiberorder->size() >= j) { //---- FIXME check
-     _fibersOn[pos][fiberorder->at(j)-1] = thisfibon;
+     if (thisfibon) _fibersOn[pos][fiberorder->at(j)-1] = 1;
+     else           _fibersOn[pos][fiberorder->at(j)-1] = 0;
     }
    }
    
@@ -141,6 +143,18 @@ void Hodoscope::FillWC(){
 }
 
 
+
+std::map<std::pair<int,int>, int > Hodoscope::GetFibers() {
+ FillFiberOrder();
+ std::map<std::pair<int,int>, int > result;
+ for (int i=0; i<4; i++) {
+  for (int j=0; j<64; j++) {
+   std::pair<int,int> pairmap (i,j);
+   result[pairmap] = _fibersOn[i][j];
+  }
+ }
+ return result;
+}
 
 
 
