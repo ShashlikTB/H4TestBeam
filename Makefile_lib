@@ -21,7 +21,7 @@ SRCSNOLINKDEF	:= Mapper.cc waveInterface.cc CalReco.cc
 
 # sources for which dictionaries are to be created, 
 # using LinkDefs
-SRCSWITHLINKDEF:= TBEvent.cc waveInterface.cc PadeChannel.cc Hodoscope.cc TBRecHit.cc
+SRCSWITHLINKDEF:= TBEvent.cc PadeChannel.cc Hodoscope.cc TBRecHit.cc
 # ----------------------------------------------------------------------------
 SRCSNOLINKDEF	:= $(patsubst %.cc,$(SRCDIR)/%.cc,$(SRCSNOLINKDEF))
 DICTSNOLINKDEF	:= $(patsubst $(SRCDIR)/%.cc,$(BLDDIR)/%Dict.cxx,$(SRCSNOLINKDEF))
