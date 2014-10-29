@@ -150,8 +150,9 @@ void calDisplay(TString fdat, int ndisplay=-1){
   c1->cd(4)->SetGrid();
   hChanU->Draw("colz");
   hmChanU->Draw("text same");
- 
-  return;   // skip timing
+  c1->SaveAs("plot/cal_peak.png");
+  
+//   return;   // skip timing
 
 
 
@@ -168,4 +169,6 @@ void calDisplay(TString fdat, int ndisplay=-1){
   hChanU_time->Draw("colz");
   //  drawChannelMap(c2);
   c2->Update();
+  c2->SaveAs("plot/cal_time.png");
+  
 }
