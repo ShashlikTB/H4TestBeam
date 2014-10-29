@@ -183,7 +183,7 @@ class TBEvent : public TObject {
   void SetHodoScopeData   (Int_t runNumber, Int_t spillNumber, Int_t eventNum,  unsigned int *adcData,  unsigned int *adcBoard,  unsigned int * adcChannel, Int_t nAdcChannels);
   void SetWireChambersData(Int_t runNumber, Int_t spillNumber, Int_t eventNum,  unsigned int *tdcData,  unsigned int *tdcBoard,  unsigned int * tdcChannel, Int_t nTdcChannels);
   
-                   
+  void SetHodoScope (Hodoscope inhodoscope) { hodoscope = inhodoscope; }
 
   private:
   std::vector<PadeChannel> padeChannel;

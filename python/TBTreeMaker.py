@@ -104,30 +104,27 @@ def filler(padeDat, beamDat, NEventLimit=NMAX):
     if beamDat!="": fBeam=TBOpen(beamDat)
     else: logger.Warn("No corresponding Beam data file provided")
 
-    eventDict = {} # dictionary holds event data for a spill, use event # as key
-    padeDict = {}  # dictionary holds PADE header data for a spill, use PADE ID as key
-    beamDict = {}  # dictionary holds Beam information
+    eventDict={} # dictionary holds event data for a spill, use event # as key
+    padeDict={}  # dictionary holds PADE header data for a spill, use PADE ID as key
 
     lastBoardID=-1
     lastEvent=-1
     nSpills=0
     nEventsInSpill=0
-    nEventsInSpillFromBeamInformation = 0
-    currentSpillFromBeam = -1
+    nEventsInSpillFromBeamInformation=0
+    currentSpillFromBeam = 0
     nEventsTot=0
     skipToNextSpill=False
     skipToNextBoard=False
     fakeSpillData=False
     writevent=True
 
-    newSpillInPade = False
-    
     # read PADE data file
     linesread=0;
     while 1:
         padeline=fPade.readline().rstrip()
         if not padeline:                                             # end of file
-            ndrop = fillTree(BeamTree,eventDict,tbspill)          
+            ndrop=fillTree(BeamTree,eventDict,tbspill)          
             if not ndrop==0: logger.Warn(ndrop,"incomplete events dropped from tree, spill",nSpills)
             break
         linesread=linesread+1
@@ -136,26 +133,23 @@ def filler(padeDat, beamDat, NEventLimit=NMAX):
 
         if "starting spill" in padeline:   # new spill condition
             if nSpills>0:                  # if this is not the 1st spill, fill the tree with the spill we just read
-                ndrop = fillTree(BeamTree,eventDict,tbspill)
+                ndrop=fillTree(BeamTree,eventDict,tbspill)
                 if not ndrop==0: logger.Warn(ndrop,"incomplete events dropped from tree, spill",nSpills)
             if (nEventsTot>=NEventLimit): 
                 break
 
-            if nEventsInSpill != nEventsInSpillFromBeamInformation :
-              logger.Warn("Number of events per spill mismatch [nSpills:",nSpills,". Pade:", nEventsInSpill,", Beam:", nEventsInSpillFromBeamInformation)
-
             tbspill.Reset();
             logger.Info(padeline)
-            eventDict = {}           # clear dictionary containing events in spill
-            lastBoardID = -1         # reset counters and flags
-            lastEvent = -1
-            newEvent =False
-            skipToNextSpill = False
-            skipToNextBoard = False
-            nEventsInSpill = 0
+            eventDict={}           # clear dictionary containing events in spill
+            lastBoardID=-1         # reset counters and flags
+            lastEvent=-1
+            newEvent=False
+            skipToNextSpill=False
+            skipToNextBoard=False
+            nEventsInSpill=0
 
-            padeSpill = ParsePadeSpillHeader(padeline)
-            nSpills = nSpills+1;
+            padeSpill=ParsePadeSpillHeader(padeline)
+            nSpills=nSpills+1;
 
             tbspill.SetSpillData(padeSpill['number'],padeSpill['pcTime'],
                                  padeSpill['nTrigWC'],padeSpill['wcTime'],
@@ -261,106 +255,113 @@ def filler(padeDat, beamDat, NEventLimit=NMAX):
             if fBeam!=0:
                 if padeEvent==0:
                     logger.Info("Looking up beam data.  Spill:",padeSpill['number'],"Event",padeEvent)
-                #while 1:
-                # read file till "Event" is found
-                beamline = fBeam.readline().lstrip()
                 while 1:
-                  if len(beamline.split()) != 0 and (beamline.split()[0]) == 'Event':    # "Event" found
+                  # read file till "Event" is found
+                  beamline = fBeam.readline().lstrip()
+                  if not beamline: # end of file
+                    logger.Warn("End of file reading beam data. nEventsInSpillFromBeamInformation=",nEventsInSpillFromBeamInformation)
+                    #logger.Warn("End of file reading beam data. Wrong beam file or sync problem.")
+                    fBeam=0
                     break
-                  beamline = fBeam.readline().lstrip() # read the next line
 
-                if "Event" in beamline: # cross check, but actually not needed
-                #if "spillNumber" in beamline:  
-                    beamEvent = int(beamline.split()[1])
-                    
-                    beamline = fBeam.readline().rstrip()
-                    beamrunNumber=int(beamline.split()[1])
-                    
-                    beamspill=int(beamline.split()[1])+1  # spill number starts from 1 on PADE
-                    
-                    newSpillFromBeam = beamspill;
-                    if currentSpillFromBeam != beamspill:
-                      #if it is a new spill, reset the counter
-                      nEventsInSpillFromBeamInformation = 0
-                      currentSpillFromBeam = beamspill
-                    
-                    nEventsInSpillFromBeamInformation = nEventsInSpillFromBeamInformation+1
-                    
-                    if nEventsInSpill != nEventsInSpillFromBeamInformation :
-                      logger.Warn("A new spill started in PADE but DAQ is still in the previous spill")
-                      logger.Warn("Number of events per spill mismatch [nSpills:",nSpills,". Pade:", nEventsInSpill,", Beam:", nEventsInSpillFromBeamInformation)
+                  while 1:
+                    if len(beamline.split()) != 0 and (beamline.split()[0]) == 'Event':    # "Event" found
+                      break
+                    beamline = fBeam.readline().lstrip() # read the next line
 
-                    beamline=fBeam.readline().rstrip()                        
-                    beamevt = int(beamline.split()[1])
-                    evtTimeDist = fBeam.readline()
-                    evtTimeStart = fBeam.readline()
-                    nEvtTimes = fBeam.readline()
-                    evtTime = fBeam.readline()
-                    evtTimeBoard = fBeam.readline()
-                    
-                    if DEBUG_LEVEL>1: print " Event:Spill ", beamEvent, " ", beamspill
-                    
-                    
-                    # get to the "nTdcChannels"
-                    tempLine = fBeam.readline().lstrip()
-                    tempLine_split = tempLine.split()
-                    while (tempLine_split[0] != "nTdcChannels") :
+                  if "Event" in beamline: # cross check, but actually not needed
+                  #if "spillNumber" in beamline:  
+ 
+                      nEventsInSpillFromBeamInformation = nEventsInSpillFromBeamInformation+1
+                      beamEvent = int(beamline.split()[1])
+                      
+                      beamline = fBeam.readline().rstrip()
+                      beamrunNumber=int(beamline.split()[1])
+                      
+                      beamspill=int(beamline.split()[1])+1  # spill number starts from 1 on PADE
+
+                      if currentSpillFromBeam != beamspill:
+                        #if it is a new spill, reset the counter
+                        nEventsInSpillFromBeamInformation = 0
+                        currentSpillFromBeam = beamspill
+                                            
+                      beamline=fBeam.readline().rstrip()                        
+                      beamevt = int(beamline.split()[1])
+                      
+                      if (beamspill != nSpills) and (beamevt != padeEvent) :
+                        logger.Warn("Event number mismatch. beamspill:",beamspill,", nSpills:",nSpills," beamevt:",beamevt," padeEvent:",padeEvent )
+                        continue
+
+                      evtTimeDist = fBeam.readline()
+                      evtTimeStart = fBeam.readline()
+                      nEvtTimes = fBeam.readline()
+                      evtTime = fBeam.readline()
+                      evtTimeBoard = fBeam.readline()
+                      
+                      if DEBUG_LEVEL>1: print " Event:Spill ", beamEvent, " ", beamspill
+                      
+                      
+                      # get to the "nTdcChannels"
                       tempLine = fBeam.readline().lstrip()
                       tempLine_split = tempLine.split()
+                      while (tempLine_split[0] != "nTdcChannels") :
+                        tempLine = fBeam.readline().lstrip()
+                        tempLine_split = tempLine.split()
 
-                    if tempLine.startswith('nTdcChannels') :
-                      if DEBUG_LEVEL>2: print " >>> hodoscope wire chambers"
-                      nTdcChannels = int(( tempLine_split )[1]) # --> nPatterns 12345
-                      
-                      tdcBoard = fBeam.readline().split() # --> patternBoard
-                      tdcBoard_a = array("I",[0]*max(32,nTdcChannels))
-                      for i in range(nTdcChannels):  tdcBoard_a[i] = long(tdcBoard[i+1])
-                      tdcChannel = fBeam.readline().split() # --> patternChannel
-                      tdcChannel_a = array("I",[0]*max(32,nTdcChannels))
-                      for i in range(nTdcChannels): tdcChannel_a[i] = long(tdcChannel[i+1])
+                      if tempLine.startswith('nTdcChannels') :
+                        if DEBUG_LEVEL>2: print " >>> hodoscope wire chambers"
+                        nTdcChannels = int(( tempLine_split )[1]) # --> nPatterns 12345
+                        
+                        tdcBoard = fBeam.readline().split() # --> patternBoard
+                        tdcBoard_a = array("I",[0]*max(32,nTdcChannels))
+                        for i in range(nTdcChannels):  tdcBoard_a[i] = long(tdcBoard[i+1])
+                        tdcChannel = fBeam.readline().split() # --> patternChannel
+                        tdcChannel_a = array("I",[0]*max(32,nTdcChannels))
+                        for i in range(nTdcChannels): tdcChannel_a[i] = long(tdcChannel[i+1])
 
-                      tdcData = fBeam.readline().split() # --> tdcData
-                      if DEBUG_LEVEL>3: print "tdcData = ",tdcData
-                      tdcData_a = array ("I",[0]*max(32,nTdcChannels))
-                      if DEBUG_LEVEL>3: print "tdcData_a = ",tdcData_a
-                      for i in range(nTdcChannels): tdcData_a[i] = long(tdcData[i+1])
-                      #tdcData_a[i]=123456789
+                        tdcData = fBeam.readline().split() # --> tdcData
+                        if DEBUG_LEVEL>3: print "tdcData = ",tdcData
+                        tdcData_a = array ("I",[0]*max(32,nTdcChannels))
+                        if DEBUG_LEVEL>3: print "tdcData_a = ",tdcData_a
+                        for i in range(nTdcChannels): tdcData_a[i] = long(tdcData[i+1])
+                        #tdcData_a[i]=123456789
+                        
+                        if DEBUG_LEVEL>1: print "Found beam tdcData for spill",beamspill,"event",beamevt
+                        eventDict[padeEvent].SetWireChambersData(beamrunNumber, beamspill,beamevt,tdcData_a,tdcBoard_a,tdcChannel_a,nTdcChannels)
+                        
                       
-                      if DEBUG_LEVEL>1: print "Found beam tdcData for spill",beamspill,"event",beamevt
-                      eventDict[padeEvent].SetWireChambersData(beamrunNumber, beamspill,beamevt,tdcData_a,tdcBoard_a,tdcChannel_a,nTdcChannels)
-                      
-                    
-                    # get to the "nPatterns"
-                    tempLine = fBeam.readline().lstrip()
-                    tempLine_split = tempLine.split()
-                    while (tempLine_split[0] != "nPatterns") :
+                      # get to the "nPatterns"
                       tempLine = fBeam.readline().lstrip()
                       tempLine_split = tempLine.split()
+                      while (tempLine_split[0] != "nPatterns") :
+                        tempLine = fBeam.readline().lstrip()
+                        tempLine_split = tempLine.split()
 
-                    if tempLine.startswith('nPatterns') :
-                      if DEBUG_LEVEL>1: print " >>> hodoscope "
-                      nAdcChannels = int(( tempLine_split )[1]) # --> nPatterns 12345
+                      if tempLine.startswith('nPatterns') :
+                        if DEBUG_LEVEL>1: print " >>> hodoscope "
+                        nAdcChannels = int(( tempLine_split )[1]) # --> nPatterns 12345
 
-                      pattern = fBeam.readline().split() # --> pattern
-                      if DEBUG_LEVEL>1: print "pattern = ",pattern
-                      pattern_a = array ("I",[0]*max(32,nAdcChannels))
-                      if DEBUG_LEVEL>1: print "pattern_a = ",pattern_a
-                      for i in range(nAdcChannels): pattern_a[i] = long(pattern[i+1])
-                      #pattern_a[i]=123456789
-                      
-                      adcBoard = fBeam.readline().split() # --> patternBoard
-                      adcBoard_a = array("I",[0]*max(32,nAdcChannels))
-                      for i in range(nAdcChannels):  adcBoard_a[i] = long(adcBoard[i+1])
-                      adcChannel = fBeam.readline().split() # --> patternChannel
-                      adcChannel_a = array("I",[0]*max(32,nAdcChannels))
-                      for i in range(nAdcChannels): adcChannel_a[i] = long(adcChannel[i+1])
-                      
-                      if DEBUG_LEVEL>1: print "Found beam adcData for spill",beamspill,"event",beamevt
-                      eventDict[padeEvent].SetHodoScopeData(beamrunNumber, beamspill,beamevt,pattern_a,adcBoard_a,adcChannel_a,nAdcChannels)
-                      
-                    tempLine_split = fBeam.readline().rstrip().split()
-                    while (tempLine_split[0] != "End" and tempLine_split[1] != "Event") :
+                        pattern = fBeam.readline().split() # --> pattern
+                        if DEBUG_LEVEL>1: print "pattern = ",pattern
+                        pattern_a = array ("I",[0]*max(32,nAdcChannels))
+                        if DEBUG_LEVEL>1: print "pattern_a = ",pattern_a
+                        for i in range(nAdcChannels): pattern_a[i] = long(pattern[i+1])
+                        #pattern_a[i]=123456789
+                        
+                        adcBoard = fBeam.readline().split() # --> patternBoard
+                        adcBoard_a = array("I",[0]*max(32,nAdcChannels))
+                        for i in range(nAdcChannels):  adcBoard_a[i] = long(adcBoard[i+1])
+                        adcChannel = fBeam.readline().split() # --> patternChannel
+                        adcChannel_a = array("I",[0]*max(32,nAdcChannels))
+                        for i in range(nAdcChannels): adcChannel_a[i] = long(adcChannel[i+1])
+                        
+                        if DEBUG_LEVEL>1: print "Found beam adcData for spill",beamspill,"event",beamevt
+                        eventDict[padeEvent].SetHodoScopeData(beamrunNumber, beamspill,beamevt,pattern_a,adcBoard_a,adcChannel_a,nAdcChannels)
+                        
                       tempLine_split = fBeam.readline().rstrip().split()
+                      while (tempLine_split[0] != "End" and tempLine_split[1] != "Event") :
+                        tempLine_split = fBeam.readline().rstrip().split()
+
 
             #!!! This code needs to be written  
             #!!! Fetch all data from fBeam for this event
@@ -379,14 +380,6 @@ def filler(padeDat, beamDat, NEventLimit=NMAX):
             if DEBUG_LEVEL>2: eventDict[padeEvent].GetLastPadeChan().Dump()
 
 
-    if nEventsInSpill != nEventsInSpillFromBeamInformation :
-      logger.Warn("Number of events per spill mismatch [nSpills:",nSpills,". Pade:", nEventsInSpill,", Beam:", nEventsInSpillFromBeamInformation)
-
-    if fBeam :
-      beamline = fBeam.readline().lstrip()
-      if "Event" in beamline:
-        logger.Warn("Number of events per spill mismatch [nSpills:",nSpills,". Pade:", nEventsInSpill,", Beam (at least):", nEventsInSpillFromBeamInformation+1)
-          
 
     #=======================================================================# 
     #  Write tree and file to disk                                          #

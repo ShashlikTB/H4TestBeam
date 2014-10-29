@@ -86,7 +86,7 @@ void beamDisplay(TString fdat, int ndisplay=-1){
    fibers_mappairY1.second = iBinY;
    fibers_mappairY2.second = iBinY;
    int valueY1 = fibers[fibers_mappairY1];
-   int valueY2 = fibers[fibers_mappairY1];
+   int valueY2 = fibers[fibers_mappairY2];
    if (valueY1 != 0) {
     for (int iBinX=0; iBinX<64; iBinX++) {
      hHS_Y1->Fill(iBinX,iBinY);
@@ -110,7 +110,7 @@ void beamDisplay(TString fdat, int ndisplay=-1){
    fibers_mappairX1.second = iBinX;
    fibers_mappairX2.second = iBinX;
    int valueX1 = fibers[fibers_mappairX1];
-   int valueX2 = fibers[fibers_mappairX1];
+   int valueX2 = fibers[fibers_mappairX2];
    if (valueX1 != 0) {
     for (int iBinY=0; iBinY<64; iBinY++) {
      hHS_X1->Fill(iBinX,iBinY);
