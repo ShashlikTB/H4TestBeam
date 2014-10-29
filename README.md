@@ -6,6 +6,7 @@ Code for H4 test H4TestBeam
     source setupTB.csh
     source setupTB.sh
     
+    make -f Makefile_lib  clean
     make -f Makefile_lib
 
 Compile exe
@@ -22,6 +23,7 @@ To run (example):
     cd H4DQM
     ./bin/readBinary -f ../H4TestBeam/data/1.raw.fromMarini.raw  -o ../H4TestBeam/data/1.raw.fromMarini.raw.root
     
+    cd H4TestBeam
     ./bin/Hodo2text.exe --input_file data/1.raw.fromMarini.raw.root   --output_file data/test_1_Marini.txt --maxEvents 4
 
     ./bin/Hodo2text.exe --input_file data/1.raw.fromMarini.raw.root   --output_file data/test_1_Marini.txt --maxEvents 307
@@ -49,6 +51,7 @@ To get a visual about which channels are present, do
 
     calDisplay.py
 
+    beamDisplay.py
 
 
 
