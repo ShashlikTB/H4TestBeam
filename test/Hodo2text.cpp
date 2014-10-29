@@ -1,6 +1,7 @@
 #include <string>
 #include "TTree.h"
 #include "TFile.h"
+#include "TChain.h"
 
 #include <iostream>
 #include <fstream>
@@ -39,7 +40,7 @@ int main(int argc, char**argv){
  po::options_description desc("Allowed options");
  desc.add_options()
     ("help", "produce help message")
-    ("input_file",  po::value<std::string>(), "input file")
+    ("input_file",   po::value<std::string>(), "input file")
     ("output_file", po::value<std::string>(), "output file")
     ("maxEvents", po::value<int>(), "maxEvents")
  ;
@@ -59,11 +60,27 @@ int main(int argc, char**argv){
   std::cout << "defult?.\n";
  }
  
+ 
+ std::vector<std::string> input_files_vector;
+ std::stringstream ss(input_file);
+ 
+ std::string token_string;
+ while(std::getline(ss, token_string, ',')) {
+  std::cout << token_string << '\n';
+  input_files_vector.push_back(token_string);
+ }
+ 
+
+ 
+ 
  if (vm.count("output_file")) {
   output_file = vm["output_file"].as<std::string>();
  } else {
   std::cout << "defult?.\n";
  }
+ 
+ 
+ 
  
  if (vm.count("maxEvents")) {
   maxEvents = vm["maxEvents"].as<int>();
@@ -77,8 +94,16 @@ int main(int argc, char**argv){
   
  
  //---- read file
- TFile* fileIn = new TFile (input_file.c_str(), "READ");
- TTree* H4tree = (TTree*) fileIn->Get("H4tree");
+ 
+ 
+ 
+ TChain* H4tree = new TChain("H4tree");
+ for (unsigned int i=0; i<input_files_vector.size(); i++) {
+  H4tree->Add(input_files_vector.at(i).c_str());
+ }
+ 
+//  TFile* fileIn = new TFile (input_file.c_str(), "READ");
+//  TTree* H4tree = (TTree*) fileIn->Get("H4tree");
  
  
  //---- variables 
