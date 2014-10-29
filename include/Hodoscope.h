@@ -36,8 +36,9 @@ class Hodoscope : public TObject {
  public:
   Hodoscope();
   ~Hodoscope();
-  void SetSpill(Int_t spillNum){_spillNum=spillNum;};
-  void SetEvent(Int_t eventNum){_eventNum=eventNum;};
+  void SetRun(Int_t runNum){_runNum = runNum;};
+  void SetSpill(Int_t spillNum){_spillNum = spillNum;};
+  void SetEvent(Int_t eventNum){_eventNum = eventNum;};
   void SetADCData(unsigned int *adcData, unsigned int * adcBoard, unsigned int *adcChannel, Int_t nAdcChannels);
   void SetTDCData(unsigned int *tdcData, unsigned int * tdcBoard, unsigned int *tdcChannel, Int_t nTdcChannels);
    
@@ -49,13 +50,15 @@ class Hodoscope : public TObject {
    
   Int_t GetSpill() const {return _spillNum;};
   Int_t GetEvent() const {return _eventNum;} ;
-
+  Int_t GetRun()   const {return _runNum;} ;
+  
   std::map<std::pair<int,int>, int > GetFibers();
   
   void Reset();
   void Dump() const;
 
   // private:
+  Int_t     _runNum;
   Int_t     _spillNum;
   Int_t     _eventNum;
   ULong_t   _evtTime[3];

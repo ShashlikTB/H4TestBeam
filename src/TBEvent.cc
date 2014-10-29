@@ -152,13 +152,15 @@ TBEvent::TBRun TBEvent::GetRunPeriod() const{
   else return TBUndef;
 }
 
-void TBEvent::SetHodoScopeData(Int_t spillNumber, Int_t eventNum,  unsigned int *adcData,  unsigned int *adcBoard,  unsigned int * adcChannel, Int_t nAdcChannels){
-  hodoscope.SetSpill(spillNumber);
-  hodoscope.SetEvent(eventNum);
-  hodoscope.SetADCData(adcData, adcBoard, adcChannel, nAdcChannels);
+void TBEvent::SetHodoScopeData(Int_t runNumber, Int_t spillNumber, Int_t eventNum,  unsigned int *adcData,  unsigned int *adcBoard,  unsigned int * adcChannel, Int_t nAdcChannels){
+ hodoscope.SetRun(runNumber);
+ hodoscope.SetSpill(spillNumber);
+ hodoscope.SetEvent(eventNum);
+ hodoscope.SetADCData(adcData, adcBoard, adcChannel, nAdcChannels);
 }
 
-void TBEvent::SetWireChambersData(Int_t spillNumber, Int_t eventNum, unsigned int *tdcData,  unsigned int *tdcBoard,  unsigned int * tdcChannel, Int_t nTdcChannels){
+void TBEvent::SetWireChambersData(Int_t runNumber, Int_t spillNumber, Int_t eventNum, unsigned int *tdcData,  unsigned int *tdcBoard,  unsigned int * tdcChannel, Int_t nTdcChannels){
+ hodoscope.SetRun(runNumber);
  hodoscope.SetSpill(spillNumber);
  hodoscope.SetEvent(eventNum);
  hodoscope.SetTDCData(tdcData, tdcBoard, tdcChannel, nTdcChannels);

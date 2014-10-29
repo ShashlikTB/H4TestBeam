@@ -180,8 +180,8 @@ class TBEvent : public TObject {
 		       UInt_t ch_number,  UInt_t eventnum, Int_t *wform, Bool_t isLaser=false);
   // void AddWCHit(UChar_t num, UChar_t wire, UShort_t count);
 //   void SetHodoScopeData(Int_t spillNumber, Int_t eventNum, Int_t * adcChannel, Int_t *adcData);
-  void SetHodoScopeData   (Int_t spillNumber, Int_t eventNum,  unsigned int *adcData,  unsigned int *adcBoard,  unsigned int * adcChannel, Int_t nAdcChannels);
-  void SetWireChambersData(Int_t spillNumber, Int_t eventNum,  unsigned int *tdcData,  unsigned int *tdcBoard,  unsigned int * tdcChannel, Int_t nTdcChannels);
+  void SetHodoScopeData   (Int_t runNumber, Int_t spillNumber, Int_t eventNum,  unsigned int *adcData,  unsigned int *adcBoard,  unsigned int * adcChannel, Int_t nAdcChannels);
+  void SetWireChambersData(Int_t runNumber, Int_t spillNumber, Int_t eventNum,  unsigned int *tdcData,  unsigned int *tdcBoard,  unsigned int * tdcChannel, Int_t nTdcChannels);
   
                    
 
