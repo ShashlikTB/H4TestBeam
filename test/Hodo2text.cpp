@@ -174,9 +174,7 @@ int main(int argc, char**argv){
   
   H4tree->GetEntry(i);
   
-  myfile << "Event " << i << std::endl;
-  myfile << "  runNumber " << runNumber << std::endl;
-  
+  myfile << "Event " << i << std::endl;  
   myfile << "  runNumber " << runNumber  << std::endl;
   myfile << "  spillNumber " << spillNumber << std::endl;
   myfile << "  evtNumber " << evtNumber << std::endl;
@@ -326,6 +324,7 @@ int main(int argc, char**argv){
   }  
   myfile << std::endl;
   
+  myfile << "  End Event " << std::endl;
   
  }
  myfile.close(); 
