@@ -154,10 +154,10 @@ void calDisplay(TString fdat, int ndisplay=-1){
       mapper->ChannelID2ModuleFiber(channelID,moduleID,fiberID);  // get module and fiber IDs
 
 
-      cout << "Printint Fiber ID and Module ID: ##########" << endl;
-      cout << "Module ID: " << moduleID << endl;
-      cout << "Fiber ID: " << fiberID << endl;
-      cout << "####################" << endl;
+//       cout << "Printint Fiber ID and Module ID: ##########" << endl;
+//       cout << "Module ID: " << moduleID << endl;
+//       cout << "Fiber ID: " << fiberID << endl;
+//       cout << "####################" << endl;
 
       double x,y;
       mapper->ModuleXY(moduleID,x,y);
