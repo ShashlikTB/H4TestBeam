@@ -51,7 +51,7 @@ gSystem.SetIncludePath("-I\"$TBHOME/include\"")
 
 
 
-gROOT.ProcessLine(".L rootscript/runTBReco.C+")
+gROOT.ProcessLine(".L $TBHOME/rootscript/runTBReco.C+")
 
 fileList=[]
 if recurse:
