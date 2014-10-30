@@ -36,6 +36,16 @@ void calDisplay(TString fdat, int ndisplay=-1){
   TH2F *hChanD=new TH2F("hChanD","Channels DownStream RO;X [mm]; Y [mm]",
 			8,MIN_EDGE_X,MAX_EDGE_X,8,MIN_EDGE_Y,MAX_EDGE_Y);
 
+
+  TH2F *hModUmax=new TH2F("hModUmax","Maximum Deposition Modules UpSteam RO;X [mm]; Y [mm]",
+		       4,MIN_EDGE_X,MAX_EDGE_X,4,MIN_EDGE_Y,MAX_EDGE_Y);
+  TH2F *hModDmax=new TH2F("hModDmax","Maximum Deposition Modules DownStream RO;X [mm]; Y [mm]",
+		       4,MIN_EDGE_X,MAX_EDGE_X,4,MIN_EDGE_Y,MAX_EDGE_Y);
+  TH2F *hChanUmax=new TH2F("hChanUmax","Maximum Deposition Channels UpStream RO;X [mm]; Y [mm]",
+			8,MIN_EDGE_X,MAX_EDGE_X,8,MIN_EDGE_Y,MAX_EDGE_Y);
+  TH2F *hChanDmax=new TH2F("hChanDmax","Maximum Deposition Channels DownStream RO;X [mm]; Y [mm]",
+			8,MIN_EDGE_X,MAX_EDGE_X,8,MIN_EDGE_Y,MAX_EDGE_Y);
+
   hModU->SetMinimum(0);
   hModD->SetMinimum(0);
   hChanU->SetMinimum(0);
@@ -45,11 +55,25 @@ void calDisplay(TString fdat, int ndisplay=-1){
   hChanD->GetXaxis()->SetNdivisions(8,0);
   hChanD->GetYaxis()->SetNdivisions(8,0);
 
+  hModUmax->SetMinimum(0);
+  hModDmax->SetMinimum(0);
+  hChanUmax->SetMinimum(0);
+  hChanDmax->SetMinimum(0);
+  hChanUmax->GetXaxis()->SetNdivisions(8,0);
+  hChanUmax->GetYaxis()->SetNdivisions(8,0);
+  hChanDmax->GetXaxis()->SetNdivisions(8,0);
+  hChanDmax->GetYaxis()->SetNdivisions(8,0);
+
   if (singleEvent){
     hModU->SetMaximum(MAXADC*4);
     hModD->SetMaximum(MAXADC*4);
     hChanU->SetMaximum(MAXADC);
     hChanU->SetMaximum(MAXADC);
+
+    hModUmax->SetMaximum(MAXADC*4);
+    hModDmax->SetMaximum(MAXADC*4);
+    hChanUmax->SetMaximum(MAXADC);
+    hChanUmax->SetMaximum(MAXADC);
   }
   
   // histograms of timing 
@@ -74,6 +98,20 @@ void calDisplay(TString fdat, int ndisplay=-1){
   int nEntries=0;
   for (Int_t i=start; i<end; i++) {
     t1041->GetEntry(i);
+
+    float m_u_maxADC = 0;
+    float m_u_maxX = -99;
+    float m_u_maxY = -99;
+    float m_d_maxADC = 0;
+    float m_d_maxX = -99;
+    float m_d_maxY = -99;
+    float c_u_maxADC = 0;
+    float c_u_maxX = -99;
+    float c_u_maxY = -99;
+    float c_d_maxADC = 0;
+    float c_d_maxX = -99;
+    float c_d_maxY = -99;
+
     for (Int_t j = 0; j < event->NPadeChan(); j++){
       PadeChannel pch = event->GetPadeChan(j);
       if (j==0) mapper->SetEpoch(pch.GetTimeStamp());
@@ -94,23 +132,50 @@ void calDisplay(TString fdat, int ndisplay=-1){
       if (moduleID<0) {
 	hModU->Fill(x, y, max);
 	hModU_time->Fill(x, y, maxTime);
+	if(max > m_u_maxADC){
+	  m_u_maxADC = max;
+	  m_u_maxX = x;
+	  m_u_maxY = y;
+	}
       }
       else {
 	hModD->Fill(x, y, max);
 	hModD_time->Fill(x, y, maxTime);
+	if(max > m_d_maxADC){
+	  m_d_maxADC = max;
+	  m_d_maxX = x;
+	  m_d_maxY = y;
+	}
       }
       
       mapper->FiberXY(fiberID, x, y);
       if (moduleID<0) {
 	hChanU->Fill(x, y, max);
 	hChanU_time->Fill(x, y, maxTime);
+	if(max > c_u_maxADC){
+	  c_u_maxADC = max;
+	  c_u_maxX = x;
+	  c_u_maxY = y;
+	}
       }
       else {
 	hChanD->Fill(x, y, max);
 	hChanD_time->Fill(x, y, maxTime);
+	if(max > c_d_maxADC){
+	  c_d_maxADC = max;
+	  c_d_maxX = x;
+	  c_d_maxY = y;
+	}
       }
 
     }
+
+    hModUmax->Fill(m_u_maxX, m_u_maxY, m_u_maxADC);
+    hModDmax->Fill(m_d_maxX, m_d_maxY, m_d_maxADC);
+    hChanUmax->Fill(c_u_maxX, c_u_maxY, c_u_maxADC);
+    hChanDmax->Fill(c_d_maxX, c_d_maxY, c_d_maxADC);
+    
+
     nEntries++;
   }
 
@@ -123,6 +188,11 @@ void calDisplay(TString fdat, int ndisplay=-1){
   hModU_time->Scale(1./nEntries);
   hChanD_time->Scale(1./nEntries);
   hChanU_time->Scale(1./nEntries);
+
+  hModDmax->Scale(1./nEntries);
+  hModUmax->Scale(1./nEntries);
+  hChanDmax->Scale(1./nEntries);
+  hChanUmax->Scale(1./nEntries);
 
 
   // fetch module and channel maps
@@ -153,10 +223,15 @@ void calDisplay(TString fdat, int ndisplay=-1){
   hmChanU->Draw("text same");
   c1->SaveAs("plot/cal_peak.png");
   
+<<<<<<< HEAD
+//   return;   // skip timing
+//
+=======
    return;   // skip timing
 
 
 
+>>>>>>> aa9228dcbf9beee2ac37f8abc9d6b62551c0cf89
   TCanvas * c2 = new TCanvas("c2", "Average Peak Timing", 800, 800);
   c2->Divide(2, 2);
 
@@ -172,4 +247,20 @@ void calDisplay(TString fdat, int ndisplay=-1){
   c2->Update();
   c2->SaveAs("plot/cal_time.png");
   
+  TCanvas *c3=new TCanvas("c3","Maximum Peak Height of Each Event",800,800);
+  c3->Divide(2,2);
+
+  c3->cd(1);
+  hModDmax->Draw("colz");
+  hmModD->Draw("text same");
+  c3->cd(2);
+  hModUmax->Draw("colz");
+  hmModU->Draw("text same");
+  c3->cd(3)->SetGrid();
+  hChanDmax->Draw("colz");
+  hmChanD->Draw("text same");
+  c3->cd(4)->SetGrid();
+  hChanUmax->Draw("colz");
+  hmChanU->Draw("text same");
+  c3->SaveAs("plot/cal_peak_max.png");
 }
