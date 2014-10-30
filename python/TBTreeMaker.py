@@ -17,10 +17,11 @@ from datetime import *
 
 ##### Parameter block #####
 
-DEBUG_LEVEL = 1   # set to 0 for normal running
+DEBUG_LEVEL = 0   # set to 0 for normal running
 #DEBUG_LEVEL = 4   # set to 0 for normal running
 NMAX = 1000000    # max events to process.  Note: this is approximate, b/c processing occurs by spill
-MASTERID = 16
+NPADES=0      # counted from spill headers
+MASTERID = 0  # now read from spill headers
 MAXPERSPILL=1000  # do not process more that this many events per spill ( mem overwrite issue )
 
 ###########################
@@ -46,8 +47,8 @@ def fillTree(tree, eventDict, tbspill):
         if not ievt in eventDict:
             ndrop=ndrop+1
             continue
-        if not eventDict[ievt].NPadeChan()==128: 
-            if DEBUG_LEVEL>0: print "Incomplete event, #PADE channels=",eventDict[ievt].NPadeChan()
+        if not eventDict[ievt].NPadeChan()==NPADES*32: 
+            if DEBUG_LEVEL>0: print "Incomplete event, #PADE channels=",eventDict[ievt].NPadeChan(),NPADES
 # Allow incomplete events for now, uncomment when hardware is working
 #            ndrop=ndrop+1
 #            continue      # only fill w/ complete events
@@ -159,13 +160,16 @@ def filler(padeDat, beamDat, NEventLimit=NMAX):
             continue  # finished w/ spill header read next line in PADE file
 
         # begin reading at next spill header (triggered by certain errors)
+        NPADES=0
         if skipToNextSpill: continue  
 
         if "spill status" in padeline:   # spill header for a PADE card
+            NPADES=NPADES+1
             (isMaster,boardID,status,trgStatus,
              events,memReg,trigPtr,pTemp,sTemp) = ParsePadeBoardHeader(padeline)
             tbspill.AddPade(PadeHeader(isMaster,boardID,status,trgStatus,
                                             events,memReg,trigPtr,pTemp,sTemp,gain))
+            if (isMaster): MASTERID=boardID
             continue
 
         ############### Reading spill header information ########## 

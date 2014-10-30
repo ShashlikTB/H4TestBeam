@@ -16,10 +16,15 @@ void Mapper::SetEpoch(unsigned long ts){  // redundant data here, clean this up
     FIBERMAP=FIBERMAP_JULY14;
     MakeMaps();
   }
-  else if (ts>=TBEvent::START_H4TB && FIBERMAP!=FIBERMAP_OCTOBER14){
+  else if (ts>=TBEvent::START_H4TB && ts<TBEvent::H4TB_MAP1 && FIBERMAP!=FIBERMAP_OCTOBER14){
     FIBERMAP=FIBERMAP_OCTOBER14;
     MakeMaps();
   }
+  else if (ts>=TBEvent::H4TB_MAP1 && FIBERMAP!=FIBERMAP_OCTOBER2914){
+    FIBERMAP=FIBERMAP_OCTOBER2914;
+    MakeMaps();
+  }
+  
 }
 
 
