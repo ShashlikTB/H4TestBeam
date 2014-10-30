@@ -81,6 +81,7 @@ void calDisplay(TString fdat, int ndisplay=-1){
       pch.GetPedestal(ped,sig);
       UShort_t max = pch.GetMax()-ped;
       Int_t maxTime = pch.GetPeak();
+      if (max<5) continue;
       if (max>MAXADC) continue;    // skip channels with bad adc readings (should be RARE)
       //max-=pch.GetPedestal();
 
@@ -152,7 +153,7 @@ void calDisplay(TString fdat, int ndisplay=-1){
   hmChanU->Draw("text same");
   c1->SaveAs("plot/cal_peak.png");
   
-//   return;   // skip timing
+   return;   // skip timing
 
 
 
