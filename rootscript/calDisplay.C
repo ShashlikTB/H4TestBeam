@@ -223,15 +223,9 @@ void calDisplay(TString fdat, int ndisplay=-1){
   hmChanU->Draw("text same");
   c1->SaveAs("plot/cal_peak.png");
   
-<<<<<<< HEAD
 //   return;   // skip timing
 //
-=======
-   return;   // skip timing
 
-
-
->>>>>>> aa9228dcbf9beee2ac37f8abc9d6b62551c0cf89
   TCanvas * c2 = new TCanvas("c2", "Average Peak Timing", 800, 800);
   c2->Divide(2, 2);
 
