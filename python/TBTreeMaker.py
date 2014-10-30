@@ -115,6 +115,7 @@ def filler(padeDat, beamDat, NEventLimit=NMAX):
     nEventsInSpillFromBeamInformation=0
     currentSpillFromBeam = 0
     nEventsTot=0
+    
     skipToNextSpill=False
     skipToNextBoard=False
     fakeSpillData=False
@@ -139,6 +140,7 @@ def filler(padeDat, beamDat, NEventLimit=NMAX):
             if (nEventsTot>=NEventLimit): 
                 break
 
+            print " starting spill ... ", (nSpills+1)
             tbspill.Reset();
             logger.Info(padeline)
             eventDict={}           # clear dictionary containing events in spill
@@ -161,7 +163,8 @@ def filler(padeDat, beamDat, NEventLimit=NMAX):
 
         # begin reading at next spill header (triggered by certain errors)
         NPADES=0
-        if skipToNextSpill: continue  
+        if skipToNextSpill: 
+         continue  
 
         if "spill status" in padeline:   # spill header for a PADE card
             NPADES=NPADES+1
@@ -181,6 +184,7 @@ def filler(padeDat, beamDat, NEventLimit=NMAX):
 
 
         # new board/event conditions
+        #print "pade_board_id:",pade_board_id," :: lastBoardID:",lastBoardID
         newBoard =  (pade_board_id != lastBoardID)
         newEvent = (padeEvent!=lastEvent)
         newMasterEvent = (pade_board_id==MASTERID and newEvent)
@@ -202,13 +206,36 @@ def filler(padeDat, beamDat, NEventLimit=NMAX):
 
         #print "4!"
 
+        #if (padeSpill['number'] == 1 and padeEvent == 0) :
+          #print "Perpinchiopinpernaccolo!"
+          #print " board id = ",pade_board_id, " pade_ch_number = ",pade_ch_number
+        
         # check for non-sequential events
         if newEvent and (padeEvent-lastEvent)!=1:
             if logger.Warn("Nonsequential event #, delta=",padeEvent-lastEvent,
                         "this event",padeEvent,"last event",lastEvent,
-                        "Board:",pade_board_id,"channel:",pade_ch_number):
+                        "Board:",pade_board_id,"channel:",pade_ch_number,
+                        "padeSpill",padeSpill['number']):
                 if DEBUG_LEVEL>0: logger.Info("line number",linesread)
-        lastEvent=padeEvent
+        # if for some strange reason PADE events are not ordered (negative delta!) then skip that event      
+        if ((padeEvent-lastEvent) < 0):
+           #print "Strange!", (padeEvent-lastEvent)
+           logger.Warn("Nonsequential event #, delta is negative!")
+           print "Nonsequential event #, delta is negative!"
+           continue
+        
+        # if the event is already present
+        if padeEvent in eventDict.keys() :
+          # if the board is already been filled for this event
+          flagSkipPadeEvent = False
+          for iPadChannel in  range(0,eventDict[padeEvent].NPadeChan()) :
+            if (pade_ch_number == eventDict[padeEvent].GetPadeChan(iPadChannel).GetChannelNum()):
+              flagSkipPadeEvent = True
+          if flagSkipPadeEvent :
+            skipToNextSpill = True
+            # go go go!
+         
+        lastEvent = padeEvent
 
         # check packet counter
         goodPacketCount = (newBoard or newEvent) or (pade_hw_counter-lastPacket)==1
@@ -282,7 +309,9 @@ def filler(padeDat, beamDat, NEventLimit=NMAX):
                       beamline = fBeam.readline().rstrip()
                       beamrunNumber=int(beamline.split()[1])
                       
-                      beamspill=int(beamline.split()[1])+1  # spill number starts from 1 on PADE
+                      beamline = fBeam.readline().rstrip()
+                      #beamspill=int(beamline.split()[1])+1  # spill number starts from 1 on PADE
+                      beamspill=int(beamline.split()[1])  # spill number starts from 1 on PADE and also on Beam data
 
                       if currentSpillFromBeam != beamspill:
                         #if it is a new spill, reset the counter
@@ -290,10 +319,15 @@ def filler(padeDat, beamDat, NEventLimit=NMAX):
                         currentSpillFromBeam = beamspill
                                             
                       beamline=fBeam.readline().rstrip()                        
-                      beamevt = int(beamline.split()[1])
-                      
-                      if (beamspill != nSpills) and (beamevt != padeEvent) :
-                        logger.Warn("Event number mismatch. beamspill:",beamspill,", nSpills:",nSpills," beamevt:",beamevt," padeEvent:",padeEvent )
+                      beamevt = int(beamline.split()[1])-1   # event number starts from 0 on PADE and start from 1 on Beam data
+
+                      if beamspill > nSpills:
+                        skipToNextSpill = True
+                        break
+                        #FIXME ... skipping ALL events for the next 2 spills
+                        
+                      if (beamspill != nSpills) or (beamevt != padeEvent) :
+                        logger.Warn("Event number mismatch. beamspill:",beamspill,", padeSpill:",padeSpill," nSpills:",nSpills," beamevt in spill:",beamevt," padeEvent:",padeEvent," beamEvent from beginning of run:",beamEvent);
                         continue
 
                       evtTimeDist = fBeam.readline()
@@ -365,6 +399,7 @@ def filler(padeDat, beamDat, NEventLimit=NMAX):
                       tempLine_split = fBeam.readline().rstrip().split()
                       while (tempLine_split[0] != "End" and tempLine_split[1] != "Event") :
                         tempLine_split = fBeam.readline().rstrip().split()
+                      break
 
 
             #!!! This code needs to be written  
