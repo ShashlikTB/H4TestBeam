@@ -136,7 +136,8 @@ class TBEvent : public TObject {
   static const ULong64_t END_TBEAM2=635440566331915360L;
   /// Swap out board 117 for board 16, preparing for H4 TB
   static const ULong64_t START_H4TB=635479530091849620L;  // before installation
-  static const ULong64_t H4TB_MAP1=635502232652093170L;   // first data configuration
+  static const ULong64_t H4TB_MAP1=635502232652093170L;   // first data configuration 29-Oct-2014
+  static const ULong64_t H4TB_MAP2=635502992419392830L;   // 2nd data configuration 30-Oct-2014
 
   /// Times when change in pulse shapes occur
   /** Times of changes in PADE configuration that caused changes in pulse shapes:
