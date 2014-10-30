@@ -15,6 +15,8 @@ const int MAXADC=4095;
 // inputs data file and event in file to display (default is to integrate all)
 void calDisplay(TString fdat, int ndisplay=-1){
 
+  bool DO_TIMING=false;  // more for experts
+
   gStyle->SetOptStat(0);
 
   TFile *f = new TFile(fdat);
@@ -280,24 +282,25 @@ void calDisplay(TString fdat, int ndisplay=-1){
   hmChanU->Draw("text same");
   c1->SaveAs("plot/cal_peak.png");
   
-//   return;   // skip timing
-//
 
-  TCanvas * c2 = new TCanvas("c2", "Average Peak Timing", 800, 800);
-  c2->Divide(2, 2);
+// Peak time distributions
+  if (DO_TIMING) {
+    TCanvas * c2 = new TCanvas("c2", "Average Peak Timing", 800, 800);
+    c2->Divide(2, 2);
 
-  c2->cd(1);
-  hModD_time->Draw("colz");
-  c2->cd(2);
-  hModU_time->Draw("colz");
-  c2->cd(3)->SetGrid();
-  hChanD_time->Draw("colz");
-  c2->cd(4)->SetGrid();
-  hChanU_time->Draw("colz");
-  //  drawChannelMap(c2);
-  c2->Update();
-  c2->SaveAs("plot/cal_time.png");
-  
+    c2->cd(1);
+    hModD_time->Draw("colz");
+    c2->cd(2);
+    hModU_time->Draw("colz");
+    c2->cd(3)->SetGrid();
+    hChanD_time->Draw("colz");
+    c2->cd(4)->SetGrid();
+    hChanU_time->Draw("colz");
+    //  drawChannelMap(c2);
+    c2->Update();
+    c2->SaveAs("plot/cal_time.png");
+  }
+
   TCanvas *c3=new TCanvas("c3","Local of Maximum Deposition of Each Event",800,800);
   c3->Divide(2,2);
 

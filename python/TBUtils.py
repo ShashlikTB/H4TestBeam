@@ -55,7 +55,7 @@ class Logger():
     def Info(self,*arg):
         msg="Info: "+ccat(*arg)+"\n"
         sys.stdout.write(msg)   
-        if (self.logfile !=""): self.stdout.write("Info: "+msg+"\n")   
+        if (self.logfile !=""): self.stdout.write("Info: "+msg+"\n")  
     def Warn(self,*arg):
         msg="Warning: "+ccat(*arg)+"\n"
         if msg in self.warnings: self.warnings[msg]=self.warnings[msg]+1

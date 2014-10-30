@@ -23,7 +23,7 @@ NMAX = 1000000    # max events to process.  Note: this is approximate, b/c proce
 NPADES=0      # counted from spill headers
 MASTERID = 0  # now read from spill headers
 MAXPERSPILL=1000  # do not process more that this many events per spill ( mem overwrite issue )
-
+logger=Logger(1)  # instantiate a logger, w/ 1 repetition of messages
 ###########################
 
 def usage():
@@ -39,29 +39,29 @@ def usage():
 
 
 def fillTree(tree, eventDict, tbspill):  
-    ndrop=0                 # counter for incomlpete events that get dropped
-    if len(eventDict)==0: return
-    nfill=min(len(eventDict),MAXPERSPILL)
-    tree[0].SetBranchAddress("tbspill",AddressOf(tbspill))
-    for ievt in range(nfill):
-        if not ievt in eventDict:
-            ndrop=ndrop+1
-            continue
-        if not eventDict[ievt].NPadeChan()==NPADES*32: 
-            if DEBUG_LEVEL>0: print "Incomplete event, #PADE channels=",eventDict[ievt].NPadeChan(),NPADES
-# Allow incomplete events for now, uncomment when hardware is working
-#            ndrop=ndrop+1
-#            continue      # only fill w/ complete events
-        tree[0].SetBranchAddress("tbevent",AddressOf(eventDict[ievt]))
-        tree[0].Fill()
-#    sys.exit()
-    return ndrop
+	global NPADES
+	ndrop=0                 # counter for incomlpete events that get dropped
+	if len(eventDict)==0: return
+	nfill=min(len(eventDict),MAXPERSPILL)
+	tree[0].SetBranchAddress("tbspill",AddressOf(tbspill))
+	for ievt in range(nfill):
+		if not ievt in eventDict:
+			ndrop=ndrop+1
+			continue
+		if not eventDict[ievt].NPadeChan()==NPADES*32: 
+			if DEBUG_LEVEL>0: logger.Warn("Incomplete event, #PADE channels=",eventDict[ievt].NPadeChan(),NPADES)
+        ## Allow incomplete events for now, uncomment when hardware is working
+        # ndrop=ndrop+1
+        # continue      # only fill w/ complete events
+		tree[0].SetBranchAddress("tbevent",AddressOf(eventDict[ievt]))
+		tree[0].Fill()
+	return ndrop
 
 
 
 def filler(padeDat, beamDat, NEventLimit=NMAX):
-
-    logger=Logger(1)  # instantiate a logger, w/ 1 repetition of messages
+    global NPADES
+#    logger=Logger(1)  # instantiate a logger, w/ 1 repetition of messages
 
     #=======================================================================# 
     #  Declare an element of the event class for our event                  #
@@ -84,8 +84,6 @@ def filler(padeDat, beamDat, NEventLimit=NMAX):
     #    pdgId=0; momentum=0; gain=0; tableX=0; tableY=0; angle=0
 
     pdgId=0; momentum=0; gain=0; tableX=0; tableY=0; angle=0
-
-
     logger.Info("pdgId,momentum,gain,tableX,tableY,angle:",pdgId,momentum,gain,tableX,tableY,angle)
         
     fout = TFile(outFile+"_tmp", "recreate")   # write to tmp file, rename at successful close
@@ -134,13 +132,11 @@ def filler(padeDat, beamDat, NEventLimit=NMAX):
         ############### Reading spill header information ##########
 
         if "starting spill" in padeline:   # new spill condition
-            if nSpills>0:                  # if this is not the 1st spill, fill the tree with the spill we just read
+            if nSpills>0 and not skipToNextSpill:  # if we processed a good spill, fill the tree
                 ndrop=fillTree(BeamTree,eventDict,tbspill)
                 if not ndrop==0: logger.Warn(ndrop,"incomplete events dropped from tree, spill",nSpills)
-            if (nEventsTot>=NEventLimit): 
-                break
+            if (nEventsTot>=NEventLimit): break
 
-            print " starting spill ... ", (nSpills+1)
             tbspill.Reset();
             logger.Info(padeline)
             eventDict={}           # clear dictionary containing events in spill
@@ -157,25 +153,25 @@ def filler(padeDat, beamDat, NEventLimit=NMAX):
             tbspill.SetSpillData(padeSpill['number'],padeSpill['pcTime'],
                                  padeSpill['nTrigWC'],padeSpill['wcTime'],
                                  pdgId,momentum,tableX,tableY,angle)
-            if DEBUG_LEVEL>0: 
-                tbspill.Dump()
+            tbspill.Dump()
+            NPADES=0  # count PADE boards in each spill
             continue  # finished w/ spill header read next line in PADE file
 
         # begin reading at next spill header (triggered by certain errors)
-        NPADES=0
         if skipToNextSpill: 
          continue  
 
         if "spill status" in padeline:   # spill header for a PADE card
-            NPADES=NPADES+1
-            (isMaster,boardID,status,trgStatus,
-             events,memReg,trigPtr,pTemp,sTemp) = ParsePadeBoardHeader(padeline)
-            tbspill.AddPade(PadeHeader(isMaster,boardID,status,trgStatus,
-                                            events,memReg,trigPtr,pTemp,sTemp,gain))
-            if (isMaster): MASTERID=boardID
-            continue
+			NPADES=NPADES+1
+			if DEBUG_LEVEL>1: print padeline
+			(isMaster,boardID,status,trgStatus,events,memReg,trigPtr,pTemp,sTemp) = ParsePadeBoardHeader(padeline)
+			tbspill.AddPade(PadeHeader(isMaster,boardID,status,trgStatus,events,memReg,trigPtr,pTemp,sTemp,gain))
+			if (isMaster): 
+				MASTERID=boardID
+				logger.Info("Board",boardID,"is master")
+			continue
 
-        ############### Reading spill header information ########## 
+        ######### Finished reading spill header information ####### 
         ###########################################################
 
         # parse PADE channel data
@@ -193,7 +189,9 @@ def filler(padeDat, beamDat, NEventLimit=NMAX):
             lastBoardID=pade_board_id
             lastEvent=-1
             skipToNextBoard=False
-            if DEBUG_LEVEL>0: print "New board, ID=",pade_board_id
+            if DEBUG_LEVEL>0: 
+				print "New board, ID=",pade_board_id
+				print padeline
         if skipToNextBoard: continue
 
         # check for event overflows
@@ -211,28 +209,27 @@ def filler(padeDat, beamDat, NEventLimit=NMAX):
           #print " board id = ",pade_board_id, " pade_ch_number = ",pade_ch_number
         
         # check for non-sequential events
-        if newEvent and (padeEvent-lastEvent)!=1:
-            if logger.Warn("Nonsequential event #, delta=",padeEvent-lastEvent,
-                        "this event",padeEvent,"last event",lastEvent,
+        if newEvent and (padeEvent-lastEvent)>1:
+			logger.Warn("Nonsequential event #, delta=",padeEvent-lastEvent,
+						"this event",padeEvent,"last event",lastEvent,
                         "Board:",pade_board_id,"channel:",pade_ch_number,
-                        "padeSpill",padeSpill['number']):
-                if DEBUG_LEVEL>0: logger.Info("line number",linesread)
+                        "padeSpill",padeSpill['number'])
+			if DEBUG_LEVEL>0: logger.Info("line number",linesread)
         # if for some strange reason PADE events are not ordered (negative delta!) then skip that event      
-        if ((padeEvent-lastEvent) < 0):
-           #print "Strange!", (padeEvent-lastEvent)
-           logger.Warn("Nonsequential event #, delta is negative!")
-           print "Nonsequential event #, delta is negative!"
-           continue
+        elif ((padeEvent-lastEvent) < 0):
+			logger.Warn("Nonsequential event #, delta is negative!")
+			skipToNextBoard = True  # this is a very bad sign
+			continue
         
         # if the event is already present
-        if padeEvent in eventDict.keys() :
-          # if the board is already been filled for this event
-          flagSkipPadeEvent = False
-          for iPadChannel in  range(0,eventDict[padeEvent].NPadeChan()) :
-            if (pade_ch_number == eventDict[padeEvent].GetPadeChan(iPadChannel).GetChannelNum()):
-              flagSkipPadeEvent = True
-          if flagSkipPadeEvent :
-            skipToNextSpill = True
+#        if padeEvent in eventDict.keys() :
+          # if the board has already been filled for this event
+#          flagSkipPadeEvent = False
+#          for iPadChannel in  range(0,eventDict[padeEvent].NPadeChan()) :
+#            if (pade_ch_number == eventDict[padeEvent].GetPadeChan(iPadChannel).GetChannelNum()):
+#              flagSkipPadeEvent = True
+#          if flagSkipPadeEvent :
+#            skipToNextSpill = True
             # go go go!
          
         lastEvent = padeEvent
@@ -267,12 +264,11 @@ def filler(padeDat, beamDat, NEventLimit=NMAX):
 
         writeChan=True   # assume channel is good to write, until proven bad
 
-        #print "6!"
 
         # new event condition in master
         # NOTE: the code implicitly assumes that the MASTER is the board with LOWEST board ID
-        # Boards are witten out sequentially to the data file, so this means the MASTER is always the
-        # first data block
+        # Boards are witten out sequentially to the data file, so this requires that the MASTER 
+        # is always the first data block
         if newMasterEvent:
             nEventsTot=nEventsTot+1
             nEventsInSpill=nEventsInSpill+1
@@ -281,7 +277,7 @@ def filler(padeDat, beamDat, NEventLimit=NMAX):
 
             eventDict[padeEvent]=TBEvent()
 
-            # search for WC spill info
+            # search for hodoscope spill info
             # find matching spill and event in Hodoscope file
             if fBeam!=0:
                 if padeEvent==0:
@@ -401,11 +397,14 @@ def filler(padeDat, beamDat, NEventLimit=NMAX):
                         tempLine_split = fBeam.readline().rstrip().split()
                       break
 
-
-            #!!! This code needs to be written  
-            #!!! Fetch all data from fBeam for this event
-
+            ### End hodoscope event matching
+            #################################
+            
+        # end if newMasterEvent
         else: # new event in a slavereadline
+            if DEBUG_LEVEL>0 and padeEvent==0 and pade_ch_number==0: 
+				logger.Info("New Event in PADE:", pade_board_id)
+				print padeline
             if not padeEvent in eventDict:
                 logger.Warn("Event number mismatch. Slave:",
                             pade_board_id,"reports event not present in master.")
