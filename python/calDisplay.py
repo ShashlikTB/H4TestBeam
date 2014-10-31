@@ -12,7 +12,7 @@ from TBUtils import *
 logger=Logger()
 
 if len(sys.argv)<2:
-    runDat="latest.root"
+    runDat="latest_reco.root"
 else: runDat=sys.argv[1]
 selectEvent=-1
 if len(sys.argv)>2: selectEvent=int(sys.argv[2])

@@ -7,6 +7,7 @@
 #include "TCanvas.h"
 #include "TStyle.h"
 #include "TBEvent.h"
+#include "TBRecHit.h"
 #include "Mapper.h"
 
 const int MAXADC=4095;
@@ -114,10 +115,16 @@ void calDisplay(TString fdat, int ndisplay=-1){
   TTree *t1041 = (TTree*)f->Get("t1041");
   TBranch *bevent = t1041->GetBranch("tbevent");
   bevent->SetAddress(&event);
+  bool haverechits=false;
+  vector<TBRecHit> *rechits=0;
+  if(t1041->GetListOfBranches()->FindObject("tbrechits")) {
+    cout <<"found rechits"<<endl;
+    t1041->SetBranchAddress("tbrechits",&rechits);
+    haverechits=true;
+  }
 
   Int_t start=0; Int_t end=t1041->GetEntries();
   
-
   if (singleEvent && ndisplay<t1041->GetEntries() ) {
     start=ndisplay;
     end=ndisplay+1;
@@ -126,6 +133,7 @@ void calDisplay(TString fdat, int ndisplay=-1){
   int nEntries=0;
   for (Int_t i=start; i<end; i++) {
     t1041->GetEntry(i);
+    if (i==0) mapper->SetEpoch(event->GetTimeStamp());
 
     float m_u_maxADC = 0;
     float m_u_maxX = -99;
@@ -141,19 +149,33 @@ void calDisplay(TString fdat, int ndisplay=-1){
     float c_d_maxY = -99;
 
     for (Int_t j = 0; j < event->NPadeChan(); j++){
-      PadeChannel pch = event->GetPadeChan(j);
-      if (j==0) mapper->SetEpoch(pch.GetTimeStamp());
-      double ped,sig;
-      pch.GetPedestal(ped,sig);
-      UShort_t max = pch.GetMax()-ped;
-      Int_t maxTime = pch.GetPeak();
-      if (max<5) continue;
-      if (max>MAXADC) continue;    // skip channels with bad adc readings (should be RARE)
-      //max-=pch.GetPedestal();
+      if (haverechits && j>=(int)rechits->size()) break;
 
-      int channelID=pch.GetChannelID();   // boardID*100+channelNum in PADE
+      double ped,sig, max, maxTime;
+      int channelID;
+
+      if (haverechits){
+	TBRecHit &hit=rechits->at(j);
+	ped=hit.Pedestal();
+	sig=hit.NoiseRMS();
+	max=hit.AMax();
+	maxTime=hit.TRise();
+	channelID=hit.GetChannelID();
+      }
+      else{
+	PadeChannel pch = event->GetPadeChan(j);
+	pch.GetPedestal(ped,sig);
+	max = pch.GetMax()-ped;
+	maxTime = pch.GetPeak();
+	channelID=pch.GetChannelID();   // boardID*100+channelNum in PADE
+      }
+
+      if (max<3) continue;
+
       int moduleID,fiberID;
       mapper->ChannelID2ModuleFiber(channelID,moduleID,fiberID);  // get module and fiber IDs
+
+
 
 
 //       cout << "Printint Fiber ID and Module ID: ##########" << endl;
