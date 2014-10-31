@@ -173,6 +173,7 @@ class TBEvent : public TObject {
   //vector<WCChannel> GetWChitsY(Int_t wc, Int_t *min=0, Int_t* max=0) const;
   static TBRun GetRunPeriod(ULong64_t padeTime);
   TBRun GetRunPeriod() const;
+  ULong64_t GetTimeStamp();  // time stamp from 1st PADE channel
 
 
   // setters

@@ -168,5 +168,10 @@ void TBEvent::SetWireChambersData(Int_t runNumber, Int_t spillNumber, Int_t even
 
 
 
+ULong64_t TBEvent::GetTimeStamp(){
+  if (NPadeChan()==0) return 0;
+  PadeChannel pc=GetPadeChan(0);
+  return pc.GetTimeStamp();
+}
 
 
