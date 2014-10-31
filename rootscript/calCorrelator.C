@@ -16,19 +16,23 @@ const int MAXADC=4095;
 
 
 // inputs data file and event in file to display (default is to integrate all)
-void calCorrelator(TString fdat, int ndisplay=-1){
+void calCorrelator(TTree *t1041, int ndisplay=-1){
+
+  cout << "#Starting calCorrelation function, number of events in tree is: " << t1041->GetEntries() << endl;
 
   bool DO_TIMING=false;  // more for experts
   bool DO_WEIGHTED=true;
 
   gStyle->SetOptStat(0);
 
+/*
   TFile *f = new TFile(fdat);
   if (f->IsZombie()){
     cout << "Cannot open file: " << fdat << endl;
     return;
   }
-  
+  */
+
   Bool_t singleEvent=ndisplay>=0;
   Mapper *mapper=Mapper::Instance();
 
@@ -40,7 +44,7 @@ void calCorrelator(TString fdat, int ndisplay=-1){
 			8,MIN_EDGE_X,MAX_EDGE_X,8,MIN_EDGE_Y,MAX_EDGE_Y);
   TH2F *ChanCorrX=new TH2F("ChanCorrX", "Correlation in X Between Largest Deposition in Up and Downstream ROs;X Downstream [mm];X Upstream[mm]",
 			8,MIN_EDGE_X,MAX_EDGE_X,8,MIN_EDGE_X,MAX_EDGE_X);
-  TH2F *ChanCorrY=new TH2F("ChanCorrX", "Correlation in Y Between Largest Deposition in Up and Downstream ROs;Y Downstream [mm];Y Upstream[mm]",
+  TH2F *ChanCorrY=new TH2F("ChanCorrY", "Correlation in Y Between Largest Deposition in Up and Downstream ROs;Y Downstream [mm];Y Upstream[mm]",
 			8,MIN_EDGE_Y,MAX_EDGE_Y,8,MIN_EDGE_Y,MAX_EDGE_Y);
 
   hChanU->SetMinimum(0);
@@ -66,15 +70,17 @@ void calCorrelator(TString fdat, int ndisplay=-1){
   }
 
   TBEvent *event = new TBEvent();
-  TTree *t1041 = (TTree*)f->Get("t1041");
-  TBranch *bevent = t1041->GetBranch("tbevent");
-  bevent->SetAddress(&event);
+
+  t1041->SetBranchAddress("tbevent", &event);
+  
   bool haverechits=false;
   vector<TBRecHit> *rechits=0;
   if(t1041->GetListOfBranches()->FindObject("tbrechits")) {
     cout <<"found rechits"<<endl;
     t1041->SetBranchAddress("tbrechits",&rechits);
     haverechits=true;
+  } else {
+	cout << " PROBLEMS WITH THE BRANCH..." << endl;
   }
 
   Int_t start=0; Int_t end=t1041->GetEntries();
