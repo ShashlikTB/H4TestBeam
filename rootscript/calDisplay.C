@@ -170,7 +170,7 @@ void calDisplay(TString fdat, int ndisplay=-1){
 	channelID=pch.GetChannelID();   // boardID*100+channelNum in PADE
       }
 
-      if (max<3) continue;
+      if (max<0) continue;
 
       int moduleID,fiberID;
       mapper->ChannelID2ModuleFiber(channelID,moduleID,fiberID);  // get module and fiber IDs
