@@ -35,8 +35,8 @@ void calo_DQM(TTree *tree){
   TCanvas *cCal=new TCanvas("cCal","CaloDQM: Slopes, Projections",1500,800);
   cCal->Divide(4,2);
   TH2F *hNoise=new TH2F("hNoise","Noise vs Channel;channel index;ADC counts",128,0,128,20,0,2);
-  TH2F *hAmp=new TH2F("hAmp","log(Amplitude) vs Channel;channel index;ln(ADC counts)",128,0,128,40,0,3.5);
-  TH2F *hChi2=new TH2F("hChi2","log(Chi2) vs Channel;channel number;ln(Chi2)",128,0,128,40,0,6);
+  TH2F *hAmp=new TH2F("hAmp","log(Amplitude) vs Channel;channel index;log(ADC counts)",128,0,128,40,0,3.5);
+  TH2F *hChi2=new TH2F("hChi2","log(Chi2) vs Channel;channel number;log(Chi2)",128,0,128,40,0,6);
   TH2F *hNdof=new TH2F("hNdof","Ndof vs Channel;channel number;NDOF fit",128,0,128,40,0,40);
   TH2F *hChi2U=new TH2F("hChi2U","Upstream: log(Chi2) vs Amplitude;Amplitude;log(Chi2)",128,0,4096,40,0,6);
   TH2F *hChi2D=new TH2F("hChi2D","Downstream: log(Chi2) vs Amplitude;Amplitude;log(Chi2)",128,0,4096,40,0,6);
