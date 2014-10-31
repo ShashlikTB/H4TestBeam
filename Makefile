@@ -33,6 +33,7 @@ BASEDIR=$(shell pwd)
 BINDIR=$(BASEDIR)/bin
 SRCDIR = $(BASEDIR)/src
 HDIR = $(BASEDIR)/interface
+EXTLIBDIR = -L$(BASEDIR)/build/lib/ -lTB
 
 ### Main Target, first
 .PHONY: all
@@ -40,6 +41,8 @@ all: info $(Packages) | $(BINDIR)
 
 CXXFLAGS	+=`root-config --cflags`
 LDFLAGS 	+=`root-config --libs`
+
+LDFLAGS += $(EXTLIBDIR)
 
 BINOBJ	=$(patsubst %,$(BINDIR)/%.$(ObjSuf),$(Objects) )
 SRCFILES=$(patsubst %,$(SRCDIR)/%.$(SrcSuf),$(Objects) )
