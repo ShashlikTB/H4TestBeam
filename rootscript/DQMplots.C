@@ -35,11 +35,11 @@ void calo_DQM(TTree *tree){
   TCanvas *cCal=new TCanvas("cCal","CaloDQM: Slopes, Projections",1500,800);
   cCal->Divide(4,2);
   TH2F *hNoise=new TH2F("hNoise","Noise vs Channel;channel index;ADC counts",128,0,128,20,0,2);
-  TH2F *hAmp=new TH2F("hAmp","ln(Amplitude) vs Channel;channel index;ln(ADC counts)",128,0,128,40,0,8);
-  TH2F *hChi2=new TH2F("hChi2","ln(Chi2) vs Channel;channel number;ln(Chi2)",128,0,128,40,0,9);
+  TH2F *hAmp=new TH2F("hAmp","log(Amplitude) vs Channel;channel index;ln(ADC counts)",128,0,128,40,0,3.5);
+  TH2F *hChi2=new TH2F("hChi2","log(Chi2) vs Channel;channel number;ln(Chi2)",128,0,128,40,0,6);
   TH2F *hNdof=new TH2F("hNdof","Ndof vs Channel;channel number;NDOF fit",128,0,128,40,0,40);
-  TH2F *hChi2U=new TH2F("hChi2U","Upstream: ln(Chi2) vs Amplitude;Amplitude;ln(Chi2)",128,0,4096,40,0,9);
-  TH2F *hChi2D=new TH2F("hChi2D","Downstream: ln(Chi2) vs Amplitude;Amplitude;ln(Chi2)",128,0,4096,40,0,9);
+  TH2F *hChi2U=new TH2F("hChi2U","Upstream: log(Chi2) vs Amplitude;Amplitude;log(Chi2)",128,0,4096,40,0,6);
+  TH2F *hChi2D=new TH2F("hChi2D","Downstream: log(Chi2) vs Amplitude;Amplitude;log(Chi2)",128,0,4096,40,0,6);
   
   hAmp->SetStats(0);
   hNoise->SetStats(0);
@@ -54,12 +54,12 @@ void calo_DQM(TTree *tree){
       TBRecHit &hit=rechits->at(c);
       double amax=hit.AMax();
       double chi2=hit.Chi2();
-      if (amax>0) hAmp->Fill( hit.ChannelIndex(), TMath::Log(amax) );
-      if (chi2>0) hChi2->Fill( hit.ChannelIndex(), TMath::Log(chi2) );
+      if (amax>0) hAmp->Fill( hit.ChannelIndex(), TMath::Log10(amax) );
+      if (chi2>0) hChi2->Fill( hit.ChannelIndex(), TMath::Log10(chi2) );
       hNoise->Fill( hit.ChannelIndex(), hit.NoiseRMS() );
       hNdof->Fill( hit.ChannelIndex(), hit.Ndof());
-      if (hit.ChannelIndex()<64) hChi2U->Fill( amax, TMath::Log(chi2) );
-      else hChi2D->Fill( amax, TMath::Log(chi2) );
+      if (hit.ChannelIndex()<64) hChi2U->Fill( amax, TMath::Log10(chi2) );
+      else hChi2D->Fill( amax, TMath::Log10(chi2) );
     }
   }
   cCal->cd(1);
