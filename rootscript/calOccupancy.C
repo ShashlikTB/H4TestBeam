@@ -63,7 +63,7 @@ void calOccupancy(TString fdat, int firstTime = 1){
   t1041->SetBranchAddress("tbevent",&event);
   
   bool haverechits=false;
-  vector<TBRecHit> *rechits=0;
+  std::vector<TBRecHit> *rechits=0;
   if(t1041->GetListOfBranches()->FindObject("tbrechits")) {
     std::cout <<"found rechits"<< std::endl;
     t1041->SetBranchAddress("tbrechits",&rechits);

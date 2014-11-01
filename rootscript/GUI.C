@@ -21,6 +21,8 @@ private:
  TGTextButton        *fExit;
  TGTextButton        *fDrawOccupancy;
  TGTextButton        *fDrawDQM;
+ TGTextButton        *fDrawBeamPosition;
+
  TGTextButton        *fSetNumber;
  TGGroupFrame        *fGframe;
  TGNumberEntry       *fNumber;
@@ -93,7 +95,7 @@ MyMainFrame::MyMainFrame(const TGWindow *p, UInt_t w, UInt_t h) : TGMainFrame(p,
  fDrawOccupancy = new TGTextButton(fHor1, "Draw Occupancy");
  fDrawOccupancy->Connect("Clicked()", "MyMainFrame", this, "DrawPlotOccupancy()");
  fHor1->AddFrame(fDrawOccupancy, new TGLayoutHints(kLHintsTop | kLHintsExpandX, 1, 1, 1, 1));
- fDrawOccupancy->SetToolTipText("Click to draw the run DQM plots");
+ fDrawOccupancy->SetToolTipText("Click to draw the run Occupancy plots");
  AddFrame(fHor1,new TGLayoutHints(kLHintsBottom | kLHintsRight, 1, 1, 1, 1));
  
  
@@ -103,6 +105,12 @@ MyMainFrame::MyMainFrame(const TGWindow *p, UInt_t w, UInt_t h) : TGMainFrame(p,
  fDrawDQM->SetToolTipText("Click to draw the run DQM plots");
  AddFrame(fHor1,new TGLayoutHints(kLHintsBottom | kLHintsRight, 1, 1, 1, 1));
  
+ 
+ fDrawBeamPosition = new TGTextButton(fHor1, "Draw Hodoscope vs Shashlik");
+ fDrawBeamPosition->Connect("Clicked()", "MyMainFrame", this, "DrawPlotBeamPosition()");
+ fHor1->AddFrame(fDrawBeamPosition, new TGLayoutHints(kLHintsTop | kLHintsExpandX, 1, 1, 1, 1));
+ fDrawBeamPosition->SetToolTipText("Click to draw the run BeamPosition plots");
+ AddFrame(fHor1,new TGLayoutHints(kLHintsBottom | kLHintsRight, 1, 1, 1, 1));
  
  
  //---- add Exit button
@@ -159,6 +167,22 @@ void MyMainFrame::DrawPlotDQM() {
  fDrawDQM->SetState(kButtonUp);
 }
 
+
+
+
+
+void MyMainFrame::DrawPlotBeamPosition() {
+ // Slot connected to the Clicked() signal. 
+ std::cout << " Draw BeamPosition plots " << std::endl;
+ fDrawBeamPosition->SetState(kButtonDown); 
+ 
+ TString CommandToROOTSize = Form(".x rootscript/beamPosition.C(\"../DAQ/rec_capture_%d_reco.root\",%d)",_RunNumber, _firstTime_Generic);
+ gROOT->ProcessLine(CommandToROOTSize);
+ 
+ _firstTime_Generic = 0;
+ 
+ fDrawBeamPosition->SetState(kButtonUp);
+}
 
 
 void MyMainFrame::DoSetlabel()
