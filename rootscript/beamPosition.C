@@ -2,16 +2,17 @@
 #include "TString.h"
 #include "TFile.h"
 #include "TTree.h"
-#include "TBranch.h"
+// #include "TBranch.h"
 #include "TH2F.h"
 #include "TCanvas.h"
 #include "TStyle.h"
 // #include "TBEvent.h"
 // #include "Mapper.h"
 
+
+
 const int MAXADC=4095;
 
-#include <map>
 
 #define hodoX1 0
 #define hodoY1 1
@@ -26,9 +27,11 @@ void beamPosition(TString fdat, int firstTime = 1){
  gInterpreter->GenerateDictionary("std::map<std::pair<int,int>, int >","map");
  
  if (firstTime) {
+//   std::cout << "doing this!" << std::endl;
   gROOT->ProcessLine("#include \"include/TBEvent.h\"");
   gROOT->ProcessLine("#include \"include/TBRecHit.h\"");
   gROOT->ProcessLine("#include \"include/Mapper.h\"");
+  gROOT->ProcessLine("#include <map>");
  }
  
  gStyle->SetOptStat(0);
