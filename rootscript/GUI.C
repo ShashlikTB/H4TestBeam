@@ -45,7 +45,7 @@ public:
 
 MyMainFrame::MyMainFrame(const TGWindow *p, UInt_t w, UInt_t h) : TGMainFrame(p, w, h) {
  
- _RunNumber = 0;
+ _RunNumber = 999;
  _firstTime_Occupancy = 1;
  _firstTime_DQM = 1;
  _firstTime_Generic = 1;
