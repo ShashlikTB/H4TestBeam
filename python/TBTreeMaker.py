@@ -128,6 +128,14 @@ def filler(padeDat, beamDat, NEventLimit=NMAX):
             if not ndrop==0: logger.Warn(ndrop,"incomplete events dropped from tree, spill",nSpills)
             break
         linesread=linesread+1
+
+        ###########################################################
+        ##################### message/error line  #################
+        if padeline.startswith("##!"):
+            if "!DAQINFO" in padeline: logger.Info(padeline)
+            elif "!DAQERR" in padeline: logger.Warn(padeline)
+            continue
+
         ###########################################################
         ############### Reading spill header information ##########
 
