@@ -139,7 +139,7 @@ class TBEvent : public TObject {
   static const ULong64_t H4TB_MAP1=635502232652093170L;   // first data configuration 29-Oct-2014
   static const ULong64_t H4TB_MAP2=635502992419392830L;   // 2nd data configuration 30-Oct-2014
   static const ULong64_t H4TB_MAP3=635503713451583370L;   // 3rd data configuration 31-Oct-2014
-  static const ULong64_t H4TB_MAP4=635504599999999999L;   // 4th data configuration 01-Nov-2014
+  static const ULong64_t H4TB_MAP4=635504663348032610L;   // 4th data configuration 01-Nov-2014
 
 
   /// Times when change in pulse shapes occur
