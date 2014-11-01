@@ -23,12 +23,12 @@ const int MAXADC=4095;
 // inputs data file and event in file to display (default is to integrate all)
 void beamPosition(TString fdat, int firstTime = 1){
  
+ gInterpreter->GenerateDictionary("std::map<std::pair<int,int>, int >","map");
  
  if (firstTime) {
   gROOT->ProcessLine("#include \"include/TBEvent.h\"");
   gROOT->ProcessLine("#include \"include/TBRecHit.h\"");
   gROOT->ProcessLine("#include \"include/Mapper.h\"");
-  gInterpreter->GenerateDictionary("std::map<std::pair<int,int>, int >","map");
  }
  
  gStyle->SetOptStat(0);
