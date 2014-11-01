@@ -213,12 +213,12 @@ void beamPosition(TString fdat, int firstTime = 1){
    int valueY2 = fibers[fibers_mappairY2];
    
    if (valueY1 != 0) {
-    hHS_Shashlik_Y_HS1_SHUp->Fill(c_d_maxY,iBinY);
-    hHS_Shashlik_Y_HS1_SHDo->Fill(c_u_maxY,iBinY);
+    hHS_Shashlik_Y_HS1_SHUp->Fill(c_u_maxY,iBinY);
+    hHS_Shashlik_Y_HS1_SHDo->Fill(c_d_maxY,iBinY);
    }
    if (valueY2 != 0) {
-    hHS_Shashlik_Y_HS2_SHUp->Fill(c_d_maxY,iBinY);
-    hHS_Shashlik_Y_HS2_SHDo->Fill(c_u_maxY,iBinY);
+    hHS_Shashlik_Y_HS2_SHUp->Fill(c_u_maxY,iBinY);
+    hHS_Shashlik_Y_HS2_SHDo->Fill(c_d_maxY,iBinY);
    }
   }
   
@@ -233,12 +233,12 @@ void beamPosition(TString fdat, int firstTime = 1){
    int valueX1 = fibers[fibers_mappairX1];
    int valueX2 = fibers[fibers_mappairX2];
    if (valueX1 != 0) {
-     hHS_Shashlik_X_HS1_SHUp->Fill(c_d_maxX,iBinX);
-     hHS_Shashlik_X_HS1_SHDo->Fill(c_u_maxX,iBinX);
+     hHS_Shashlik_X_HS1_SHUp->Fill(c_u_maxX,iBinX);
+     hHS_Shashlik_X_HS1_SHDo->Fill(c_d_maxX,iBinX);
    }
    if (valueX2 != 0) {
-     hHS_Shashlik_X_HS2_SHUp->Fill(c_d_maxX,iBinX);
-     hHS_Shashlik_X_HS2_SHDo->Fill(c_u_maxX,iBinX);
+     hHS_Shashlik_X_HS2_SHUp->Fill(c_u_maxX,iBinX);
+     hHS_Shashlik_X_HS2_SHDo->Fill(c_d_maxX,iBinX);
    }
   }
    
