@@ -33,7 +33,8 @@ vector<TBRecHit> *rechits=0;
 
 void calo_DQM(TTree *tree, TString file){
   TString canvasName = Form ("cc_DQM_%s",file.Data());
-  TCanvas *cCal=new TCanvas(canvasName.Data(),"CaloDQM: Slopes, Projections",1500,800);
+  TString canvasNameHR = Form ("CaloDQM: Slopes, Projections [%s]",file.Data());
+  TCanvas *cCal=new TCanvas(canvasName.Data(),canvasNameHR.Data(),1500,800);
   cCal->Divide(4,2);
   TH2F *hNoise=new TH2F("hNoise","Noise vs Channel;channel index;ADC counts",128,0,128,20,0,2);
   TH2F *hAmp=new TH2F("hAmp","log(Amplitude) vs Channel;channel index;log(ADC counts)",128,0,128,40,0,3.5);

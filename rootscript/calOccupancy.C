@@ -144,8 +144,10 @@ void calOccupancy(TString fdat, int firstTime = 1){
   TH2I *hmChanD = new TH2I();
   mapper->GetChannelMap(hmChanD,1);
 
+  std::cout << " plotting ... " << std::endl;
   TString canvasName = Form ("cc_Occupancy_%s",fdat.Data());
-  TCanvas *c1 = new TCanvas(canvasName.Data(),"Occupancy",800,800);
+  TString canvasNameHR = Form ("Occupancy [%s]",fdat.Data());
+  TCanvas *c1 = new TCanvas(canvasName.Data(),canvasNameHR.Data(),800,800);
   c1->Divide(2,2);
 
   c1->cd(1);
