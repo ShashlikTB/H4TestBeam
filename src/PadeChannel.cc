@@ -41,8 +41,8 @@ void PadeChannel::Fill(ULong64_t ts, UShort_t transfer_size,
   if (isLaser) _status|=kLaser;
   
   // range to search for signal peaks
-  int tmin=15;
-  int tmax=40;
+  int tmin=30;
+  int tmax=70;
   
   // This handles the start of testbeam2 data where the first
   // 32 waveform samples are not valid wave data.  No porch was present in April 2014

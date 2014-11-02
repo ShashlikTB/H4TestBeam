@@ -50,9 +50,9 @@ def fillTree(tree, eventDict, tbspill):
 			continue
 		if not eventDict[ievt].NPadeChan()==NPADES*32: 
 			if DEBUG_LEVEL>0: logger.Warn("Incomplete event, #PADE channels=",eventDict[ievt].NPadeChan(),NPADES)
-        ## Allow incomplete events for now, uncomment when hardware is working
-        # ndrop=ndrop+1
-        # continue      # only fill w/ complete events
+                        ## comment out to allow incomplete events, uncomment when hardware is working
+                        ndrop=ndrop+1
+                        continue      # only fill w/ complete events
 		tree[0].SetBranchAddress("tbevent",AddressOf(eventDict[ievt]))
 		tree[0].Fill()
 	return ndrop
@@ -128,6 +128,14 @@ def filler(padeDat, beamDat, NEventLimit=NMAX):
             if not ndrop==0: logger.Warn(ndrop,"incomplete events dropped from tree, spill",nSpills)
             break
         linesread=linesread+1
+
+        ###########################################################
+        ##################### message/error line  #################
+        if padeline.startswith("##!"):
+            if "!DAQINFO" in padeline: logger.Info(padeline)
+            elif "!DAQERR" in padeline: logger.Warn(padeline)
+            continue
+
         ###########################################################
         ############### Reading spill header information ##########
 
