@@ -22,7 +22,8 @@ private:
  TGTextButton        *fDrawOccupancy;
  TGTextButton        *fDrawDQM;
  TGTextButton        *fDrawBeamPosition;
-
+ TGTextButton        *fDrawBeamPositionOnly;
+ 
  TGTextButton        *fSetNumber;
  TGGroupFrame        *fGframe;
  TGNumberEntry       *fNumber;
@@ -112,6 +113,11 @@ MyMainFrame::MyMainFrame(const TGWindow *p, UInt_t w, UInt_t h) : TGMainFrame(p,
  fDrawBeamPosition->SetToolTipText("Click to draw the run BeamPosition plots");
  AddFrame(fHor1,new TGLayoutHints(kLHintsBottom | kLHintsRight, 1, 1, 1, 1));
  
+ fDrawBeamPositionOnly = new TGTextButton(fHor1, "Draw Hodoscope vs Hodoscope");
+ fDrawBeamPositionOnly->Connect("Clicked()", "MyMainFrame", this, "DrawPlotBeamPositionOnly()");
+ fHor1->AddFrame(fDrawBeamPositionOnly, new TGLayoutHints(kLHintsTop | kLHintsExpandX, 1, 1, 1, 1));
+ fDrawBeamPosition->SetToolTipText("Click to draw the run BeamPosition plots");
+ AddFrame(fHor1,new TGLayoutHints(kLHintsBottom | kLHintsRight, 1, 1, 1, 1));
  
  //---- add Exit button
  
@@ -184,6 +190,20 @@ void MyMainFrame::DrawPlotBeamPosition() {
  fDrawBeamPosition->SetState(kButtonUp);
 }
 
+
+
+void MyMainFrame::DrawPlotBeamPositionOnly() {
+ // Slot connected to the Clicked() signal. 
+ std::cout << " Draw BeamPosition Only plots " << std::endl;
+ fDrawBeamPositionOnly->SetState(kButtonDown); 
+ 
+ TString CommandToROOTSize = Form(".x rootscript/beamPositionOnly.C(\"../DAQ/rec_capture_%d_reco.root\",%d)",_RunNumber, _firstTime_Generic);
+ gROOT->ProcessLine(CommandToROOTSize);
+ 
+ _firstTime_Generic = 0;
+ 
+ fDrawBeamPositionOnly->SetState(kButtonUp);
+}
 
 void MyMainFrame::DoSetlabel()
 {
