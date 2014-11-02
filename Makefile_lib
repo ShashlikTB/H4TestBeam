@@ -17,7 +17,7 @@ $(shell mkdir -p build/lib)
 # ----------------------------------------------------------------------------
 # sources for which dictionaries are to be created, 
 # but without the use of LinkDefs
-SRCSNOLINKDEF	:= Mapper.cc waveInterface.cc CalReco.cc
+SRCSNOLINKDEF	:= Mapper.cc waveInterface.cc CalReco.cc Connection.cc Slot.cc Util.cc Dialog.cc
 
 # sources for which dictionaries are to be created, 
 # using LinkDefs
