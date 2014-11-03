@@ -32,6 +32,9 @@ def usage():
     print "       A PADE file must be provided, Beam data is optional"
     print "      -n max_events  : Maximum (requested) number of events to read"
     print "                       Always reads at least 1 spill"
+    print "      -o DIR         : Output dir, instead of default = location of input file" 
+    print "      -f             : Overwrite existing root files"
+    print "      -l             : Copy logger messages to [root file basename].log"
     print "      -v             : verbose output"
     print 
     sys.exit()
@@ -59,10 +62,9 @@ def fillTree(tree, eventDict, tbspill):
 
 
 
-def filler(padeDat, beamDat, NEventLimit=NMAX):
+def filler(padeDat, beamDat, NEventLimit=NMAX, forceFlag=False, outDir=""):
     global NPADES
-#    logger=Logger(1)  # instantiate a logger, w/ 1 repetition of messages
-
+    print padeDat, beamDat, NEventLimit, forceFlag
     #=======================================================================# 
     #  Declare an element of the event class for our event                  #
     #=======================================================================#
@@ -75,6 +77,26 @@ def filler(padeDat, beamDat, NEventLimit=NMAX):
     #=======================================================================#
     outFile=padeDat.replace(".bz2","").replace(".txt",".root")
 
+    if not outDir=="":
+        outFile=outDir+"/"+os.path.basename(outFile)
+
+    if  os.path.isfile(outFile) and not forceFlag:
+        logger.Info(outFile,"is present, skip processing. Use -f flag to override")
+        return
+
+    tmpROOT=outFile+"_tmp"
+    if os.path.isfile(tmpROOT):
+        logger.Fatal(tmpROOT,"is present.  Job already in progress or ended on error.  Remove",tmpROOT,"to continue.")
+    fout = TFile(outFile+"_tmp", "recreate")   # write to tmp file, rename at successful close
+
+    if logToFile:
+        logFile=outFile.replace(".root",".log")
+        logger.Info("Writing logger output to file:",logFile)
+        logger.SetLogFile(logFile)
+
+    logger.Info("Writing to output file",outFile)
+
+
     #!!! this section needs a rewrite to get beam and configuration parameters somehow
     #timeStamp=os.path.basename(outFile).replace("rec_capture_","").replace(".root","")
     #try:
@@ -86,9 +108,7 @@ def filler(padeDat, beamDat, NEventLimit=NMAX):
     pdgId=0; momentum=0; gain=0; tableX=0; tableY=0; angle=0
     logger.Info("pdgId,momentum,gain,tableX,tableY,angle:",pdgId,momentum,gain,tableX,tableY,angle)
         
-    fout = TFile(outFile+"_tmp", "recreate")   # write to tmp file, rename at successful close
-    logger.Info("Writing to output file",outFile)
-
+    
     BeamTree = [TTree("t1041", "T1041")] # ugly python hack to pass a reference
     #print "1!"
     BeamTree[0].Branch("tbevent", "TBEvent", AddressOf(tbevent), 64000, 0)
@@ -454,17 +474,23 @@ def filler(padeDat, beamDat, NEventLimit=NMAX):
 
 if __name__ == '__main__': 
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "n:P:B:v")
+        opts, args = getopt.getopt(sys.argv[1:], "n:P:B:o:flv")
     except getopt.GetoptError as err: usage()
 
     NEventLimit=NMAX
     PadeFile=""
     BeamFile=""
+    forceFlag=False
+    logToFile=False
     verbose=false
+    outDir=""
     for o, a in opts:
         if o == "-n": NEventLimit=int(a)
         elif o == "-P": PadeFile=a
         elif o == "-B": BeamFile=a
+        elif o == "-o": outDir=a
+        elif o == "-f": forceFlag=True
+        elif o == "-l": logToFile=True
         elif o == "-v": verbose=true
 
     if PadeFile=="":
@@ -480,7 +506,7 @@ if __name__ == '__main__':
     LoadLibs("TBLIB","libTB.so")
     print "lib loaded"
     
-    filler(PadeFile,BeamFile,NEventLimit)
+    filler(PadeFile,BeamFile,NEventLimit,forceFlag,outDir)
 
     print "Exiting" 
     exit(0)
