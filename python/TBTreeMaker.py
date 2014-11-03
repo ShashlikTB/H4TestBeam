@@ -34,6 +34,7 @@ def usage():
     print "                       Always reads at least 1 spill"
     print "      -o DIR         : Output dir, instead of default = location of input file" 
     print "      -f             : Overwrite existing root files"
+    print "      -l             : Copy logger messages to [root file basename].log"
     print "      -v             : verbose output"
     print 
     sys.exit()
@@ -88,6 +89,10 @@ def filler(padeDat, beamDat, NEventLimit=NMAX, forceFlag=False, outDir=""):
         logger.Fatal(tmpROOT,"is present.  Job already in progress or ended on error.  Remove",tmpROOT,"to continue.")
     fout = TFile(outFile+"_tmp", "recreate")   # write to tmp file, rename at successful close
 
+    if logToFile:
+        logFile=outFile.replace(".root",".log")
+        logger.Info("Writing logger output to file:",logFile)
+        logger.SetLogFile(logFile)
 
     logger.Info("Writing to output file",outFile)
 
@@ -469,13 +474,14 @@ def filler(padeDat, beamDat, NEventLimit=NMAX, forceFlag=False, outDir=""):
 
 if __name__ == '__main__': 
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "n:P:B:o:fv")
+        opts, args = getopt.getopt(sys.argv[1:], "n:P:B:o:flv")
     except getopt.GetoptError as err: usage()
 
     NEventLimit=NMAX
     PadeFile=""
     BeamFile=""
     forceFlag=False
+    logToFile=False
     verbose=false
     outDir=""
     for o, a in opts:
@@ -484,6 +490,7 @@ if __name__ == '__main__':
         elif o == "-B": BeamFile=a
         elif o == "-o": outDir=a
         elif o == "-f": forceFlag=True
+        elif o == "-l": logToFile=True
         elif o == "-v": verbose=true
 
     if PadeFile=="":
