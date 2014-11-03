@@ -1,7 +1,7 @@
 INC_DIR = ./
 CXX		=g++
 LD		=g++
-CXXFLAGS	=-O2 -ggdb -std=gnu++0x -Wall
+CXXFLAGS	=-O2 -ggdb -std=gnu++0x -Wall -Wno-sign-compare
 LDFLAGS		=-lz -lm
 SOFLAGS		=-fPIC -shared 
 SHELL		=bash
@@ -40,7 +40,7 @@ EXTLIBDIR = -L$(BASEDIR)/build/lib/ -lTB
 all: info $(Packages) | $(BINDIR)
 
 CXXFLAGS	+=`root-config --cflags`
-LDFLAGS 	+=`root-config --libs`
+LDFLAGS 	+=`root-config --libs` -lTreePlayer
 
 LDFLAGS += $(EXTLIBDIR)
 

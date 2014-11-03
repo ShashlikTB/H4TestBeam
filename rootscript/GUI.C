@@ -197,7 +197,8 @@ void MyMainFrame::DrawPlotBeamPositionOnly() {
  std::cout << " Draw BeamPosition Only plots " << std::endl;
  fDrawBeamPositionOnly->SetState(kButtonDown); 
  
- TString CommandToROOTSize = Form(".x rootscript/beamPositionOnly.C(\"../DAQ/rec_capture_%d_reco.root\",%d)",_RunNumber, _firstTime_Generic);
+ TString CommandToROOTSize = Form(".x rootscript/beamPositionOnly.C(\"../DAQ/rec_capture_%d.root\",%d)",_RunNumber, _firstTime_Generic);
+//  TString CommandToROOTSize = Form(".x rootscript/beamPositionOnly.C(\"../DAQ/rec_capture_%d_reco.root\",%d)",_RunNumber, _firstTime_Generic);
  gROOT->ProcessLine(CommandToROOTSize);
  
  _firstTime_Generic = 0;
