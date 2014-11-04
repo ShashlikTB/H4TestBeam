@@ -264,92 +264,89 @@ int main(int argc, char**argv){
   
   int Shashlik_spillNumber_old = -1;
   int Beam_spillNumber_old = -1;
+  int new_spill = 1;
 
+  int iBeam_Position_within_one_spill = 0;
+  int iBeam_Position_of_the_spill = 0;
+  
   ULong64_t delta_time_shashlik;
   
   for (int i=0; i<nEntries; i++) {
-
+   
    if ((i%4)==0) {
     std::cout <<  " entry: " << i << "::" << nEntries << std::endl;
    }
    
    H4tree_shashlik->GetEntry(i);
-
+   
    tbevent2 = *tbevent;
    tbspill2 = *tbspill;
    
    int Shashlik_spillNumber = tbspill->GetSpillNumber();
    int Shashlik_eventNumber = -1;
    
-//    std::cout << " Shashlik_spillNumber = " << Shashlik_spillNumber << std::endl;
-//    if (Shashlik_spillNumber>1) break;
-    
    if (Shashlik_spillNumber_old != Shashlik_spillNumber) {
+    new_spill = 1; //---- it's a new spill
+    
+    iBeam_Position_within_one_spill = 0;
+    iBeam_Position_of_the_spill = 0;
+    
     std::cout << " delta_time_shashlik old spill = " << delta_time_shashlik << std::endl;
-   }
-   
-   if (tbevent->NPadeChan() != 0) {
-    Shashlik_eventNumber = tbevent->GetPadeChan(0).GetEventNum();
-    ULong64_t time_event_shashlik;
-    time_event_shashlik = tbevent->GetPadeChan(0).GetTimeStamp();
     
-    delta_time_shashlik = time_event_shashlik - start_event_shashlik;
-   }
-
-   if (Shashlik_spillNumber_old != Shashlik_spillNumber) {
+    if (tbevent->NPadeChan() != 0) {
+     Shashlik_eventNumber = tbevent->GetPadeChan(0).GetEventNum();
+     ULong64_t time_event_shashlik;
+     time_event_shashlik = tbevent->GetPadeChan(0).GetTimeStamp();
+     
+     delta_time_shashlik = (time_event_shashlik - start_event_shashlik);
+     delta_time_shashlik = delta_time_shashlik * 10;  //---- convert between 100ns=0.1mus to 1mus;
+    }
+    
     std::cout << " delta_time_shashlik new spill = " << delta_time_shashlik << std::endl;
     Shashlik_spillNumber_old = Shashlik_spillNumber;
    }
    
    
    
-   //---- delta_time_shashlik expressed in 100 * \mu sec
-//    delta_time_shashlik = delta_time_shashlik / 1000; //---- transform to ms
-//    std::cout << "    delta_time_shashlik = " << delta_time_shashlik << std::endl;
-//    delta_time_shashlik = delta_time_shashlik * 1000000; //---- transform to the same units as beam
-//    delta_time_shashlik = delta_time_shashlik * 100; //---- transform to the same units as beam
-//    delta_time_shashlik = delta_time_shashlik * 23.7; //---- transform to the same units as beam
-   
-
-   for (int iBeam=0; iBeam<nEntries_beam; iBeam++) {
-    H4tree_beam->GetEntry(iBeam);
-    if (Beam_spillNumber_old != spillNumber) {
-    
+   //---- beam     time is in mus
+   //---- shashlik time is in 100ns = 0.1mus
+   if (new_spill) {
+    for (int iBeam=0; iBeam<nEntries_beam; iBeam++) {
+     H4tree_beam->GetEntry(iBeam);
+     //---- get to the correct spill number for the beam data
+     //---- using itme information
      ULong64_t time_event_beam = evtTime[0];
      ULong64_t delta_time_beam = time_event_beam - start_event_beam;
      
-     //     delta_time_beam = delta_time_beam/1000; //---- from ## to ms for beam data
-     //     delta_time_beam = delta_time_beam/10; //---- from ## to ms for beam data
-     //---- delta_time_beam expressed in \mu sec
-     //     delta_time_beam = delta_time_beam/100; //---- from ms to 100*\mu s for beam data
-     
-     
-     //---- delta_time_beam expressed in \mu sec
-     //     std::cout << " iShashlik = " << i << std::endl;
-     //     std::cout << " iBeam =     " << iBeam << std::endl;
-     //     std::cout << "    delta_time_beam     = " << delta_time_beam   << " or " << evtTime[1]-start_event_beam_1 << " or " << evtTime[2] - start_event_beam_2  << std::endl;
-     //     std::cout << "    delta_time_shashlik = " << delta_time_shashlik     << std::endl;
-     //     std::cout << " abs(delta_time_shashlik - delta_time_beam) = " << abs(delta_time_shashlik - delta_time_beam) << std::endl;
-     
-     //     if (delta_time_shashlik == delta_time_beam) {
-     
-     //     if (abs(delta_time_shashlik - delta_time_beam)<(50 * 1000000)) { //---- Delta between electrons ~ 200 * 10^6 --> but 50 * 10^6 as time window
-     if (abs(delta_time_shashlik - delta_time_beam) < (100 * 23.7)) { //---- Delta between electrons ~ 200 * 10^6 --> but 50 * 10^6 as time window
-      //     if ((spillNumber == Shashlik_spillNumber) && (Shashlik_eventNumber == (evtNumber-1))) {
-      std::cout << "  found  delta_time_beam     = " << delta_time_beam     << std::endl;
-      std::cout << "  found  delta_time_shashlik = " << delta_time_shashlik << std::endl;
-      tbevent2.SetWireChambersData(runNumber, spillNumber,evtNumber-1,tdcData,tdcBoard,tdcChannel,nTdcChannels);
-      tbevent2.SetHodoScopeData(runNumber, spillNumber,evtNumber-1,pattern,patternBoard,patternChannel,nPatterns);
-      break;
+     //---- 1 ms window match, to be large
+     if (abs(delta_time_shashlik - delta_time_beam) < 1000) { 
+      iBeam_Position_of_the_spill = iBeam; //---- save the position of the first event in the spill -> then in the loop start from this point!
+      iBeam_Position_within_one_spill = 0; //---- found the correct position within one spill, set the counter to 0
+      new_spill = 0;      
+      Beam_spillNumber_old = spillNumber; //---- used to check that we are not in the next spill -> if it happens, don't fill the tree!
+      std::cout << " got new spill ... " << std::endl;
      }
     }
    }
+   //---- get to the correct position within one spill
+   H4tree_beam->GetEntry(iBeam_Position_of_the_spill + iBeam_Position_within_one_spill);
    
    
+   //---- if the beam moved to the next spill, fill the tree but not set hodoscope data
+   //---- then the default values will appear, and we can filter a posteriori if needed
+   if (spillNumber == Beam_spillNumber_old) {
+    tbevent2.SetWireChambersData(runNumber, spillNumber,evtNumber-1,tdcData,tdcBoard,tdcChannel,nTdcChannels);
+    tbevent2.SetHodoScopeData(runNumber, spillNumber,evtNumber-1,pattern,patternBoard,patternChannel,nPatterns);
+//     std::cout << " iBeam_Position_of_the_spill = " << iBeam_Position_of_the_spill << std::endl;
+//     std::cout << " iBeam_Position_within_one_spill = " << iBeam_Position_within_one_spill << std::endl;
+    iBeam_Position_within_one_spill++;
+    //---- once we are in the correct position within one spill and we save information, we can exit from the loop
+   }
    
    outtree->Fill();
-
+   
   }
+
   outtree->Write();
   output_file_root->Close();
     
