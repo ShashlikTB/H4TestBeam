@@ -342,6 +342,9 @@ int main(int argc, char**argv){
     iBeam_Position_within_one_spill++;
     //---- once we are in the correct position within one spill and we save information, we can exit from the loop
    }
+   else {
+    std::cout << " Events not found in beam data for : [spill shashlik = " << Shashlik_spillNumber << " ][Event = " << i << "]" << std::endl; 
+   }
    
    outtree->Fill();
    
