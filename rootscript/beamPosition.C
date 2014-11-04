@@ -2,14 +2,22 @@
 #include "TString.h"
 #include "TFile.h"
 #include "TTree.h"
+#include "TChain.h"
 // #include "TBranch.h"
 #include "TH2F.h"
 #include "TCanvas.h"
 #include "TStyle.h"
-// #include "TBEvent.h"
-// #include "Mapper.h"
+
+#if not defined(__CINT__) || defined(__MAKECINT__)
+// needs to be included when makecint runs (ACLIC)
+#include "TBEvent.h"
+#include "TBRecHit.h"
+#include "Mapper.h"
+#endif
 
 
+#include "TROOT.h"
+#include "TInterpreter.h"
 
 const int MAXADC=4095;
 
@@ -36,12 +44,22 @@ void beamPosition(TString fdat, int firstTime = 1){
  
  gStyle->SetOptStat(0);
  
- TFile *f = new TFile(fdat);
- if (f->IsZombie()){
+ //  TFile *f = new TFile(fdat);
+ //  if (f->IsZombie()){
+ //   cout << "Cannot open file: " << fdat << endl;
+ //   return;
+ //  }
+ 
+ 
+ TChain *t1041 = new TChain("t1041");
+ int numFiles = t1041->Add(fdat);
+ cout << "Files: #" << numFiles << " :: " << fdat << endl;
+ if (numFiles<1){
   cout << "Cannot open file: " << fdat << endl;
   return;
- }
-  
+ }  
+ 
+ 
  //---- Histograms
  TH2F *hHS_Shashlik_X_HS1_SHUp  = new TH2F("hHS_Shashlik_X_HS1_SHUp", "Hodoscope 1 vs Shashlik X Up", 128, -64, 64, 64, 0, 64);
  TH2F *hHS_Shashlik_Y_HS1_SHUp  = new TH2F("hHS_Shashlik_Y_HS1_SHUp", "Hodoscope 1 vs Shashlik Y Up", 128, -64, 64, 64, 0, 64);
@@ -79,7 +97,7 @@ void beamPosition(TString fdat, int firstTime = 1){
  
  //---- fill histograms
  TBEvent *event = new TBEvent();
- TTree *t1041 = (TTree*)f->Get("t1041");
+//  TTree *t1041 = (TTree*) f->Get("t1041");
  t1041->SetBranchAddress("tbevent",&event);
  
  Int_t start=0; Int_t end=t1041->GetEntries();
@@ -100,6 +118,9 @@ void beamPosition(TString fdat, int firstTime = 1){
  
  int nEntries = 0;
  for (Int_t i = start; i<end; i++) {
+  if ((i%20) == 0) {
+   std::cout << " i = " << i << " :: " << (end-start) << std::endl;
+  }
   t1041->GetEntry(i);
   
   if (i==0) mapper->SetEpoch(event->GetTimeStamp());
@@ -213,12 +234,16 @@ void beamPosition(TString fdat, int firstTime = 1){
    int valueY2 = fibers[fibers_mappairY2];
    
    if (valueY1 != 0) {
-    hHS_Shashlik_Y_HS1_SHUp->Fill(c_u_maxY,iBinY);
-    hHS_Shashlik_Y_HS1_SHDo->Fill(c_d_maxY,iBinY);
+    hHS_Shashlik_Y_HS1_SHUp->Fill(m_u_maxY,iBinY);
+    hHS_Shashlik_Y_HS1_SHDo->Fill(m_d_maxY,iBinY);
+//     hHS_Shashlik_Y_HS1_SHUp->Fill(c_u_maxY,iBinY);
+//     hHS_Shashlik_Y_HS1_SHDo->Fill(c_d_maxY,iBinY);
    }
    if (valueY2 != 0) {
-    hHS_Shashlik_Y_HS2_SHUp->Fill(c_u_maxY,iBinY);
-    hHS_Shashlik_Y_HS2_SHDo->Fill(c_d_maxY,iBinY);
+    hHS_Shashlik_Y_HS2_SHUp->Fill(m_u_maxY,iBinY);
+    hHS_Shashlik_Y_HS2_SHDo->Fill(m_d_maxY,iBinY);
+//     hHS_Shashlik_Y_HS2_SHUp->Fill(c_u_maxY,iBinY);
+//     hHS_Shashlik_Y_HS2_SHDo->Fill(c_d_maxY,iBinY);
    }
   }
   
@@ -233,12 +258,16 @@ void beamPosition(TString fdat, int firstTime = 1){
    int valueX1 = fibers[fibers_mappairX1];
    int valueX2 = fibers[fibers_mappairX2];
    if (valueX1 != 0) {
-     hHS_Shashlik_X_HS1_SHUp->Fill(c_u_maxX,iBinX);
-     hHS_Shashlik_X_HS1_SHDo->Fill(c_d_maxX,iBinX);
+//     hHS_Shashlik_X_HS1_SHUp->Fill(c_u_maxX,iBinX);
+//     hHS_Shashlik_X_HS1_SHDo->Fill(c_d_maxX,iBinX);
+    hHS_Shashlik_X_HS1_SHUp->Fill(m_u_maxX,iBinX);
+    hHS_Shashlik_X_HS1_SHDo->Fill(m_d_maxX,iBinX);
    }
    if (valueX2 != 0) {
-     hHS_Shashlik_X_HS2_SHUp->Fill(c_u_maxX,iBinX);
-     hHS_Shashlik_X_HS2_SHDo->Fill(c_d_maxX,iBinX);
+//     hHS_Shashlik_X_HS2_SHUp->Fill(c_u_maxX,iBinX);
+//     hHS_Shashlik_X_HS2_SHDo->Fill(c_d_maxX,iBinX);
+    hHS_Shashlik_X_HS2_SHUp->Fill(m_u_maxX,iBinX);
+    hHS_Shashlik_X_HS2_SHDo->Fill(m_d_maxX,iBinX);
    }
   }
    

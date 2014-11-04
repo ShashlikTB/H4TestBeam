@@ -273,7 +273,7 @@ int main(int argc, char**argv){
   
   for (int i=0; i<nEntries; i++) {
    
-   if ((i%4)==0) {
+   if ((i%100)==0) {
     std::cout <<  " entry: " << i << "::" << nEntries << std::endl;
    }
    
@@ -299,7 +299,7 @@ int main(int argc, char**argv){
      time_event_shashlik = tbevent->GetPadeChan(0).GetTimeStamp();
      
      delta_time_shashlik = (time_event_shashlik - start_event_shashlik);
-     delta_time_shashlik = delta_time_shashlik * 10;  //---- convert between 100ns=0.1mus to 1mus;
+     delta_time_shashlik = delta_time_shashlik / 10;  //---- convert between 100ns=0.1mus to 1mus;
     }
     
     std::cout << " delta_time_shashlik new spill = " << delta_time_shashlik << std::endl;
@@ -310,6 +310,7 @@ int main(int argc, char**argv){
    
    //---- beam     time is in mus
    //---- shashlik time is in 100ns = 0.1mus
+   //----    but before I converted everything into mus
    if (new_spill) {
     for (int iBeam=0; iBeam<nEntries_beam; iBeam++) {
      H4tree_beam->GetEntry(iBeam);
@@ -318,13 +319,18 @@ int main(int argc, char**argv){
      ULong64_t time_event_beam = evtTime[0];
      ULong64_t delta_time_beam = time_event_beam - start_event_beam;
      
-     //---- 1 ms window match, to be large
-     if (abs(delta_time_shashlik - delta_time_beam) < 1000) { 
+     //---- 15000mus = 15 ms window match, to be large
+     //---- it should get the first event in the spill from beam data
+//      std::cout << " iBeam:: "<< iBeam << " :: abs(delta_time_shashlik - delta_time_beam) = " << delta_time_shashlik << " - " << delta_time_beam << " = " << delta_time_shashlik - delta_time_beam << std::endl;
+     if ( (delta_time_shashlik >  delta_time_beam && (delta_time_shashlik - delta_time_beam) < 15000)  || (delta_time_shashlik <= delta_time_beam && (delta_time_beam - delta_time_shashlik) < 15000)) { 
       iBeam_Position_of_the_spill = iBeam; //---- save the position of the first event in the spill -> then in the loop start from this point!
       iBeam_Position_within_one_spill = 0; //---- found the correct position within one spill, set the counter to 0
       new_spill = 0;      
       Beam_spillNumber_old = spillNumber; //---- used to check that we are not in the next spill -> if it happens, don't fill the tree!
-      std::cout << " got new spill ... " << std::endl;
+      std::cout << " >> got new spill in beam data ... " << std::endl;
+      std::cout << " >> time = " << (delta_time_shashlik >  delta_time_beam) * (delta_time_shashlik - delta_time_beam)  +    (delta_time_shashlik <= delta_time_beam) * (delta_time_beam - delta_time_shashlik) << std::endl;
+      std::cout << " >>  spillNumber = " << spillNumber << std::endl;
+      break;
      }
     }
    }

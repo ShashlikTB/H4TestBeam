@@ -9,6 +9,15 @@
 // #include "TBEvent.h"
 // #include "Mapper.h"
 
+#if not defined(__CINT__) || defined(__MAKECINT__)
+#include "TBEvent.h"
+#include "TBRecHit.h"
+#include "Mapper.h"
+#endif
+
+
+#include "TROOT.h"
+#include "TInterpreter.h"
 
 
 const int MAXADC=4095;
