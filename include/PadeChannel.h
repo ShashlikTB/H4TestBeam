@@ -19,6 +19,8 @@ class PadeChannel : public TObject {
   void Dump() const;
 
   // getters
+  
+  UInt_t GetEventNum() {return _eventnum;}
   ULong64_t GetTimeStamp() {return _ts;}  ///< C# time in pade channel data
   UInt_t GetBoardID() {return _board_id;}
   UInt_t GetChannelNum() {return _ch_number;}
