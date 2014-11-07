@@ -143,7 +143,8 @@ const int FIBERMAP_OCTOBER3114[]={
 	11531,	1601,		11200,		-1601,
 	11529,	1602,		11202,		-1602,
 	11526,	1603,		11205,		-1603,
-	11524,	1604,		11207,		-1604};
+	11524,	1604,		11207,		-1604
+};
 
     
 const int FIBERMAP_OCTOBER3014[]={
@@ -213,6 +214,7 @@ const int FIBERMAP_OCTOBER3014[]={
 	11526,	1603,		11205,		-1603,
 	11524,	1604,		11207,		-1604
 };
+
 const int FIBERMAP_OCTOBER2914[]={
 //	Cookie A			Cookie B		
 	99906,	101,		11525,		-101,
@@ -281,7 +283,7 @@ const int FIBERMAP_OCTOBER2914[]={
 	11624,	1604,		11207,		-1604
 };
 
-
+// this one will probably not be used module -2 <==> -12 swap not included
 const int FIBERMAP_OCTOBER14[]={
 //	Cookie A			Cookie B		
 	11206,	101,		11525,		-101,
