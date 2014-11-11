@@ -11,8 +11,13 @@ Plot Hodoscope information
 ====
 
     ./bin/PlotHodo  -i  ../DAQ/rec_capture_9999.root
-        
 
+    
+Plot Hodoscope and Shashlik information
+====
+    
+    ./bin/PlotHodoAndShashlik -i mix_1140_reco.root
+    
     
     
 test

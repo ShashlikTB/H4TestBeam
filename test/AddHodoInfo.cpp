@@ -283,7 +283,7 @@ int main(int argc, char**argv){
    tbspill2 = *tbspill;
    
    int Shashlik_spillNumber = tbspill->GetSpillNumber();
-   int Shashlik_eventNumber = -1;
+//    int Shashlik_eventNumber = -1;
    
    if (Shashlik_spillNumber_old != Shashlik_spillNumber) {
     new_spill = 1; //---- it's a new spill
@@ -294,7 +294,7 @@ int main(int argc, char**argv){
     std::cout << " delta_time_shashlik old spill = " << delta_time_shashlik << std::endl;
     
     if (tbevent->NPadeChan() != 0) {
-     Shashlik_eventNumber = tbevent->GetPadeChan(0).GetEventNum();
+//      Shashlik_eventNumber = tbevent->GetPadeChan(0).GetEventNum();
      ULong64_t time_event_shashlik;
      time_event_shashlik = tbevent->GetPadeChan(0).GetTimeStamp();
      
