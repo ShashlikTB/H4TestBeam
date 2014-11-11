@@ -247,6 +247,7 @@ int main(int argc, char**argv){
    for (int iCluster1 = 0; iCluster1 < pos_fibers_X1.size(); iCluster1++) {
     for (int iCluster2 = 0; iCluster2 < pos_fibers_X2.size(); iCluster2++) {
      hHS_HS2_HS1_X->Fill(pos_fibers_X1.at(iCluster1),pos_fibers_X2.at(iCluster2));
+     std::cout << " pos_fibers_X:: " << pos_fibers_X1.at(iCluster1) << " :: " << pos_fibers_X2.at(iCluster2) << std::endl;
     }
    }
    
@@ -262,17 +263,31 @@ int main(int argc, char**argv){
   }
   
   cc->Divide(2,2);
-  
+ 
+  TF1* fxy = new TF1 ("fxy","x",-20,20);
   cc->cd(1)->SetGrid();
   hHS_HS2_HS1_X->Draw("colz");
+  hHS_HS2_HS1_X->GetXaxis()->SetTitle("X1");
+  hHS_HS2_HS1_X->GetYaxis()->SetTitle("X2");
+  fxy->Draw("same");
+
   cc->cd(2)->SetGrid();
   hHS_HS2_HS1_Y->Draw("colz");
+  hHS_HS2_HS1_Y->GetXaxis()->SetTitle("Y1");
+  hHS_HS2_HS1_Y->GetYaxis()->SetTitle("Y2");
+  fxy->Draw("same");
   
   cc->cd(3)->SetGrid();
   num_hHS_HS2_HS1_X->Draw("colz");
+  num_hHS_HS2_HS1_X->GetXaxis()->SetTitle("number of clusters 1");
+  num_hHS_HS2_HS1_X->GetYaxis()->SetTitle("number of clusters 2");
+  
+//   fxy->Draw("same");
   cc->cd(4)->SetGrid();
   num_hHS_HS2_HS1_Y->Draw("colz");
-  
+  num_hHS_HS2_HS1_Y->GetXaxis()->SetTitle("number of clusters 1");
+  num_hHS_HS2_HS1_Y->GetYaxis()->SetTitle("number of clusters 2");
+  //   fxy->Draw("same");  
   
   gMyRootApp->Run(); 
   
