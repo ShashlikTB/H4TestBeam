@@ -309,7 +309,7 @@ int main(int argc, char**argv){
    
    
    
-   //---- check if Shashlik skept one or more events
+   //---- check if Shashlik skipped one or more events
    //---- if that is the case, skip the same number of event in the beam data
    Shashlik_eventNumber = tbevent->GetPadeChan(0).GetEventNum();
    int delta_event_in_Shashlik = Shashlik_eventNumber - Shashlik_eventNumber_old - 1;
@@ -318,7 +318,7 @@ int main(int argc, char**argv){
     std::cout << " delta_event_in_Shashlik = " << delta_event_in_Shashlik << " = " << Shashlik_eventNumber << " - " << Shashlik_eventNumber_old << " - 1  " << std::endl;
    }
    Shashlik_eventNumber_old = Shashlik_eventNumber;   
-   //---- check if Shashlik skept one event (end)
+   //---- check if Shashlik skipped one event (end)
    
    
    //---- beam     time is in mus
