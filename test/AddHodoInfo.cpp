@@ -269,6 +269,8 @@ int main(int argc, char**argv){
   int iBeam_Position_within_one_spill = 0;
   int iBeam_Position_of_the_spill = 0;
   
+  int Shashlik_eventNumber_old = -1;
+  
   ULong64_t delta_time_shashlik;
   
   for (int i=0; i<nEntries; i++) {
@@ -283,7 +285,7 @@ int main(int argc, char**argv){
    tbspill2 = *tbspill;
    
    int Shashlik_spillNumber = tbspill->GetSpillNumber();
-//    int Shashlik_eventNumber = -1;
+   int Shashlik_eventNumber = -1;
    
    if (Shashlik_spillNumber_old != Shashlik_spillNumber) {
     new_spill = 1; //---- it's a new spill
@@ -291,10 +293,9 @@ int main(int argc, char**argv){
     iBeam_Position_within_one_spill = 0;
     iBeam_Position_of_the_spill = 0;
     
-    std::cout << " delta_time_shashlik old spill = " << delta_time_shashlik << std::endl;
+    std::cout << " delta_time_shashlik old spill = " << delta_time_shashlik << " ## spillNumber = " << Shashlik_spillNumber << std::endl;
     
-    if (tbevent->NPadeChan() != 0) {
-//      Shashlik_eventNumber = tbevent->GetPadeChan(0).GetEventNum();
+    if (tbevent->NPadeChan() != 0) {     
      ULong64_t time_event_shashlik;
      time_event_shashlik = tbevent->GetPadeChan(0).GetTimeStamp();
      
@@ -302,10 +303,22 @@ int main(int argc, char**argv){
      delta_time_shashlik = delta_time_shashlik / 10;  //---- convert between 100ns=0.1mus to 1mus;
     }
     
-    std::cout << " delta_time_shashlik new spill = " << delta_time_shashlik << std::endl;
+    std::cout << " delta_time_shashlik new spill = " << delta_time_shashlik << " ## spillNumber = " << Shashlik_spillNumber << std::endl;
     Shashlik_spillNumber_old = Shashlik_spillNumber;
    }
    
+   
+   
+   //---- check if Shashlik skept one or more events
+   //---- if that is the case, skip the same number of event in the beam data
+   Shashlik_eventNumber = tbevent->GetPadeChan(0).GetEventNum();
+   int delta_event_in_Shashlik = Shashlik_eventNumber - Shashlik_eventNumber_old - 1;
+   if (Shashlik_eventNumber_old != -1 && delta_event_in_Shashlik != 0) {
+    iBeam_Position_within_one_spill += delta_event_in_Shashlik;
+    std::cout << " delta_event_in_Shashlik = " << delta_event_in_Shashlik << " = " << Shashlik_eventNumber << " - " << Shashlik_eventNumber_old << " - 1  " << std::endl;
+   }
+   Shashlik_eventNumber_old = Shashlik_eventNumber;   
+   //---- check if Shashlik skept one event (end)
    
    
    //---- beam     time is in mus
@@ -349,7 +362,7 @@ int main(int argc, char**argv){
     //---- once we are in the correct position within one spill and we save information, we can exit from the loop
    }
    else {
-    std::cout << " Events not found in beam data for : [spill shashlik = " << Shashlik_spillNumber << " ][Event = " << i << "]" << std::endl; 
+    std::cout << " Events not found in beam data for : [spill shashlik = " << Shashlik_spillNumber << " ][shashlik Event = " << i << " :: " << Shashlik_eventNumber << "]" << std::endl; 
    }
    
    outtree->Fill();
