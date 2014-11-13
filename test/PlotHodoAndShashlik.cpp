@@ -358,7 +358,7 @@ int main(int argc, char**argv){
     
     for (int iCluster = 0; iCluster < pos_fibers_X1.size(); iCluster++) {
      for (int iCalo = 0; iCalo < caloCluster_position_X_front.size(); iCalo++) {
-      std::cout << " caloCluster_position_X_front.at(" << iCalo << "), pos_fibers_X1.at(" << iCluster << ")  = " << caloCluster_position_X_front.at(iCalo) << "," <<  pos_fibers_X1.at(iCluster) << std::endl;
+//       std::cout << " caloCluster_position_X_front.at(" << iCalo << "), pos_fibers_X1.at(" << iCluster << ")  = " << caloCluster_position_X_front.at(iCalo) << "," <<  pos_fibers_X1.at(iCluster) << std::endl;
       hHS_HS1_Cal_front_X->Fill(caloCluster_position_X_front.at(iCalo), pos_fibers_X1.at(iCluster));
      }
      for (int iCalo = 0; iCalo < caloCluster_position_X_back.size(); iCalo++) {

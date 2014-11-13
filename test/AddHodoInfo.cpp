@@ -265,11 +265,13 @@ int main(int argc, char**argv){
   int Shashlik_spillNumber_old = -1;
   int Beam_spillNumber_old = -1;
   int new_spill = 1;
-
+  int new_spill_has_been_started = 1;
+  
   int iBeam_Position_within_one_spill = 0;
   int iBeam_Position_of_the_spill = 0;
   
   int Shashlik_eventNumber_old = -1;
+  int Beam_eventNumber_old = -1;
   
   ULong64_t delta_time_shashlik;
   
@@ -325,6 +327,7 @@ int main(int argc, char**argv){
    //---- shashlik time is in 100ns = 0.1mus
    //----    but before I converted everything into mus
    if (new_spill) {
+    new_spill_has_been_started = 1;
     for (int iBeam=0; iBeam<nEntries_beam; iBeam++) {
      H4tree_beam->GetEntry(iBeam);
      //---- get to the correct spill number for the beam data
@@ -332,38 +335,56 @@ int main(int argc, char**argv){
      ULong64_t time_event_beam = evtTime[0];
      ULong64_t delta_time_beam = time_event_beam - start_event_beam;
      
-     //---- 15000mus = 15 ms window match, to be large
+     //---- 250000mus = 250 ms window match, to be large
      //---- it should get the first event in the spill from beam data
 //      std::cout << " iBeam:: "<< iBeam << " :: abs(delta_time_shashlik - delta_time_beam) = " << delta_time_shashlik << " - " << delta_time_beam << " = " << delta_time_shashlik - delta_time_beam << std::endl;
-     if ( (delta_time_shashlik >  delta_time_beam && (delta_time_shashlik - delta_time_beam) < 15000)  || (delta_time_shashlik <= delta_time_beam && (delta_time_beam - delta_time_shashlik) < 15000)) { 
+     if ( (delta_time_shashlik >  delta_time_beam && (delta_time_shashlik - delta_time_beam) < 250000)  || (delta_time_shashlik <= delta_time_beam && (delta_time_beam - delta_time_shashlik) < 250000)) { 
       iBeam_Position_of_the_spill = iBeam; //---- save the position of the first event in the spill -> then in the loop start from this point!
       iBeam_Position_within_one_spill = 0; //---- found the correct position within one spill, set the counter to 0
       new_spill = 0;      
       Beam_spillNumber_old = spillNumber; //---- used to check that we are not in the next spill -> if it happens, don't fill the tree!
       std::cout << " >> got new spill in beam data ... " << std::endl;
       std::cout << " >> time = " << (delta_time_shashlik >  delta_time_beam) * (delta_time_shashlik - delta_time_beam)  +    (delta_time_shashlik <= delta_time_beam) * (delta_time_beam - delta_time_shashlik) << std::endl;
-      std::cout << " >>  spillNumber = " << spillNumber << std::endl;
+      std::cout << " >> spillNumber = " << spillNumber << std::endl;
       break;
      }
     }
    }
+   else {
+    new_spill_has_been_started = 0;
+   }
    //---- get to the correct position within one spill
    H4tree_beam->GetEntry(iBeam_Position_of_the_spill + iBeam_Position_within_one_spill);
    
-   
-   //---- if the beam moved to the next spill, fill the tree but not set hodoscope data
-   //---- then the default values will appear, and we can filter a posteriori if needed
+
+   //---- check if H4DAQ skipped one event
+   //---- if that happened it means that PADE still got that event
+   //---- but H4DAQ information is lost.
+   //---- then we need to skip the matching for this PADE event
+   //---- and iBeam_Position_within_one_spill is *not* increased
+   //---- do this if we are not at the beginning of a new spill: new_spill_has_been_started != 0
    if (spillNumber == Beam_spillNumber_old) {
-    tbevent2.SetWireChambersData(runNumber, spillNumber,evtNumber-1,tdcData,tdcBoard,tdcChannel,nTdcChannels);
-    tbevent2.SetHodoScopeData(runNumber, spillNumber,evtNumber-1,pattern,patternBoard,patternChannel,nPatterns);
-//     std::cout << " iBeam_Position_of_the_spill = " << iBeam_Position_of_the_spill << std::endl;
-//     std::cout << " iBeam_Position_within_one_spill = " << iBeam_Position_within_one_spill << std::endl;
-    iBeam_Position_within_one_spill++;
-    //---- once we are in the correct position within one spill and we save information, we can exit from the loop
+    if ((new_spill_has_been_started == 0) && (Beam_eventNumber_old != -1) && (evtNumber != (Beam_eventNumber_old+1))) {
+     std::cout << " [attention] Beam data was skipped: " << evtNumber << " != ( " << Beam_eventNumber_old << " +1) in :: [spill shashlik = " << Shashlik_spillNumber << " ][shashlik Event = " << i << " :: " << Shashlik_eventNumber << "]" << std::endl;
+     //---- skip (evtNumber-(Beam_eventNumber_old+1)) events, because those are the evetns skipped by beam data
+     Beam_eventNumber_old = Beam_eventNumber_old+1;
+    }
+    else {   
+     Beam_eventNumber_old = evtNumber;
+     //---- if the beam moved to the next spill, fill the tree but not set hodoscope data
+     //---- then the default values will appear, and we can filter a posteriori if needed
+     tbevent2.SetWireChambersData(runNumber, spillNumber,evtNumber-1,tdcData,tdcBoard,tdcChannel,nTdcChannels);
+     tbevent2.SetHodoScopeData(runNumber, spillNumber,evtNumber-1,pattern,patternBoard,patternChannel,nPatterns);
+     //     std::cout << " iBeam_Position_of_the_spill = " << iBeam_Position_of_the_spill << std::endl;
+     //     std::cout << " iBeam_Position_within_one_spill = " << iBeam_Position_within_one_spill << std::endl;
+     iBeam_Position_within_one_spill++;
+     //---- once we are in the correct position within one spill and we save information, we can exit from the loop
+    }
    }
    else {
     std::cout << " Events not found in beam data for : [spill shashlik = " << Shashlik_spillNumber << " ][shashlik Event = " << i << " :: " << Shashlik_eventNumber << "]" << std::endl; 
    }
+   
    
    outtree->Fill();
    
