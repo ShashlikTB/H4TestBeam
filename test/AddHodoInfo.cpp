@@ -351,10 +351,10 @@ int main(int argc, char**argv){
      ULong64_t time_event_beam = evtTime[0];
      ULong64_t delta_time_beam = time_event_beam - start_event_beam;
      
-     //---- 25000mus = 25 ms window match, to be large
+     //---- 250000mus = 250 ms window match, to be large
      //---- it should get the first event in the spill from beam data
 //      std::cout << " iBeam:: "<< iBeam << " :: abs(delta_time_shashlik - delta_time_beam) = " << delta_time_shashlik << " - " << delta_time_beam << " = " << delta_time_shashlik - delta_time_beam << std::endl;
-     if ( (delta_time_shashlik >  delta_time_beam && (delta_time_shashlik - delta_time_beam) < 25000)  || (delta_time_shashlik <= delta_time_beam && (delta_time_beam - delta_time_shashlik) < 25000)) { 
+     if ( (delta_time_shashlik >  delta_time_beam && (delta_time_shashlik - delta_time_beam) < 250000)  || (delta_time_shashlik <= delta_time_beam && (delta_time_beam - delta_time_shashlik) < 250000)) { 
       iBeam_Position_of_the_spill = iBeam; //---- save the position of the first event in the spill -> then in the loop start from this point!
       iBeam_Position_within_one_spill = 0; //---- found the correct position within one spill, set the counter to 0
       new_spill = 0;      

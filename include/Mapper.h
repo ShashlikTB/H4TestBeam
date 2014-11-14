@@ -39,7 +39,7 @@ const int NMODULES=16;
 
 /// Approximate postions of module centers, relative to center of the detector in mm
 const double MODULEXY[]={
-1, -21.0,  21.0,
+  1, -21.0,  21.0,
   2,  -7.0,  21.0,
   3,   7.0,  21.0,
   4,  21.0,  21.0,

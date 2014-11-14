@@ -295,6 +295,12 @@ int main(int argc, char**argv){
   TH2F *hHS_HS2_Cal_back   = new TH2F("hHS_HS2_Cal_back",  "Hodoscope 2 vs Cal back " , 64, -32, 32, nEntries, 0, nEntries);
 
   
+  TCanvas* cc_Cal = new TCanvas ("cc_Cal","",800,400);
+  
+  TH2F *hHS_Cal_front  = new TH2F("hHS_Cal_front", "Cal front ", 64, -32, 32, 64, -32, 32);
+  TH2F *hHS_Cal_back   = new TH2F("hHS_Cal_back",  "Cal back " , 64, -32, 32, 64, -32, 32);
+  
+  
   bool haverechits = false;
   std::vector<TBRecHit> *rechits=0;
   if(H4tree->GetListOfBranches()->FindObject("tbrechits")) {
@@ -403,11 +409,36 @@ int main(int argc, char**argv){
      }
     }
    }
+   
+   //---- Fill Calorimeter mapping
+   for (int iCaloX = 0; iCaloX < caloCluster_position_X_front.size(); iCaloX++) {
+    for (int iCaloY = 0; iCaloY < caloCluster_position_Y_front.size(); iCaloY++) {
+     hHS_Cal_front->Fill(caloCluster_position_X_front.at(iCaloX),caloCluster_position_Y_front.at(iCaloY));
+    }
+   }
+   for (int iCaloX = 0; iCaloX < caloCluster_position_X_back.size(); iCaloX++) {
+    for (int iCaloY = 0; iCaloY < caloCluster_position_Y_back.size(); iCaloY++) {
+     hHS_Cal_back->Fill(caloCluster_position_X_back.at(iCaloX),caloCluster_position_Y_back.at(iCaloY));
+    }
+   }
     
   }
   
   
+  //---- plot ----
+  cc_Cal->Divide(2,1);
+  cc_Cal->cd(1)->SetGrid();
+  hHS_Cal_front->Draw("colz");
+  hHS_Cal_front->GetXaxis()->SetTitle("cal X");
+  hHS_Cal_front->GetYaxis()->SetTitle("cal Y");
+  
+  cc_Cal->cd(2)->SetGrid();
+  hHS_Cal_back->Draw("colz");
+  hHS_Cal_back->GetXaxis()->SetTitle("cal X");
+  hHS_Cal_back->GetYaxis()->SetTitle("cal Y");
+  
 
+  
   cc_DR->Divide(2,2);
   cc_DR->cd(1)->SetGrid();
   hHS_HS1_Cal_front->Draw("colz");
