@@ -138,8 +138,8 @@ void doCalorimeterReconstruction( Mapper* mapper,  std::vector<TBRecHit>* rechit
   mapper->ChannelID2ModuleFiber(channelID,moduleID,fiberID);  // get module and fiber IDs
   
   double x,y;
-//   mapper->ModuleXY(moduleID,x,y);
-  mapper->FiberXY(fiberID, x, y);
+  mapper->ModuleXY(moduleID,x,y);
+//   mapper->FiberXY(fiberID, x, y);
   
   //---- only the wanted face (front [1] or back [-1])
   if (moduleID<0 && face>0) {
@@ -287,6 +287,14 @@ int main(int argc, char**argv){
   TH2F *hHS_HS1_Cal_back_Y  = new TH2F("hHS_HS1_Cal_back_Y", "Hodoscope 1 vs Cal back Y", 64, -32, 32, 64, -32, 32);
   TH2F *hHS_HS2_Cal_back_Y  = new TH2F("hHS_HS2_Cal_back_Y", "Hodoscope 2 vs Cal back Y", 64, -32, 32, 64, -32, 32);
   
+  TCanvas* cc_DR = new TCanvas ("cc_DR","",800,800);
+  
+  TH2F *hHS_HS1_Cal_front  = new TH2F("hHS_HS1_Cal_front", "Hodoscope 1 vs Cal front ", 64, -32, 32, nEntries, 0, nEntries);
+  TH2F *hHS_HS2_Cal_front  = new TH2F("hHS_HS2_Cal_front", "Hodoscope 2 vs Cal front ", 64, -32, 32, nEntries, 0, nEntries);
+  TH2F *hHS_HS1_Cal_back   = new TH2F("hHS_HS1_Cal_back",  "Hodoscope 1 vs Cal back " , 64, -32, 32, nEntries, 0, nEntries);
+  TH2F *hHS_HS2_Cal_back   = new TH2F("hHS_HS2_Cal_back",  "Hodoscope 2 vs Cal back " , 64, -32, 32, nEntries, 0, nEntries);
+
+  
   bool haverechits = false;
   std::vector<TBRecHit> *rechits=0;
   if(H4tree->GetListOfBranches()->FindObject("tbrechits")) {
@@ -360,17 +368,21 @@ int main(int argc, char**argv){
      for (int iCalo = 0; iCalo < caloCluster_position_X_front.size(); iCalo++) {
 //       std::cout << " caloCluster_position_X_front.at(" << iCalo << "), pos_fibers_X1.at(" << iCluster << ")  = " << caloCluster_position_X_front.at(iCalo) << "," <<  pos_fibers_X1.at(iCluster) << std::endl;
       hHS_HS1_Cal_front_X->Fill(caloCluster_position_X_front.at(iCalo), pos_fibers_X1.at(iCluster));
+      hHS_HS1_Cal_front->Fill(caloCluster_position_X_front.at(iCalo) - pos_fibers_X1.at(iCluster), i);
      }
      for (int iCalo = 0; iCalo < caloCluster_position_X_back.size(); iCalo++) {
       hHS_HS1_Cal_back_X->Fill(caloCluster_position_X_back.at(iCalo), pos_fibers_X1.at(iCluster));
+      hHS_HS1_Cal_back->Fill(caloCluster_position_X_back.at(iCalo) - pos_fibers_X1.at(iCluster), i);
      }
     }
     for (int iCluster = 0; iCluster < pos_fibers_X2.size(); iCluster++) {
      for (int iCalo = 0; iCalo < caloCluster_position_X_front.size(); iCalo++) {
       hHS_HS2_Cal_front_X->Fill(caloCluster_position_X_front.at(iCalo), pos_fibers_X2.at(iCluster));
+      hHS_HS2_Cal_front->Fill(caloCluster_position_X_front.at(iCalo) - pos_fibers_X2.at(iCluster), i);
      }
      for (int iCalo = 0; iCalo < caloCluster_position_X_back.size(); iCalo++) {
       hHS_HS2_Cal_back_X->Fill(caloCluster_position_X_back.at(iCalo), pos_fibers_X2.at(iCluster));
+      hHS_HS2_Cal_back->Fill(caloCluster_position_X_back.at(iCalo) - pos_fibers_X2.at(iCluster), i);
      }
     }
     
@@ -393,6 +405,31 @@ int main(int argc, char**argv){
    }
     
   }
+  
+  
+
+  cc_DR->Divide(2,2);
+  cc_DR->cd(1)->SetGrid();
+  hHS_HS1_Cal_front->Draw("colz");
+  hHS_HS1_Cal_front->GetXaxis()->SetTitle("calo - hodoscope");
+  hHS_HS1_Cal_front->GetYaxis()->SetTitle("event");
+
+  cc_DR->cd(2)->SetGrid();
+  hHS_HS2_Cal_front->Draw("colz");
+  hHS_HS2_Cal_front->GetXaxis()->SetTitle("calo - hodoscope");
+  hHS_HS2_Cal_front->GetYaxis()->SetTitle("event");
+
+  cc_DR->cd(3)->SetGrid();
+  hHS_HS1_Cal_back->Draw("colz");
+  hHS_HS1_Cal_back->GetXaxis()->SetTitle("calo - hodoscope");
+  hHS_HS1_Cal_back->GetYaxis()->SetTitle("event");
+
+  cc_DR->cd(4)->SetGrid();
+  hHS_HS2_Cal_back->Draw("colz");
+  hHS_HS2_Cal_back->GetXaxis()->SetTitle("calo - hodoscope");
+  hHS_HS2_Cal_back->GetYaxis()->SetTitle("event");
+  
+  
   
   
   TF1* fxy = new TF1 ("fxy","x",-20,20);

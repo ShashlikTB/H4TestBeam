@@ -17,6 +17,8 @@ Plot Hodoscope and Shashlik information
 ====
     
     ./bin/PlotHodoAndShashlik -i mix_1140_reco.root
+    ./bin/PlotHodoAndShashlik -i ../DAQ/rec_capture_1003_reco_beam.root
+    ./bin/PlotHodoAndShashlik -i ../DAQ/rec_capture_1224_reco_beam.root
     
     
     
@@ -30,4 +32,7 @@ test
     
     
     ./bin/AddHodoInfo -s ../DAQ/rec_capture_1003_reco.root  -b ../DAQ/hodoscope/1003/?.root,../DAQ/hodoscope/1003/??.root,../DAQ/hodoscope/1003/???.root  -o  ../DAQ/rec_capture_1003_reco_beam.root
+    
+    
+    ./bin/AddHodoInfo -s ../DAQ/rec_capture_1224_reco.root  -b ../DAQ/hodoscope/1224/?.root,../DAQ/hodoscope/1224/??.root,../DAQ/hodoscope/1224/???.root  -o  ../DAQ/rec_capture_1224_reco_beam.root
     
