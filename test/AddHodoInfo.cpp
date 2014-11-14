@@ -21,6 +21,8 @@
 
 //---- from TBtree Shashlik ----
 #include "include/TBEvent.h"
+#include "include/TBRecHit.h"
+
 
 //---- boost
 // #include "boost/program_options.hpp"
@@ -210,23 +212,33 @@ int main(int argc, char**argv){
   TTree* outtree = new TTree("t1041","t1041");
   TBSpill* tbspill = new TBSpill();
   TBEvent* tbevent = new TBEvent();
+  std::vector<TBRecHit> *rechits = new vector<TBRecHit>;
   
+  TBranch *branch_reco;
+  bool haverechits = false;
+  if(H4tree_shashlik->GetListOfBranches()->FindObject("tbrechits")) {
+   std::cout << "found rechits" << std::endl;
+   branch_reco = H4tree_shashlik->GetBranch("tbrechits");
+   branch_reco->SetAddress(&rechits);  
+   haverechits = true;
+  }
   TBranch *branch_event = H4tree_shashlik->GetBranch("tbevent");
   branch_event->SetAddress(&tbevent);
   TBranch *branch_spill = H4tree_shashlik->GetBranch("tbspill");
   branch_spill->SetAddress(&tbspill);
-  
-//   H4tree_shashlik->SetBranchAddress("tbspill",tbspill);
-//   H4tree_shashlik->SetBranchAddress("tbevent",tbevent);
-  
-//   std::cout << " SetBranchAddress " << std::endl;
 
+  
   TBSpill tbspill2;
   TBEvent tbevent2;
+  std::vector<TBRecHit> *rechits2 = new vector<TBRecHit>;
+  
   outtree->Branch("tbspill", "TBSpill", &tbspill2, 64000, 0);
   outtree->Branch("tbevent", "TBEvent", &tbevent2, 64000, 0);
+  if (haverechits) {
+   outtree->Branch("tbrechits","std::vector<TBRecHit>",&rechits2);
+  }
   
-//   std::cout << " Branch " << std::endl;   
+  
    
    
   int nEntries_beam = H4tree_beam->GetEntries();
@@ -285,6 +297,10 @@ int main(int argc, char**argv){
    
    tbevent2 = *tbevent;
    tbspill2 = *tbspill;
+   
+   if (haverechits) {
+    rechits2 = rechits;
+   }
    
    int Shashlik_spillNumber = tbspill->GetSpillNumber();
    int Shashlik_eventNumber = -1;
