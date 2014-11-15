@@ -117,8 +117,18 @@ void doHodoReconstruction( std::vector<int> input_values, std::vector<int>& nFib
 
 
 
+
+//---- distance definition in calorimeter position
+float DR (float x1, float x2, float y1, float y2) {
+ return sqrt((x1-x2)*(x1-x2) + (y1-y2)*(y1-y2));
+}
+
+
+
+
+
 //---- Reconstruct Calorimeter clusters
-void doCalorimeterReconstruction( Mapper* mapper,  std::vector<TBRecHit>* rechits, std::vector<float>& caloCluster_position_X, std::vector<float>& caloCluster_position_Y, std::vector<float>& caloCluster_Energy, int face) {
+void doCalorimeterReconstruction( Mapper* mapper,  std::vector<TBRecHit>* rechits, std::vector<float>& caloCluster_position_X, std::vector<float>& caloCluster_position_Y, std::vector<float>& caloCluster_Energy, int face, float maxDR, int fiberLevel = 0) {
   
  //----      adc              X      Y
  std::map < float, std::pair<float, float> > map_of_calo_clusters;
@@ -138,8 +148,8 @@ void doCalorimeterReconstruction( Mapper* mapper,  std::vector<TBRecHit>* rechit
   mapper->ChannelID2ModuleFiber(channelID,moduleID,fiberID);  // get module and fiber IDs
   
   double x,y;
-  mapper->ModuleXY(moduleID,x,y);
-//   mapper->FiberXY(fiberID, x, y);
+  if (fiberLevel == 0) mapper->ModuleXY(moduleID,x,y);
+  else                 mapper->FiberXY(fiberID, x, y);
   
   //---- only the wanted face (front [1] or back [-1])
   if (moduleID<0 && face>0) {
@@ -167,44 +177,75 @@ void doCalorimeterReconstruction( Mapper* mapper,  std::vector<TBRecHit>* rechit
  
  //---- do clustering ----
 //  int num_clusters = 0;
- float x_cluster = 0;
- float y_cluster = 0;
+ float x_cluster_logE = 0;
+ float y_cluster_logE = 0;
+ float weight_cluster = 0;
  float energy_cluster = 0;
+ 
+ float x_cluster_max = -1000;
+ float y_cluster_max = -1000;
+ 
+ //---- first calculate cluster energy
  for( std::map < float, std::pair<float, float> >::iterator ii=map_of_calo_clusters.begin(); ii!=map_of_calo_clusters.end(); ii++) {
-  x_cluster = x_cluster + (ii->second.first)  * (- ii->first) ;
-  y_cluster = y_cluster + (ii->second.second) * (- ii->first) ;
-  energy_cluster = energy_cluster - ii->first;
-//   num_clusters++;
- }
- if (energy_cluster != 0) {
-  x_cluster = x_cluster / energy_cluster;
-  y_cluster = y_cluster / energy_cluster;
+//   std::cout << " energy = " << - ii->first << std::endl;
+  if (x_cluster_max == -1000) {
+   x_cluster_max = (ii->second.first); //---- seed position X
+   y_cluster_max = (ii->second.second); //---- seed position X   
+   float energy_temp = - ii->first;
+   energy_cluster = energy_cluster + energy_temp;
+  }
+  else {
+   if (DR(ii->second.first, x_cluster_max, ii->second.second, y_cluster_max) < maxDR) {
+    float energy_temp = - ii->first;
+    energy_cluster = energy_cluster + energy_temp;
+    //   num_clusters++;
+   }
+  }
  }
  
- if (energy_cluster != 0) {
+ //---- then calculate position 
+//  std::cout<< " new cluster " << std::endl;
+ float w0 = 3.8;
+ if (energy_cluster > 0) {
+  for( std::map < float, std::pair<float, float> >::iterator ii=map_of_calo_clusters.begin(); ii!=map_of_calo_clusters.end(); ii++) {
+   //   std::cout << " energy = " << - ii->first << std::endl;
+   if (DR(ii->second.first, x_cluster_max, ii->second.second, y_cluster_max) < maxDR) {
+    float energy_temp = - ii->first;
+    float wi = (w0 + log(energy_temp/energy_cluster));
+    if (wi > 0) {
+     x_cluster_logE = x_cluster_logE + (ii->second.first)  * wi ;
+     y_cluster_logE = y_cluster_logE + (ii->second.second) * wi ;
+     weight_cluster = weight_cluster + wi;
+    }
+   }
+  }
+ }
+
+ float x_cluster_final = 0;
+ float y_cluster_final = 0;
+ 
+ if (weight_cluster != 0) {
+  x_cluster_final = x_cluster_logE / weight_cluster;
+  y_cluster_final = y_cluster_logE / weight_cluster;
+
   caloCluster_Energy.push_back( energy_cluster );
-  caloCluster_position_X.push_back( x_cluster );
-  caloCluster_position_Y.push_back( y_cluster );
+  caloCluster_position_X.push_back( x_cluster_final );
+  caloCluster_position_Y.push_back( y_cluster_final );
  }
  
 //  std::cout << " num_clusters = " << num_clusters << std::endl;
 } 
   
-  
-  
-  
-  
-
 
 int main(int argc, char**argv){
  
  std::string input_file;
  int maxEvents = -1;
- 
+ int doFiber = 0;
  //---- configuration
  
  int c;
- while ((c = getopt (argc, argv, "i:m:")) != -1)
+ while ((c = getopt (argc, argv, "i:m:f:")) != -1)
   switch (c)
   {
    case 'i': //---- input
@@ -213,9 +254,12 @@ int main(int argc, char**argv){
    case 'm':
     maxEvents =  atoi(optarg);
     break;
+   case 'f':
+    doFiber =  atoi(optarg);
+    break;
     
    case '?':
-    if (optopt == 'i' || optopt == 'm')
+    if (optopt == 'i' || optopt == 'm' || optopt == 'f')
      fprintf (stderr, "Option -%c requires an argument.\n", optopt);
     else if (isprint (optopt))
      fprintf (stderr, "Unknown option `-%c'.\n", optopt);
@@ -295,10 +339,30 @@ int main(int argc, char**argv){
   TH2F *hHS_HS2_Cal_back   = new TH2F("hHS_HS2_Cal_back",  "Hodoscope 2 vs Cal back " , 64, -32, 32, nEntries, 0, nEntries);
 
   
-  TCanvas* cc_Cal = new TCanvas ("cc_Cal","",800,400);
+  TCanvas* cc_Cal = new TCanvas ("cc_Cal","",800,800);
   
-  TH2F *hHS_Cal_front  = new TH2F("hHS_Cal_front", "Cal front ", 64, -32, 32, 64, -32, 32);
-  TH2F *hHS_Cal_back   = new TH2F("hHS_Cal_back",  "Cal back " , 64, -32, 32, 64, -32, 32);
+  TH2F *hHS_Cal_front;
+  TH2F *hHS_Cal_back;
+
+  TH2F *hHS_Cal_front_module;
+  TH2F *hHS_Cal_back_module;
+  
+  if (doFiber) {
+   hHS_Cal_front  = new TH2F("hHS_Cal_front", "Cal front ", 48, -28, 28, 48, -28, 28);
+   hHS_Cal_back   = new TH2F("hHS_Cal_back",  "Cal back " , 48, -28, 28, 48, -28, 28);
+   
+   hHS_Cal_front_module  = new TH2F("hHS_Cal_front_module", "Cal front ", 24, -28, 28, 24, -28, 28);
+   hHS_Cal_back_module   = new TH2F("hHS_Cal_back_module",  "Cal back " , 24, -28, 28, 24, -28, 28);
+  }
+  else {
+   hHS_Cal_front  = new TH2F("hHS_Cal_front", "Cal front ", 144, -28, 28, 144, -28, 28);
+   hHS_Cal_back   = new TH2F("hHS_Cal_back",  "Cal back " , 144, -28, 28, 144, -28, 28);
+   
+   hHS_Cal_front_module  = new TH2F("hHS_Cal_front_module", "Cal front ", 12, -28, 28, 12, -28, 28);
+   hHS_Cal_back_module   = new TH2F("hHS_Cal_back_module",  "Cal back " , 12, -28, 28, 12, -28, 28);
+  }
+  
+  
   
   
   bool haverechits = false;
@@ -326,14 +390,29 @@ int main(int argc, char**argv){
    std::vector<float> caloCluster_position_Y_front;
    std::vector<float> caloCluster_Energy_front;
    
-   doCalorimeterReconstruction( mapper, rechits, caloCluster_position_X_front, caloCluster_position_Y_front, caloCluster_Energy_front, 1);    
+   doCalorimeterReconstruction( mapper, rechits, caloCluster_position_X_front, caloCluster_position_Y_front, caloCluster_Energy_front, 1, 30, doFiber);    
     
    std::vector<float> caloCluster_position_X_back;
    std::vector<float> caloCluster_position_Y_back;
    std::vector<float> caloCluster_Energy_back;
    
-   doCalorimeterReconstruction( mapper, rechits, caloCluster_position_X_back, caloCluster_position_Y_back, caloCluster_Energy_back, -1);
+   doCalorimeterReconstruction( mapper, rechits, caloCluster_position_X_back, caloCluster_position_Y_back, caloCluster_Energy_back, -1, 30, doFiber);
     
+ 
+   
+   
+   //---- modular level DR = 5 mm
+   std::vector<float> caloCluster_position_X_front_module;
+   std::vector<float> caloCluster_position_Y_front_module;
+   std::vector<float> caloCluster_Energy_front_module;
+   
+   doCalorimeterReconstruction( mapper, rechits, caloCluster_position_X_front_module, caloCluster_position_Y_front_module, caloCluster_Energy_front_module, 1, 5, doFiber);    
+   
+   std::vector<float> caloCluster_position_X_back_module;
+   std::vector<float> caloCluster_position_Y_back_module;
+   std::vector<float> caloCluster_Energy_back_module;
+   
+   doCalorimeterReconstruction( mapper, rechits, caloCluster_position_X_back_module, caloCluster_position_Y_back_module, caloCluster_Energy_back_module, -1, 5, doFiber);
    
    
    //---- hodoscope data
@@ -421,12 +500,25 @@ int main(int argc, char**argv){
      hHS_Cal_back->Fill(caloCluster_position_X_back.at(iCaloX),caloCluster_position_Y_back.at(iCaloY));
     }
    }
+   
+   //---- Fill Calorimeter mapping with module information only
+   for (int iCaloX = 0; iCaloX < caloCluster_position_X_front_module.size(); iCaloX++) {
+    for (int iCaloY = 0; iCaloY < caloCluster_position_Y_front_module.size(); iCaloY++) {
+     hHS_Cal_front_module->Fill(caloCluster_position_X_front_module.at(iCaloX),caloCluster_position_Y_front_module.at(iCaloY));
+//      std::cout << " calo cluster position (module) : " << caloCluster_position_X_front_module.at(iCaloX) << " , " << caloCluster_position_Y_front_module.at(iCaloY) << std::endl;
+    }
+   }
+   for (int iCaloX = 0; iCaloX < caloCluster_position_X_back_module.size(); iCaloX++) {
+    for (int iCaloY = 0; iCaloY < caloCluster_position_Y_back_module.size(); iCaloY++) {
+     hHS_Cal_back_module->Fill(caloCluster_position_X_back_module.at(iCaloX),caloCluster_position_Y_back_module.at(iCaloY));
+    }
+   }
     
   }
   
   
   //---- plot ----
-  cc_Cal->Divide(2,1);
+  cc_Cal->Divide(2,2);
   cc_Cal->cd(1)->SetGrid();
   hHS_Cal_front->Draw("colz");
   hHS_Cal_front->GetXaxis()->SetTitle("cal X");
@@ -437,28 +529,41 @@ int main(int argc, char**argv){
   hHS_Cal_back->GetXaxis()->SetTitle("cal X");
   hHS_Cal_back->GetYaxis()->SetTitle("cal Y");
   
+  cc_Cal->cd(3)->SetGrid();
+  hHS_Cal_front_module->Draw("colz");
+  hHS_Cal_front_module->GetXaxis()->SetTitle("cal X");
+  hHS_Cal_front_module->GetYaxis()->SetTitle("cal Y");
+  
+  cc_Cal->cd(4)->SetGrid();
+  hHS_Cal_back_module->Draw("colz");
+  hHS_Cal_back_module->GetXaxis()->SetTitle("cal X");
+  hHS_Cal_back_module->GetYaxis()->SetTitle("cal Y");
+  
 
+  
+  
+  
   
   cc_DR->Divide(2,2);
   cc_DR->cd(1)->SetGrid();
   hHS_HS1_Cal_front->Draw("colz");
   hHS_HS1_Cal_front->GetXaxis()->SetTitle("calo - hodoscope");
-  hHS_HS1_Cal_front->GetYaxis()->SetTitle("event");
+  hHS_HS1_Cal_front->GetYaxis()->SetTitle("event number");
 
   cc_DR->cd(2)->SetGrid();
   hHS_HS2_Cal_front->Draw("colz");
   hHS_HS2_Cal_front->GetXaxis()->SetTitle("calo - hodoscope");
-  hHS_HS2_Cal_front->GetYaxis()->SetTitle("event");
+  hHS_HS2_Cal_front->GetYaxis()->SetTitle("event number");
 
   cc_DR->cd(3)->SetGrid();
   hHS_HS1_Cal_back->Draw("colz");
   hHS_HS1_Cal_back->GetXaxis()->SetTitle("calo - hodoscope");
-  hHS_HS1_Cal_back->GetYaxis()->SetTitle("event");
+  hHS_HS1_Cal_back->GetYaxis()->SetTitle("event number");
 
   cc_DR->cd(4)->SetGrid();
   hHS_HS2_Cal_back->Draw("colz");
   hHS_HS2_Cal_back->GetXaxis()->SetTitle("calo - hodoscope");
-  hHS_HS2_Cal_back->GetYaxis()->SetTitle("event");
+  hHS_HS2_Cal_back->GetYaxis()->SetTitle("event number");
   
   
   
