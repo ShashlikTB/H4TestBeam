@@ -23,7 +23,8 @@ Plot Hodoscope and Shashlik information
     ./bin/PlotHodoAndShashlik -i ../DAQ/rec_capture_1244_reco_beam.root
     ./bin/PlotHodoAndShashlik -i ../DAQ/rec_capture_1140_reco_beam.root
     ./bin/PlotHodoAndShashlik -i ../DAQ/rec_capture_1211_reco_beam.root
-    ./bin/PlotHodoAndShashlik -i ../DAQ/rec_capture_1163_reco_beam.root
+    ./bin/PlotHodoAndShashlik -i ../DAQ/rec_capture_1163_reco_beam.root   -f  1
+    ./bin/PlotHodoAndShashlik -i ../DAQ/rec_capture_1163_reco_beam.root   -f  0
     ./bin/PlotHodoAndShashlik -i ../DAQ/rec_capture_1221_reco_beam.root
     ./bin/PlotHodoAndShashlik -i ../DAQ/rec_capture_1121_reco_beam.root   -f  1
     

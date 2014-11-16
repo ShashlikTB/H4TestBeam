@@ -54,7 +54,9 @@ void TransformFibers(std::map<std::pair<int,int>, int > fibers, std::vector <int
  std::pair<int,int> fibers_mappairY2;
  fibers_mappairY2.first  = hodoY2;
  
- for(int iBinY=0;iBinY<64;iBinY++){
+ //---- Y direction is inverted !?!?
+ for(int iBinY=63;iBinY>=0;iBinY--){
+//   for(int iBinY=0;iBinY<64;iBinY++){
   fibers_mappairY1.second = iBinY;
   fibers_mappairY2.second = iBinY;
   fibers_Y1.push_back( fibers[fibers_mappairY1] );
@@ -205,7 +207,8 @@ void doCalorimeterReconstruction( Mapper* mapper,  std::vector<TBRecHit>* rechit
  
  //---- then calculate position 
 //  std::cout<< " new cluster " << std::endl;
- float w0 = 3.8;
+//  float w0 = 3.8;
+ float w0 = 5.0;
  if (energy_cluster > 0) {
   for( std::map < float, std::pair<float, float> >::iterator ii=map_of_calo_clusters.begin(); ii!=map_of_calo_clusters.end(); ii++) {
    //   std::cout << " energy = " << - ii->first << std::endl;
@@ -331,13 +334,40 @@ int main(int argc, char**argv){
   TH2F *hHS_HS1_Cal_back_Y  = new TH2F("hHS_HS1_Cal_back_Y", "Hodoscope 1 vs Cal back Y", 64, -32, 32, 64, -32, 32);
   TH2F *hHS_HS2_Cal_back_Y  = new TH2F("hHS_HS2_Cal_back_Y", "Hodoscope 2 vs Cal back Y", 64, -32, 32, 64, -32, 32);
   
-  TCanvas* cc_DR = new TCanvas ("cc_DR","",800,800);
+  TCanvas* cc_DX = new TCanvas ("cc_DX","",800,400);
   
-  TH2F *hHS_HS1_Cal_front  = new TH2F("hHS_HS1_Cal_front", "Hodoscope 1 vs Cal front ", 64, -32, 32, nEntries, 0, nEntries);
-  TH2F *hHS_HS2_Cal_front  = new TH2F("hHS_HS2_Cal_front", "Hodoscope 2 vs Cal front ", 64, -32, 32, nEntries, 0, nEntries);
-  TH2F *hHS_HS1_Cal_back   = new TH2F("hHS_HS1_Cal_back",  "Hodoscope 1 vs Cal back " , 64, -32, 32, nEntries, 0, nEntries);
-  TH2F *hHS_HS2_Cal_back   = new TH2F("hHS_HS2_Cal_back",  "Hodoscope 2 vs Cal back " , 64, -32, 32, nEntries, 0, nEntries);
+  TH2F *X_hHS_HS1_Cal_front  = new TH2F("X_hHS_HS1_Cal_front", "X Hodoscope 1 vs Cal front ", 64, -32, 32, nEntries, 0, nEntries);
+  TH2F *X_hHS_HS2_Cal_front  = new TH2F("X_hHS_HS2_Cal_front", "X Hodoscope 2 vs Cal front ", 64, -32, 32, nEntries, 0, nEntries);
+  TH2F *X_hHS_HS1_Cal_back   = new TH2F("X_hHS_HS1_Cal_back",  "X Hodoscope 1 vs Cal back " , 64, -32, 32, nEntries, 0, nEntries);
+  TH2F *X_hHS_HS2_Cal_back   = new TH2F("X_hHS_HS2_Cal_back",  "X Hodoscope 2 vs Cal back " , 64, -32, 32, nEntries, 0, nEntries);
 
+  
+  TH1F *X_h1_HS1_Cal_front  = new TH1F("X_h1_HS1_Cal_front", "X Hodoscope 1 vs Cal front ", 256, -32, 32);
+  TH1F *X_h1_HS2_Cal_front  = new TH1F("X_h1_HS2_Cal_front", "X Hodoscope 2 vs Cal front ", 256, -32, 32);
+  TH1F *X_h1_HS1_Cal_back   = new TH1F("X_h1_HS1_Cal_back",  "X Hodoscope 1 vs Cal back " , 256, -32, 32);
+  TH1F *X_h1_HS2_Cal_back   = new TH1F("X_h1_HS2_Cal_back",  "X Hodoscope 2 vs Cal back " , 256, -32, 32);
+  
+  
+  TCanvas* cc_DY = new TCanvas ("cc_DY","",800,400);
+  
+  TH2F *Y_hHS_HS1_Cal_front  = new TH2F("Y_hHS_HS1_Cal_front", "Y Hodoscope 1 vs Cal front ", 64, -32, 32, nEntries, 0, nEntries);
+  TH2F *Y_hHS_HS2_Cal_front  = new TH2F("Y_hHS_HS2_Cal_front", "Y Hodoscope 2 vs Cal front ", 64, -32, 32, nEntries, 0, nEntries);
+  TH2F *Y_hHS_HS1_Cal_back   = new TH2F("Y_hHS_HS1_Cal_back",  "Y Hodoscope 1 vs Cal back " , 64, -32, 32, nEntries, 0, nEntries);
+  TH2F *Y_hHS_HS2_Cal_back   = new TH2F("Y_hHS_HS2_Cal_back",  "Y Hodoscope 2 vs Cal back " , 64, -32, 32, nEntries, 0, nEntries);
+  
+  
+  TH1F *Y_h1_HS1_Cal_front  = new TH1F("Y_h1_HS1_Cal_front", "Y Hodoscope 1 vs Cal front ", 256, -32, 32);
+  TH1F *Y_h1_HS2_Cal_front  = new TH1F("Y_h1_HS2_Cal_front", "Y Hodoscope 2 vs Cal front ", 256, -32, 32);
+  TH1F *Y_h1_HS1_Cal_back   = new TH1F("Y_h1_HS1_Cal_back",  "Y Hodoscope 1 vs Cal back " , 256, -32, 32);
+  TH1F *Y_h1_HS2_Cal_back   = new TH1F("Y_h1_HS2_Cal_back",  "Y Hodoscope 2 vs Cal back " , 256, -32, 32);
+  
+  
+  
+  TCanvas* cc_hodo = new TCanvas ("cc_hodo","",800,400);
+  
+  TH2F *hHS_HS2_HS1_X  = new TH2F("hHS_HS2_HS1_X", "Hodoscope 2 vs Hodoscope 1 X", 64, -32, 32, 64, -32, 32);
+  TH2F *hHS_HS2_HS1_Y  = new TH2F("hHS_HS2_HS1_Y", "Hodoscope 2 vs Hodoscope 1 Y", 64, -32, 32, 64, -32, 32);
+    
   
   TCanvas* cc_Cal = new TCanvas ("cc_Cal","",800,800);
   
@@ -444,49 +474,78 @@ int main(int argc, char**argv){
    doHodoReconstruction( fibers_Y1, n_fibers_Y1, pos_fibers_Y1 );
    doHodoReconstruction( fibers_Y2, n_fibers_Y2, pos_fibers_Y2 );
    
+   //---- just hodoscope information
+   for (int iCluster1 = 0; iCluster1 < pos_fibers_X1.size(); iCluster1++) {
+    for (int iCluster2 = 0; iCluster2 < pos_fibers_X2.size(); iCluster2++) {
+     hHS_HS2_HS1_X->Fill(pos_fibers_X1.at(iCluster1),pos_fibers_X2.at(iCluster2));
+//      std::cout << " pos_fibers_X:: " << pos_fibers_X1.at(iCluster1) << " :: " << pos_fibers_X2.at(iCluster2) << std::endl;
+    }
+   }
+   
+   for (int iCluster1 = 0; iCluster1 < pos_fibers_Y1.size(); iCluster1++) {
+    for (int iCluster2 = 0; iCluster2 < pos_fibers_Y2.size(); iCluster2++) {
+     hHS_HS2_HS1_Y->Fill(pos_fibers_Y1.at(iCluster1),pos_fibers_Y2.at(iCluster2));
+    }
+   }
    
    
    //---- now merge and compare
    if (pos_fibers_X1.size() > 1) {
     
+    //---- X
     for (int iCluster = 0; iCluster < pos_fibers_X1.size(); iCluster++) {
      for (int iCalo = 0; iCalo < caloCluster_position_X_front.size(); iCalo++) {
 //       std::cout << " caloCluster_position_X_front.at(" << iCalo << "), pos_fibers_X1.at(" << iCluster << ")  = " << caloCluster_position_X_front.at(iCalo) << "," <<  pos_fibers_X1.at(iCluster) << std::endl;
       hHS_HS1_Cal_front_X->Fill(caloCluster_position_X_front.at(iCalo), pos_fibers_X1.at(iCluster));
-      hHS_HS1_Cal_front->Fill(caloCluster_position_X_front.at(iCalo) - pos_fibers_X1.at(iCluster), i);
+      X_hHS_HS1_Cal_front->Fill(caloCluster_position_X_front.at(iCalo) - pos_fibers_X1.at(iCluster), i);
+      X_h1_HS1_Cal_front->Fill(caloCluster_position_X_front.at(iCalo) - pos_fibers_X1.at(iCluster));
      }
      for (int iCalo = 0; iCalo < caloCluster_position_X_back.size(); iCalo++) {
       hHS_HS1_Cal_back_X->Fill(caloCluster_position_X_back.at(iCalo), pos_fibers_X1.at(iCluster));
-      hHS_HS1_Cal_back->Fill(caloCluster_position_X_back.at(iCalo) - pos_fibers_X1.at(iCluster), i);
+      X_hHS_HS1_Cal_back->Fill(caloCluster_position_X_back.at(iCalo) - pos_fibers_X1.at(iCluster), i);
+      X_h1_HS1_Cal_back->Fill(caloCluster_position_X_back.at(iCalo) - pos_fibers_X1.at(iCluster));
      }
     }
     for (int iCluster = 0; iCluster < pos_fibers_X2.size(); iCluster++) {
      for (int iCalo = 0; iCalo < caloCluster_position_X_front.size(); iCalo++) {
       hHS_HS2_Cal_front_X->Fill(caloCluster_position_X_front.at(iCalo), pos_fibers_X2.at(iCluster));
-      hHS_HS2_Cal_front->Fill(caloCluster_position_X_front.at(iCalo) - pos_fibers_X2.at(iCluster), i);
+      X_hHS_HS2_Cal_front->Fill(caloCluster_position_X_front.at(iCalo) - pos_fibers_X2.at(iCluster), i);
+      X_h1_HS2_Cal_front->Fill(caloCluster_position_X_front.at(iCalo) - pos_fibers_X2.at(iCluster));
      }
      for (int iCalo = 0; iCalo < caloCluster_position_X_back.size(); iCalo++) {
       hHS_HS2_Cal_back_X->Fill(caloCluster_position_X_back.at(iCalo), pos_fibers_X2.at(iCluster));
-      hHS_HS2_Cal_back->Fill(caloCluster_position_X_back.at(iCalo) - pos_fibers_X2.at(iCluster), i);
+      X_hHS_HS2_Cal_back->Fill(caloCluster_position_X_back.at(iCalo) - pos_fibers_X2.at(iCluster), i);
+      X_h1_HS2_Cal_back->Fill(caloCluster_position_X_back.at(iCalo) - pos_fibers_X2.at(iCluster));
      }
     }
     
+    //---- Y
     for (int iCluster = 0; iCluster < pos_fibers_Y1.size(); iCluster++) {
      for (int iCalo = 0; iCalo < caloCluster_position_Y_front.size(); iCalo++) {
+      //       std::cout << " caloCluster_position_Y_front.at(" << iCalo << "), pos_fibers_Y1.at(" << iCluster << ")  = " << caloCluster_position_Y_front.at(iCalo) << "," <<  pos_fibers_Y1.at(iCluster) << std::endl;
       hHS_HS1_Cal_front_Y->Fill(caloCluster_position_Y_front.at(iCalo), pos_fibers_Y1.at(iCluster));
+      Y_hHS_HS1_Cal_front->Fill(caloCluster_position_Y_front.at(iCalo) - pos_fibers_Y1.at(iCluster), i);
+      Y_h1_HS1_Cal_front->Fill(caloCluster_position_Y_front.at(iCalo) - pos_fibers_Y1.at(iCluster));
      }
      for (int iCalo = 0; iCalo < caloCluster_position_Y_back.size(); iCalo++) {
       hHS_HS1_Cal_back_Y->Fill(caloCluster_position_Y_back.at(iCalo), pos_fibers_Y1.at(iCluster));
+      Y_hHS_HS1_Cal_back->Fill(caloCluster_position_Y_back.at(iCalo) - pos_fibers_Y1.at(iCluster), i);
+      Y_h1_HS1_Cal_back->Fill(caloCluster_position_Y_back.at(iCalo) - pos_fibers_Y1.at(iCluster));
      }
     }
     for (int iCluster = 0; iCluster < pos_fibers_Y2.size(); iCluster++) {
      for (int iCalo = 0; iCalo < caloCluster_position_Y_front.size(); iCalo++) {
       hHS_HS2_Cal_front_Y->Fill(caloCluster_position_Y_front.at(iCalo), pos_fibers_Y2.at(iCluster));
+      Y_hHS_HS2_Cal_front->Fill(caloCluster_position_Y_front.at(iCalo) - pos_fibers_Y2.at(iCluster), i);
+      Y_h1_HS2_Cal_front->Fill(caloCluster_position_Y_front.at(iCalo) - pos_fibers_Y2.at(iCluster));
      }
      for (int iCalo = 0; iCalo < caloCluster_position_Y_back.size(); iCalo++) {
       hHS_HS2_Cal_back_Y->Fill(caloCluster_position_Y_back.at(iCalo), pos_fibers_Y2.at(iCluster));
+      Y_hHS_HS2_Cal_back->Fill(caloCluster_position_Y_back.at(iCalo) - pos_fibers_Y2.at(iCluster), i);
+      Y_h1_HS2_Cal_back->Fill(caloCluster_position_Y_back.at(iCalo) - pos_fibers_Y2.at(iCluster));
      }
     }
+    
    }
    
    //---- Fill Calorimeter mapping
@@ -518,6 +577,24 @@ int main(int argc, char**argv){
   
   
   //---- plot ----
+  cc_hodo->Divide(2,1);
+  TF1* fxy = new TF1 ("fxy","x",-20,20);
+  
+  cc_hodo->cd(1)->SetGrid();
+  hHS_HS2_HS1_X->Draw("colz");
+  hHS_HS2_HS1_X->GetXaxis()->SetTitle("X1");
+  hHS_HS2_HS1_X->GetYaxis()->SetTitle("X2");
+  fxy->Draw("same");
+  
+  cc_hodo->cd(2)->SetGrid();
+  hHS_HS2_HS1_Y->Draw("colz");
+  hHS_HS2_HS1_Y->GetXaxis()->SetTitle("Y1");
+  hHS_HS2_HS1_Y->GetYaxis()->SetTitle("Y2");
+  fxy->Draw("same");
+  
+  
+  
+  
   cc_Cal->Divide(2,2);
   cc_Cal->cd(1)->SetGrid();
   hHS_Cal_front->Draw("colz");
@@ -542,33 +619,52 @@ int main(int argc, char**argv){
 
   
   
+  TF1* fgaus = new TF1("fgaus","gaus(0)+pol0(3)",0,4);
+  fgaus->SetParameter(1,1);
+  fgaus->SetParameter(2,0.5);
   
   
-  cc_DR->Divide(2,2);
-  cc_DR->cd(1)->SetGrid();
-  hHS_HS1_Cal_front->Draw("colz");
-  hHS_HS1_Cal_front->GetXaxis()->SetTitle("calo - hodoscope");
-  hHS_HS1_Cal_front->GetYaxis()->SetTitle("event number");
+  cc_DX->Divide(4,2);
+  cc_DX->cd(1)->SetGrid();
+  X_hHS_HS1_Cal_front->Draw("colz");
+  X_hHS_HS1_Cal_front->GetXaxis()->SetTitle("calo - hodoscope");
+  X_hHS_HS1_Cal_front->GetYaxis()->SetTitle("event number");
 
-  cc_DR->cd(2)->SetGrid();
-  hHS_HS2_Cal_front->Draw("colz");
-  hHS_HS2_Cal_front->GetXaxis()->SetTitle("calo - hodoscope");
-  hHS_HS2_Cal_front->GetYaxis()->SetTitle("event number");
+  cc_DX->cd(2)->SetGrid();
+  X_hHS_HS2_Cal_front->Draw("colz");
+  X_hHS_HS2_Cal_front->GetXaxis()->SetTitle("calo - hodoscope");
+  X_hHS_HS2_Cal_front->GetYaxis()->SetTitle("event number");
 
-  cc_DR->cd(3)->SetGrid();
-  hHS_HS1_Cal_back->Draw("colz");
-  hHS_HS1_Cal_back->GetXaxis()->SetTitle("calo - hodoscope");
-  hHS_HS1_Cal_back->GetYaxis()->SetTitle("event number");
+  cc_DX->cd(5)->SetGrid();
+  X_hHS_HS1_Cal_back->Draw("colz");
+  X_hHS_HS1_Cal_back->GetXaxis()->SetTitle("calo - hodoscope");
+  X_hHS_HS1_Cal_back->GetYaxis()->SetTitle("event number");
 
-  cc_DR->cd(4)->SetGrid();
-  hHS_HS2_Cal_back->Draw("colz");
-  hHS_HS2_Cal_back->GetXaxis()->SetTitle("calo - hodoscope");
-  hHS_HS2_Cal_back->GetYaxis()->SetTitle("event number");
+  cc_DX->cd(6)->SetGrid();
+  X_hHS_HS2_Cal_back->Draw("colz");
+  X_hHS_HS2_Cal_back->GetXaxis()->SetTitle("calo - hodoscope");
+  X_hHS_HS2_Cal_back->GetYaxis()->SetTitle("event number");
+  
+  
+  cc_DX->cd(3)->SetGrid();
+  X_h1_HS1_Cal_front->Draw();
+  X_h1_HS1_Cal_front->GetXaxis()->SetTitle("calo - hodoscope");
+  
+  cc_DX->cd(4)->SetGrid();
+  X_h1_HS2_Cal_front->Draw();
+  X_h1_HS2_Cal_front->GetXaxis()->SetTitle("calo - hodoscope");
+  
+  cc_DX->cd(7)->SetGrid();
+  X_h1_HS1_Cal_back->Draw();
+  X_h1_HS1_Cal_back->GetXaxis()->SetTitle("calo - hodoscope");
+  
+  cc_DX->cd(8)->SetGrid();
+  X_h1_HS2_Cal_back->Draw();
+  X_h1_HS2_Cal_back->GetXaxis()->SetTitle("calo - hodoscope");
+  X_h1_HS2_Cal_back->Fit("fgaus","R");
   
   
   
-  
-  TF1* fxy = new TF1 ("fxy","x",-20,20);
 
   cc_X->Divide(2,2);
   
@@ -598,6 +694,45 @@ int main(int argc, char**argv){
   
   
  
+  
+  cc_DY->Divide(4,2);
+  cc_DY->cd(1)->SetGrid();
+  Y_hHS_HS1_Cal_front->Draw("colz");
+  Y_hHS_HS1_Cal_front->GetXaxis()->SetTitle("calo - hodoscope");
+  Y_hHS_HS1_Cal_front->GetYaxis()->SetTitle("event number");
+  
+  cc_DY->cd(2)->SetGrid();
+  Y_hHS_HS2_Cal_front->Draw("colz");
+  Y_hHS_HS2_Cal_front->GetXaxis()->SetTitle("calo - hodoscope");
+  Y_hHS_HS2_Cal_front->GetYaxis()->SetTitle("event number");
+  
+  cc_DY->cd(5)->SetGrid();
+  Y_hHS_HS1_Cal_back->Draw("colz");
+  Y_hHS_HS1_Cal_back->GetXaxis()->SetTitle("calo - hodoscope");
+  Y_hHS_HS1_Cal_back->GetYaxis()->SetTitle("event number");
+  
+  cc_DY->cd(6)->SetGrid();
+  Y_hHS_HS2_Cal_back->Draw("colz");
+  Y_hHS_HS2_Cal_back->GetXaxis()->SetTitle("calo - hodoscope");
+  Y_hHS_HS2_Cal_back->GetYaxis()->SetTitle("event number");
+  
+  
+  cc_DY->cd(3)->SetGrid();
+  Y_h1_HS1_Cal_front->Draw();
+  Y_h1_HS1_Cal_front->GetXaxis()->SetTitle("calo - hodoscope");
+  
+  cc_DY->cd(4)->SetGrid();
+  Y_h1_HS2_Cal_front->Draw();
+  Y_h1_HS2_Cal_front->GetXaxis()->SetTitle("calo - hodoscope");
+  
+  cc_DY->cd(7)->SetGrid();
+  Y_h1_HS1_Cal_back->Draw();
+  Y_h1_HS1_Cal_back->GetXaxis()->SetTitle("calo - hodoscope");
+  
+  cc_DY->cd(8)->SetGrid();
+  Y_h1_HS2_Cal_back->Draw();
+  Y_h1_HS2_Cal_back->GetXaxis()->SetTitle("calo - hodoscope");
+  
   
   
   cc_Y->Divide(2,2);
