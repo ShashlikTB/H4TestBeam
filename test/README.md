@@ -11,7 +11,8 @@ Plot Hodoscope information
 ====
 
     ./bin/PlotHodo  -i  ../DAQ/rec_capture_9999.root
-
+    ./bin/PlotHodo  -i  ../DAQ/rec_capture_1163_reco_beam.root
+    
     
 Plot Hodoscope and Shashlik information
 ====
@@ -27,6 +28,17 @@ Plot Hodoscope and Shashlik information
     ./bin/PlotHodoAndShashlik -i ../DAQ/rec_capture_1163_reco_beam.root   -f  0
     ./bin/PlotHodoAndShashlik -i ../DAQ/rec_capture_1221_reco_beam.root
     ./bin/PlotHodoAndShashlik -i ../DAQ/rec_capture_1121_reco_beam.root   -f  1
+    
+    ./bin/PlotHodoAndShashlik -i ../DAQ/rec_capture_1163_reco_beam.root   -f  0   -x 192.75  -y   357.25
+    ./bin/PlotHodoAndShashlik -i ../DAQ/rec_capture_1142_reco_beam.root   -f  0   -x 207.25  -y   342.75
+    
+    ./bin/PlotHodoAndShashlik -i ../DAQ/rec_capture_1096_reco_beam.root   -f  0   -x 163.75  -y   342.75
+    
+    ./bin/PlotHodoAndShashlik -i ../DAQ/rec_capture_1101_reco_beam.root   -f  0   -x 192.75  -y   357.25    
+    ./bin/PlotHodoAndShashlik -i ../DAQ/rec_capture_1101_reco_beam.root   -f  0   -x 207.25  -y   357.25
+        
+    ./bin/PlotHodoAndShashlik -i ../DAQ/rec_capture_1098_reco_beam.root   -f  0   -x 178.25  -y   357.25
+
     
     
     
@@ -57,3 +69,16 @@ test
     ./bin/AddHodoInfo -s ../DAQ/rec_capture_1221_reco.root  -b ../DAQ/hodoscope/1221/?.root,../DAQ/hodoscope/1221/??.root,../DAQ/hodoscope/1221/???.root  -o  ../DAQ/rec_capture_1221_reco_beam.root
 
     ./bin/AddHodoInfo -s ../DAQ/rec_capture_1121_reco.root  -b ../DAQ/hodoscope/1121/?.root,../DAQ/hodoscope/1121/??.root,../DAQ/hodoscope/1121/???.root  -o  ../DAQ/rec_capture_1121_reco_beam.root
+
+    ./bin/AddHodoInfo -s ../DAQ/rec_capture_1142_reco.root  -b ../DAQ/hodoscope/1142/?.root,../DAQ/hodoscope/1142/??.root,../DAQ/hodoscope/1142/???.root  -o  ../DAQ/rec_capture_1142_reco_beam.root
+
+    ./bin/AddHodoInfo -s ../DAQ/rec_capture_1096_reco.root  -b ../DAQ/hodoscope/1096/?.root,../DAQ/hodoscope/1096/??.root,../DAQ/hodoscope/1096/???.root  -o  ../DAQ/rec_capture_1096_reco_beam.root
+
+    ./bin/AddHodoInfo -s ../DAQ/rec_capture_1101_reco.root  -b ../DAQ/hodoscope/1101/?.root,../DAQ/hodoscope/1101/??.root,../DAQ/hodoscope/1101/???.root  -o  ../DAQ/rec_capture_1101_reco_beam.root
+
+    ./bin/AddHodoInfo -s ../DAQ/rec_capture_1102_reco.root  -b ../DAQ/hodoscope/1102/?.root,../DAQ/hodoscope/1102/??.root,../DAQ/hodoscope/1102/???.root  -o  ../DAQ/rec_capture_1102_reco_beam.root
+
+    ./bin/AddHodoInfo -s ../DAQ/rec_capture_1098_reco.root  -b ../DAQ/hodoscope/1098/?.root,../DAQ/hodoscope/1098/??.root,../DAQ/hodoscope/1098/???.root  -o  ../DAQ/rec_capture_1098_reco_beam.root
+    
+    
+    

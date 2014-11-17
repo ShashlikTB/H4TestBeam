@@ -37,25 +37,50 @@ const int NMODULES=16;
 /*    16, 21.0, -21.0 */
 /* }; */
 
+
+# define MODULEWIDTH   14
+# define HALFMODULEWIDTH   7
+
 /// Approximate postions of module centers, relative to center of the detector in mm
 const double MODULEXY[]={
-  1, -21.0,  21.0,
-  2,  -7.0,  21.0,
-  3,   7.0,  21.0,
-  4,  21.0,  21.0,
-  5, -21.0,   7.0,
-  6,  -7.0,   7.0,
-  7,   7.0,   7.0,
-  8,  21.0,   7.0,
-  9, -21.0,  -7.0,
-  10,  -7.0,  -7.0,
-  11,   7.0,  -7.0,
-  12,  21.0,  -7.0,
-  13, -21.0, -21.0,
-  14,  -7.0, -21.0,
-  15,   7.0, -21.0,
-  16,  21.0, -21.0,
-  };
+  1, -3*HALFMODULEWIDTH,  3*HALFMODULEWIDTH,
+  2, -1*HALFMODULEWIDTH,  3*HALFMODULEWIDTH,
+  3,  1*HALFMODULEWIDTH,  3*HALFMODULEWIDTH,
+  4,  3*HALFMODULEWIDTH,  3*HALFMODULEWIDTH,
+//   
+  5, -3*HALFMODULEWIDTH,  1*HALFMODULEWIDTH,
+  6, -1*HALFMODULEWIDTH,  1*HALFMODULEWIDTH,
+  7,  1*HALFMODULEWIDTH,  1*HALFMODULEWIDTH,
+  8,  3*HALFMODULEWIDTH,  1*HALFMODULEWIDTH,
+//   
+  9, -3*HALFMODULEWIDTH, -1*HALFMODULEWIDTH,
+  10,-1*HALFMODULEWIDTH, -1*HALFMODULEWIDTH,
+  11, 1*HALFMODULEWIDTH, -1*HALFMODULEWIDTH,
+  12, 3*HALFMODULEWIDTH, -1*HALFMODULEWIDTH,
+//   
+  13,-3*HALFMODULEWIDTH, -3*HALFMODULEWIDTH,
+  14,-1*HALFMODULEWIDTH, -3*HALFMODULEWIDTH,
+  15, 1*HALFMODULEWIDTH, -3*HALFMODULEWIDTH,
+  16, 3*HALFMODULEWIDTH, -3*HALFMODULEWIDTH,
+// 
+//   1, -21.0,  21.0,
+//   2,  -7.0,  21.0,
+//   3,   7.0,  21.0,
+//   4,  21.0,  21.0,
+//   5, -21.0,   7.0,
+//   6,  -7.0,   7.0,
+//   7,   7.0,   7.0,
+//   8,  21.0,   7.0,
+//   9, -21.0,  -7.0,
+//   10,  -7.0,  -7.0,
+//   11,   7.0,  -7.0,
+//   12,  21.0,  -7.0,
+//   13, -21.0, -21.0,
+//   14,  -7.0, -21.0,
+//   15,   7.0, -21.0,
+//   16,  21.0, -21.0,
+//   
+};
 
 
 

@@ -5,7 +5,7 @@
 //---- kindly provided by CeF3TB group
 //---- Author: Francesco Pandolfi
 
-
+//---- units here is "mm"
 void HodoCluster::addFibre( int i ) {
  
  float xmin = 0.5*(hodoTotFibres_-1)*fibreWidth_;

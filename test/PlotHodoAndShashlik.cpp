@@ -6,6 +6,8 @@
 #include "TTreeFormula.h"
 #include "TCanvas.h"
 
+#include "TLine.h"
+
 #include <iostream>
 #include <fstream>
 
@@ -34,6 +36,29 @@
 #define hodoX2 2
 #define hodoY2 3
 
+
+//---- draw shashlik matrix
+
+void DrawShashlikModule(TPad* cc){
+ 
+ cc->cd();
+ for (int i=0; i<5; i++) {
+//   TString name = Form ("vert_%d",i);
+//   TLine* vert = new TLine (name.Data(),i*14-28,-28,i*14-28,28);
+  TLine* vert = new TLine (i*14-28,-28,i*14-28,28);
+  vert->SetLineColor(kRed);
+  vert->DrawClone("same");
+ }
+
+ for (int i=0; i<5; i++) {
+//   TString name = Form ("oriz_%d",i);
+//   TLine* oriz = new TLine (name.Data(),-28,i*14-28,28,i*14-28);
+  TLine* oriz = new TLine (-28,i*14-28,28,i*14-28);
+  oriz->SetLineColor(kRed);
+  oriz->DrawClone("same");
+ }
+ 
+}
 
 
 
@@ -109,11 +134,11 @@ std::vector<HodoCluster*> getHodoClusters( std::vector<int> hodo) {
 
 
 //---- Reconstruct Hodoscope clusters
-void doHodoReconstruction( std::vector<int> input_values, std::vector<int>& nFibres, std::vector<float>& cluster_position) {
+void doHodoReconstruction( std::vector<int> input_values, std::vector<int>& nFibres, std::vector<float>& cluster_position, float table) {
  std::vector<HodoCluster*> clusters = getHodoClusters( input_values );
  for( unsigned i=0; i<clusters.size(); ++i ) {
   nFibres.push_back( clusters[i]->getSize() );
-  cluster_position.push_back( clusters[i]->getPosition() );
+  cluster_position.push_back( clusters[i]->getPosition() - table );
  }
 }
 
@@ -245,10 +270,12 @@ int main(int argc, char**argv){
  std::string input_file;
  int maxEvents = -1;
  int doFiber = 0;
+ float table_x = 200; //---- mm
+ float table_y = 350; //---- mm
  //---- configuration
  
  int c;
- while ((c = getopt (argc, argv, "i:m:f:")) != -1)
+ while ((c = getopt (argc, argv, "i:m:f:x:y:")) != -1)
   switch (c)
   {
    case 'i': //---- input
@@ -260,9 +287,15 @@ int main(int argc, char**argv){
    case 'f':
     doFiber =  atoi(optarg);
     break;
+   case 'x':
+    table_x =  atof(optarg);
+    break;
+   case 'y':
+    table_y =  atof(optarg);
+    break;
     
    case '?':
-    if (optopt == 'i' || optopt == 'm' || optopt == 'f')
+    if (optopt == 'i' || optopt == 'm' || optopt == 'f' || optopt == 'x' || optopt == 'y')
      fprintf (stderr, "Option -%c requires an argument.\n", optopt);
     else if (isprint (optopt))
      fprintf (stderr, "Unknown option `-%c'.\n", optopt);
@@ -275,6 +308,9 @@ int main(int argc, char**argv){
     exit (-1);
   }
   
+  std::cout << " Table: " << std::endl;
+  std::cout << "   x = " << table_x << " mm " << std::endl;
+  std::cout << "   y = " << table_y << " mm " << std::endl;
   
   
   //---- get vector of files
@@ -387,8 +423,8 @@ int main(int argc, char**argv){
    hHS_Cal_back_module   = new TH2F("hHS_Cal_back_module",  "Cal back " , 24, -28, 28, 24, -28, 28);
   }
   else {
-   hHS_Cal_front  = new TH2F("hHS_Cal_front", "Cal front ", 144, -28, 28, 144, -28, 28);
-   hHS_Cal_back   = new TH2F("hHS_Cal_back",  "Cal back " , 144, -28, 28, 144, -28, 28);
+   hHS_Cal_front  = new TH2F("hHS_Cal_front", "Cal front ", 72, -28, 28, 72, -28, 28);
+   hHS_Cal_back   = new TH2F("hHS_Cal_back",  "Cal back " , 72, -28, 28, 72, -28, 28);
    
    hHS_Cal_front_module  = new TH2F("hHS_Cal_front_module", "Cal front ", 12, -28, 28, 12, -28, 28);
    hHS_Cal_back_module   = new TH2F("hHS_Cal_back_module",  "Cal back " , 12, -28, 28, 12, -28, 28);
@@ -409,7 +445,7 @@ int main(int argc, char**argv){
   
   for (int i=0; i<nEntries; i++) {
    
-   if ((i%100)==0) {
+   if ((i%1000)==0) {
     std::cout <<  " entry: " << i << "::" << nEntries << std::endl;
    }
    
@@ -465,16 +501,17 @@ int main(int argc, char**argv){
    std::vector <int> n_fibers_Y1;
    std::vector <int> n_fibers_Y2;
    
-   std::vector <float> pos_fibers_X1;
-   std::vector <float> pos_fibers_X2;
-   std::vector <float> pos_fibers_Y1;
-   std::vector <float> pos_fibers_Y2;
+   std::vector <float> pos_fibers_X1; //---- units is mm
+   std::vector <float> pos_fibers_X2; //---- units is mm
+   std::vector <float> pos_fibers_Y1; //---- units is mm
+   std::vector <float> pos_fibers_Y2; //---- units is mm
    
    
-   doHodoReconstruction( fibers_X1, n_fibers_X1, pos_fibers_X1 );
-   doHodoReconstruction( fibers_X2, n_fibers_X2, pos_fibers_X2 );
-   doHodoReconstruction( fibers_Y1, n_fibers_Y1, pos_fibers_Y1 );
-   doHodoReconstruction( fibers_Y2, n_fibers_Y2, pos_fibers_Y2 );
+   //----                                                  table position in mm
+   doHodoReconstruction( fibers_X1, n_fibers_X1, pos_fibers_X1, (table_x - 200)); //---- change of coordinate system using numbers from googledoc
+   doHodoReconstruction( fibers_X2, n_fibers_X2, pos_fibers_X2, (table_x - 200)); //---- change of coordinate system using numbers from googledoc
+   doHodoReconstruction( fibers_Y1, n_fibers_Y1, pos_fibers_Y1, (table_y - 350)); //---- change of coordinate system using numbers from googledoc
+   doHodoReconstruction( fibers_Y2, n_fibers_Y2, pos_fibers_Y2, (table_y - 350)); //---- change of coordinate system using numbers from googledoc
    
    //---- just hodoscope information
    for (int iCluster1 = 0; iCluster1 < pos_fibers_X1.size(); iCluster1++) {
@@ -591,6 +628,7 @@ int main(int argc, char**argv){
     
   }
   
+  TPad* tempPad;
   
   //---- plot ----
   cc_hodo->Divide(2,2);
@@ -613,11 +651,15 @@ int main(int argc, char**argv){
   hHS_HS1->Draw("colz");
   hHS_HS1->GetXaxis()->SetTitle("X");
   hHS_HS1->GetYaxis()->SetTitle("Y");
+  tempPad = (TPad*) gPad;
+  DrawShashlikModule(tempPad);
   
   cc_hodo->cd(4)->SetGrid();
   hHS_HS2->Draw("colz");
   hHS_HS2->GetXaxis()->SetTitle("X");
   hHS_HS2->GetYaxis()->SetTitle("Y");
+  tempPad = (TPad*) gPad;
+  DrawShashlikModule(tempPad);
   
   
   
@@ -628,21 +670,29 @@ int main(int argc, char**argv){
   hHS_Cal_front->Draw("colz");
   hHS_Cal_front->GetXaxis()->SetTitle("cal X");
   hHS_Cal_front->GetYaxis()->SetTitle("cal Y");
+  tempPad = (TPad*) gPad;
+  DrawShashlikModule(tempPad);
   
   cc_Cal->cd(2)->SetGrid();
   hHS_Cal_back->Draw("colz");
   hHS_Cal_back->GetXaxis()->SetTitle("cal X");
   hHS_Cal_back->GetYaxis()->SetTitle("cal Y");
+  tempPad = (TPad*) gPad;
+  DrawShashlikModule(tempPad);
   
-  cc_Cal->cd(3)->SetGrid();
+  cc_Cal->cd(3);
   hHS_Cal_front_module->Draw("colz");
   hHS_Cal_front_module->GetXaxis()->SetTitle("cal X");
   hHS_Cal_front_module->GetYaxis()->SetTitle("cal Y");
+  tempPad = (TPad*) gPad;
+  DrawShashlikModule(tempPad);
   
-  cc_Cal->cd(4)->SetGrid();
+  cc_Cal->cd(4);
   hHS_Cal_back_module->Draw("colz");
   hHS_Cal_back_module->GetXaxis()->SetTitle("cal X");
   hHS_Cal_back_module->GetYaxis()->SetTitle("cal Y");
+  tempPad = (TPad*) gPad;
+  DrawShashlikModule(tempPad);
   
 
   

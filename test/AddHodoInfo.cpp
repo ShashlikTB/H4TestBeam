@@ -379,13 +379,14 @@ int main(int argc, char**argv){
    //---- then we need to skip the matching for this PADE event
    //---- and iBeam_Position_within_one_spill is *not* increased
    //---- do this if we are not at the beginning of a new spill: new_spill_has_been_started != 0
-   if (spillNumber == Beam_spillNumber_old) {
-    if ((new_spill_has_been_started == 0) && (Beam_eventNumber_old != -1) && (evtNumber != (Beam_eventNumber_old+1))) {
+   if (spillNumber == Beam_spillNumber_old) {//----                                                              if a shashlik event is dropped, then is expected a jump in beam data
+    if ((new_spill_has_been_started == 0) && (Beam_eventNumber_old != -1) && (evtNumber != (Beam_eventNumber_old+1+delta_event_in_Shashlik))) {
      std::cout << " [attention] Beam data was skipped: " << evtNumber << " != ( " << Beam_eventNumber_old << " +1) in :: [spill shashlik = " << Shashlik_spillNumber << " ][shashlik Event = " << i << " :: " << Shashlik_eventNumber << "]" << std::endl;
      //---- skip (evtNumber-(Beam_eventNumber_old+1)) events, because those are the evetns skipped by beam data
      Beam_eventNumber_old = Beam_eventNumber_old+1;
     }
     else {   
+     std::cout << " merged[spill:" << spillNumber << "]: Shashlik_eventNumber:Beam_evtNumber-1 = " << Shashlik_eventNumber << " : " << evtNumber-1 << std::endl;
      Beam_eventNumber_old = evtNumber;
      //---- if the beam moved to the next spill, fill the tree but not set hodoscope data
      //---- then the default values will appear, and we can filter a posteriori if needed

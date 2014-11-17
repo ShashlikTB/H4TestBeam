@@ -206,6 +206,14 @@ int main(int argc, char**argv){
   TH2F *num_hHS_HS2_HS1_X  = new TH2F("num_hHS_HS2_HS1_X", "Hodoscope 2 vs Hodoscope 1 X", 10, 0, 10 , 10, 0, 10 );
   TH2F *num_hHS_HS2_HS1_Y  = new TH2F("num_hHS_HS2_HS1_Y", "Hodoscope 2 vs Hodoscope 1 Y", 10, 0, 10 , 10, 0, 10 );
   
+
+  TCanvas* cc_D = new TCanvas ("cc_D","",800,400);
+  
+  TH1F *X_h1_HS2_HS1  = new TH1F("X_h1_HS2_HS1", "X Hodoscope 1 vs Hodoscope 2 ", 128, -8, 8);
+  TH1F *Y_h1_HS2_HS1  = new TH1F("Y_h1_HS2_HS1", "Y Hodoscope 1 vs Hodoscope 2 ", 128, -8, 8);
+  
+  
+  
   
   for (int i=0; i<nEntries; i++) {
    
@@ -247,13 +255,15 @@ int main(int argc, char**argv){
    for (int iCluster1 = 0; iCluster1 < pos_fibers_X1.size(); iCluster1++) {
     for (int iCluster2 = 0; iCluster2 < pos_fibers_X2.size(); iCluster2++) {
      hHS_HS2_HS1_X->Fill(pos_fibers_X1.at(iCluster1),pos_fibers_X2.at(iCluster2));
-     std::cout << " pos_fibers_X:: " << pos_fibers_X1.at(iCluster1) << " :: " << pos_fibers_X2.at(iCluster2) << std::endl;
+     X_h1_HS2_HS1->Fill(pos_fibers_X1.at(iCluster1) - pos_fibers_X2.at(iCluster2));
+//      std::cout << " pos_fibers_X:: " << pos_fibers_X1.at(iCluster1) << " :: " << pos_fibers_X2.at(iCluster2) << std::endl;
     }
    }
    
    for (int iCluster1 = 0; iCluster1 < pos_fibers_Y1.size(); iCluster1++) {
     for (int iCluster2 = 0; iCluster2 < pos_fibers_Y2.size(); iCluster2++) {
      hHS_HS2_HS1_Y->Fill(pos_fibers_Y1.at(iCluster1),pos_fibers_Y2.at(iCluster2));
+     Y_h1_HS2_HS1->Fill(pos_fibers_Y1.at(iCluster1) - pos_fibers_Y2.at(iCluster2));
     }
    }
    
@@ -288,6 +298,34 @@ int main(int argc, char**argv){
   num_hHS_HS2_HS1_Y->GetXaxis()->SetTitle("number of clusters 1");
   num_hHS_HS2_HS1_Y->GetYaxis()->SetTitle("number of clusters 2");
   //   fxy->Draw("same");  
+  
+  
+  cc_D->Divide(2,1);
+  
+  TF1* fgaus = new TF1("fgaus","gaus(0)+pol0(3)",-4,4);
+  fgaus->SetParameter(1,1);
+  fgaus->SetParameter(2,0.1);
+  
+  
+  cc_D->cd(1)->SetGrid();
+  X_h1_HS2_HS1->Draw();
+  X_h1_HS2_HS1->GetXaxis()->SetTitle("X1-X2");
+  fgaus->SetParameter(0,X_h1_HS2_HS1->GetEntries());
+//   fgaus->SetParameter(1,X_h1_HS2_HS1->GetMean());
+  fgaus->SetParameter(1,X_h1_HS2_HS1->GetBinCenter(X_h1_HS2_HS1->GetMaximumBin()));
+  fgaus->SetParameter(2,X_h1_HS2_HS1->GetRMS()/10.);
+  X_h1_HS2_HS1->Fit("fgaus","RM");
+
+  cc_D->cd(2)->SetGrid();
+  Y_h1_HS2_HS1->Draw();
+  Y_h1_HS2_HS1->GetXaxis()->SetTitle("Y1-Y2");
+  fgaus->SetParameter(0,Y_h1_HS2_HS1->GetEntries());
+  fgaus->SetParameter(1,Y_h1_HS2_HS1->GetBinCenter(Y_h1_HS2_HS1->GetMaximumBin()));
+  fgaus->SetParameter(2,Y_h1_HS2_HS1->GetRMS()/10.);
+  Y_h1_HS2_HS1->Fit("fgaus","RM");
+  
+  
+  
   
   gMyRootApp->Run(); 
   

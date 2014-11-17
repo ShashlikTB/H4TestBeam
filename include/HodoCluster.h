@@ -5,6 +5,7 @@
 //---- kindly provided by CeF3TB group
 //---- Author: Francesco Pandolfi
 
+//---- units here is "mm"
 class HodoCluster {
  
 public:
