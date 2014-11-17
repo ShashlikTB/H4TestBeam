@@ -363,11 +363,13 @@ int main(int argc, char**argv){
   
   
   
-  TCanvas* cc_hodo = new TCanvas ("cc_hodo","",800,400);
+  TCanvas* cc_hodo = new TCanvas ("cc_hodo","",800,800);
   
   TH2F *hHS_HS2_HS1_X  = new TH2F("hHS_HS2_HS1_X", "Hodoscope 2 vs Hodoscope 1 X", 64, -32, 32, 64, -32, 32);
   TH2F *hHS_HS2_HS1_Y  = new TH2F("hHS_HS2_HS1_Y", "Hodoscope 2 vs Hodoscope 1 Y", 64, -32, 32, 64, -32, 32);
     
+  TH2F *hHS_HS1  = new TH2F("hHS_HS1", "Hodoscope 1", 64, -32, 32, 64, -32, 32);
+  TH2F *hHS_HS2  = new TH2F("hHS_HS2", "Hodoscope 2", 64, -32, 32, 64, -32, 32);
   
   TCanvas* cc_Cal = new TCanvas ("cc_Cal","",800,800);
   
@@ -488,6 +490,20 @@ int main(int argc, char**argv){
     }
    }
    
+   for (int iCluster1 = 0; iCluster1 < pos_fibers_X1.size(); iCluster1++) {
+    for (int iCluster2 = 0; iCluster2 < pos_fibers_Y1.size(); iCluster2++) {
+     hHS_HS1->Fill(pos_fibers_X1.at(iCluster1),pos_fibers_Y1.at(iCluster2));
+    }
+   }
+
+   for (int iCluster1 = 0; iCluster1 < pos_fibers_X2.size(); iCluster1++) {
+    for (int iCluster2 = 0; iCluster2 < pos_fibers_Y2.size(); iCluster2++) {
+     hHS_HS2->Fill(pos_fibers_X2.at(iCluster1),pos_fibers_Y2.at(iCluster2));
+    }
+   }
+   
+   
+   
    
    //---- now merge and compare
    if (pos_fibers_X1.size() > 1) {
@@ -577,7 +593,7 @@ int main(int argc, char**argv){
   
   
   //---- plot ----
-  cc_hodo->Divide(2,1);
+  cc_hodo->Divide(2,2);
   TF1* fxy = new TF1 ("fxy","x",-20,20);
   
   cc_hodo->cd(1)->SetGrid();
@@ -591,6 +607,18 @@ int main(int argc, char**argv){
   hHS_HS2_HS1_Y->GetXaxis()->SetTitle("Y1");
   hHS_HS2_HS1_Y->GetYaxis()->SetTitle("Y2");
   fxy->Draw("same");
+  
+  
+  cc_hodo->cd(3)->SetGrid();
+  hHS_HS1->Draw("colz");
+  hHS_HS1->GetXaxis()->SetTitle("X");
+  hHS_HS1->GetYaxis()->SetTitle("Y");
+  
+  cc_hodo->cd(4)->SetGrid();
+  hHS_HS2->Draw("colz");
+  hHS_HS2->GetXaxis()->SetTitle("X");
+  hHS_HS2->GetYaxis()->SetTitle("Y");
+  
   
   
   
