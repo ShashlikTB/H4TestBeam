@@ -34,6 +34,10 @@ public:
  void doCalorimeterReconstruction( std::vector<TBRecHit>* rechits, int face, float maxDR, int fiberLevel = 0);
  
  void setW0(float w0) { _w0 = w0; };
+ void setMapperEpoch(ULong64_t timestamp) { _mapper->SetEpoch(timestamp); };
+ 
+ 
+ 
  
 private:
  

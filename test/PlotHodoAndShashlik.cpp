@@ -29,6 +29,7 @@
 #include "include/TBRecHit.h"
 #include "include/Mapper.h"
 
+#include "include/CaloCluster.h"
 
 
 #define hodoX1 0
@@ -152,7 +153,7 @@ float DR (float x1, float x2, float y1, float y2) {
 
 
 
-
+/*
 
 //---- Reconstruct Calorimeter clusters
 void doCalorimeterReconstruction( Mapper* mapper,  std::vector<TBRecHit>* rechits, std::vector<float>& caloCluster_position_X, std::vector<float>& caloCluster_position_Y, std::vector<float>& caloCluster_Energy, int face, float maxDR, int fiberLevel = 0) {
@@ -262,7 +263,7 @@ void doCalorimeterReconstruction( Mapper* mapper,  std::vector<TBRecHit>* rechit
  }
  
 //  std::cout << " num_clusters = " << num_clusters << std::endl;
-} 
+} */
   
 
 int main(int argc, char**argv){
@@ -443,6 +444,8 @@ int main(int argc, char**argv){
   
   Mapper *mapper = Mapper::Instance();
   
+  CaloCluster* caloCluster = new CaloCluster();
+  
   for (int i=0; i<nEntries; i++) {
    
    if ((i%1000)==0) {
@@ -452,21 +455,30 @@ int main(int argc, char**argv){
    H4tree->GetEntry(i);
    
    //---- calorimeter data
-   if (i==0) mapper->SetEpoch(tbevent->GetTimeStamp());
+   if (i==0) caloCluster->setMapperEpoch(tbevent->GetTimeStamp());
 
    std::vector<float> caloCluster_position_X_front;
    std::vector<float> caloCluster_position_Y_front;
    std::vector<float> caloCluster_Energy_front;
    
-   doCalorimeterReconstruction( mapper, rechits, caloCluster_position_X_front, caloCluster_position_Y_front, caloCluster_Energy_front, 1, 30, doFiber);    
-    
+   caloCluster->doCalorimeterReconstruction( rechits, 1, 30, doFiber);
+   
+   caloCluster_position_X_front.push_back( caloCluster->getPositionX() );
+   caloCluster_position_Y_front.push_back( caloCluster->getPositionY() );
+   caloCluster_Energy_front.push_back( caloCluster->getEnergy() );
+   
+   
    std::vector<float> caloCluster_position_X_back;
    std::vector<float> caloCluster_position_Y_back;
    std::vector<float> caloCluster_Energy_back;
    
-   doCalorimeterReconstruction( mapper, rechits, caloCluster_position_X_back, caloCluster_position_Y_back, caloCluster_Energy_back, -1, 30, doFiber);
-    
- 
+   
+   caloCluster->doCalorimeterReconstruction( rechits, -1, 30, doFiber);
+   
+   caloCluster_position_X_back.push_back( caloCluster->getPositionX() );
+   caloCluster_position_Y_back.push_back( caloCluster->getPositionY() );
+   caloCluster_Energy_back.push_back( caloCluster->getEnergy() );
+   
    
    
    //---- modular level DR = 5 mm
@@ -474,13 +486,24 @@ int main(int argc, char**argv){
    std::vector<float> caloCluster_position_Y_front_module;
    std::vector<float> caloCluster_Energy_front_module;
    
-   doCalorimeterReconstruction( mapper, rechits, caloCluster_position_X_front_module, caloCluster_position_Y_front_module, caloCluster_Energy_front_module, 1, 5, doFiber);    
+   caloCluster->doCalorimeterReconstruction( rechits, 1, 5, doFiber);
+
+   caloCluster_position_X_front_module.push_back( caloCluster->getPositionX() );
+   caloCluster_position_Y_front_module.push_back( caloCluster->getPositionY() );
+   caloCluster_Energy_front_module.push_back( caloCluster->getEnergy() );
+      
    
    std::vector<float> caloCluster_position_X_back_module;
    std::vector<float> caloCluster_position_Y_back_module;
    std::vector<float> caloCluster_Energy_back_module;
    
-   doCalorimeterReconstruction( mapper, rechits, caloCluster_position_X_back_module, caloCluster_position_Y_back_module, caloCluster_Energy_back_module, -1, 5, doFiber);
+   caloCluster->doCalorimeterReconstruction( rechits, -1, 5, doFiber);
+   
+   caloCluster_position_X_back_module.push_back( caloCluster->getPositionX() );
+   caloCluster_position_Y_back_module.push_back( caloCluster->getPositionY() );
+   caloCluster_Energy_back_module.push_back( caloCluster->getEnergy() );
+
+
    
    
    //---- hodoscope data
