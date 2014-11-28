@@ -7,6 +7,13 @@ Automatic script to add Hodoscope information
     ls ../DAQ/rec_capture_*_reco.root | sed s:../DAQ/rec_capture_:: | sed s/_reco.root// | awk '{print "./bin/AddHodoInfo -s ../DAQ/rec_capture_"$1"_reco.root  -b ../DAQ/hodoscope/"$1"/?.root,../DAQ/hodoscope/"$1"/??.root,../DAQ/hodoscope/"$1"/???.root  -o  ../DAQ/rec_capture_"$1"_reco_beam.root"}'
 
     
+Add Table position and energy information
+====
+
+    ./bin/AddInformation -i ../DAQ/rec_capture_1098_reco_beam.root -o rec_capture_1098_reco_beam_table_energy.root
+
+    ./bin/PlotHodoAndShashlik -i rec_capture_1098_reco_beam_table_energy.root
+    
 Plot Hodoscope information
 ====
 
@@ -38,6 +45,9 @@ Plot Hodoscope and Shashlik information
     ./bin/PlotHodoAndShashlik -i ../DAQ/rec_capture_1101_reco_beam.root   -f  0   -x 207.25  -y   357.25
         
     ./bin/PlotHodoAndShashlik -i ../DAQ/rec_capture_1098_reco_beam.root   -f  0   -x 178.25  -y   357.25
+
+    
+    ./bin/PlotHodoAndShashlik -i rec_capture_1098_reco_beam_table_energy.root   -f  0
 
     
     
