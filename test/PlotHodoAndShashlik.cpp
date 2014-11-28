@@ -442,7 +442,7 @@ int main(int argc, char**argv){
    haverechits = true;
   }
   
-  Mapper *mapper = Mapper::Instance();
+//   Mapper *mapper = Mapper::Instance();
   
   CaloCluster* caloCluster = new CaloCluster();
   
@@ -453,6 +453,17 @@ int main(int argc, char**argv){
    }
    
    H4tree->GetEntry(i);
+   
+   if (i == 0) {
+    table_x = tbspill->GetTableX();
+    table_y = tbspill->GetTableY();
+    std::cout << " Table: " << std::endl;
+    std::cout << "   x = " << table_x << " mm " << std::endl;
+    std::cout << "   y = " << table_y << " mm " << std::endl;
+   }
+   
+   
+   
    
    //---- calorimeter data
    if (i==0) caloCluster->setMapperEpoch(tbevent->GetTimeStamp());

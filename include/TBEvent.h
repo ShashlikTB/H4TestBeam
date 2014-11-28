@@ -79,6 +79,10 @@ class TBSpill : public TObject {
   Int_t GetPID() const {return _pdgID;}
   Float_t GetMomentum() const {return _nomMomentum;}
   Int_t NPades() const {return _padeHeader.size();}
+
+  void SetTableX(float tableX) { _tableX = tableX; }
+  void SetTableY(float tableY) { _tableY = tableY; }
+  
   void Dump() const;
   /// index 0:n-1 
   PadeHeader const* GetPadeHeader(Int_t i) {
