@@ -455,8 +455,11 @@ int main(int argc, char**argv){
    H4tree->GetEntry(i);
    
    if (i == 0) {
-    table_x = tbspill->GetTableX();
-    table_y = tbspill->GetTableY();
+    float table_x_shift = tbspill->GetTableX();
+    float table_y_shift = tbspill->GetTableY();
+    
+    table_x = table_x - table_x_shift;
+    table_y = table_y - table_y_shift;
     std::cout << " Table: " << std::endl;
     std::cout << "   x = " << table_x << " mm " << std::endl;
     std::cout << "   y = " << table_y << " mm " << std::endl;
@@ -731,10 +734,13 @@ int main(int argc, char**argv){
 
   
   
-  TF1* fgaus = new TF1("fgaus","gaus(0)+pol0(3)",0,4);
-  fgaus->SetParameter(1,1);
+  TF1* fgaus = new TF1("fgaus","gaus(0)+pol2(3)",-10,10);
+  fgaus->SetParameter(0,10);
+  fgaus->SetParameter(1,0.0);
   fgaus->SetParameter(2,0.5);
   
+  fgaus->SetParameter(4,0.0);
+  fgaus->SetParameter(5,0.0);
   
   cc_DX->Divide(4,2);
   cc_DX->cd(1)->SetGrid();
@@ -761,14 +767,17 @@ int main(int argc, char**argv){
   cc_DX->cd(3)->SetGrid();
   X_h1_HS1_Cal_front->Draw();
   X_h1_HS1_Cal_front->GetXaxis()->SetTitle("calo - hodoscope");
+  X_h1_HS1_Cal_front->Fit("fgaus","R");
   
   cc_DX->cd(4)->SetGrid();
   X_h1_HS2_Cal_front->Draw();
   X_h1_HS2_Cal_front->GetXaxis()->SetTitle("calo - hodoscope");
+  X_h1_HS2_Cal_front->Fit("fgaus","R");
   
   cc_DX->cd(7)->SetGrid();
   X_h1_HS1_Cal_back->Draw();
   X_h1_HS1_Cal_back->GetXaxis()->SetTitle("calo - hodoscope");
+  X_h1_HS1_Cal_back->Fit("fgaus","R");
   
   cc_DX->cd(8)->SetGrid();
   X_h1_HS2_Cal_back->Draw();
@@ -832,18 +841,22 @@ int main(int argc, char**argv){
   cc_DY->cd(3)->SetGrid();
   Y_h1_HS1_Cal_front->Draw();
   Y_h1_HS1_Cal_front->GetXaxis()->SetTitle("calo - hodoscope");
+  Y_h1_HS1_Cal_front->Fit("fgaus","R");
   
   cc_DY->cd(4)->SetGrid();
   Y_h1_HS2_Cal_front->Draw();
   Y_h1_HS2_Cal_front->GetXaxis()->SetTitle("calo - hodoscope");
+  Y_h1_HS2_Cal_front->Fit("fgaus","R");
   
   cc_DY->cd(7)->SetGrid();
   Y_h1_HS1_Cal_back->Draw();
   Y_h1_HS1_Cal_back->GetXaxis()->SetTitle("calo - hodoscope");
+  Y_h1_HS1_Cal_back->Fit("fgaus","R");
   
   cc_DY->cd(8)->SetGrid();
   Y_h1_HS2_Cal_back->Draw();
   Y_h1_HS2_Cal_back->GetXaxis()->SetTitle("calo - hodoscope");
+  Y_h1_HS2_Cal_back->Fit("fgaus","R");
   
   
   

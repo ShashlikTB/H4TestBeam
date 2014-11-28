@@ -31,11 +31,15 @@
 
 #include "include/CaloCluster.h"
 
+#include "include/HodoscopeMap.h"
+
 
 #define hodoX1 0
 #define hodoY1 1
 #define hodoX2 2
 #define hodoY2 3
+
+
 
 
 //---- draw shashlik matrix
@@ -254,6 +258,8 @@ int main(int argc, char**argv){
   TH1F *Y_h1_HS1_Cal_back   = new TH1F("Y_h1_HS1_Cal_back",  "Y Hodoscope 1 vs Cal back " , 256, -32, 32);
   TH1F *Y_h1_HS2_Cal_back   = new TH1F("Y_h1_HS2_Cal_back",  "Y Hodoscope 2 vs Cal back " , 256, -32, 32);
   
+  TH1F *Energy_Cal_back   = new TH1F("Energy_Cal_back",  "Energy Cal back " , 3000, 0, 300000);
+  TH1F *Energy_Cal_front  = new TH1F("Energy_Cal_front", "Energy Cal front" , 3000, 0, 300000);
   
   
   bool haverechits = false;
@@ -304,6 +310,7 @@ int main(int argc, char**argv){
    std::vector<float> caloCluster_position_Y_front;
    std::vector<float> caloCluster_Energy_front;
    
+//    void doCalorimeterReconstruction( std::vector<TBRecHit>* rechits, int face, float maxDR, int fiberLevel = 0);
    caloCluster->doCalorimeterReconstruction( rechits, 1, 30, doFiber);
    
    caloCluster_position_X_front.push_back( caloCluster->getPositionX() );
@@ -347,6 +354,16 @@ int main(int argc, char**argv){
    caloCluster_Energy_back_module.push_back( caloCluster->getEnergy() );
 
 
+   
+   for (unsigned int iEnergy = 0; iEnergy<caloCluster_Energy_back.size(); iEnergy++) {
+    Energy_Cal_back->Fill(caloCluster_Energy_back.at(iEnergy));
+//     std::cout << " caloCluster_Energy_back.at(" << iEnergy << ") = " << caloCluster_Energy_back.at(iEnergy) << std::endl;
+   }
+   for (unsigned int iEnergy = 0; iEnergy<caloCluster_Energy_front.size(); iEnergy++) {
+    Energy_Cal_front->Fill(caloCluster_Energy_front.at(iEnergy));
+   }
+   
+   
    
    
    //---- hodoscope data
@@ -425,20 +442,57 @@ int main(int argc, char**argv){
   
 
   //---- calculate the shifts in x and y
-  float x1_shift = X_h1_HS1_Cal_front->GetBinCenter(X_h1_HS1_Cal_front->GetMaximumBin());
-  float x2_shift = X_h1_HS2_Cal_front->GetBinCenter(X_h1_HS2_Cal_front->GetMaximumBin());
+//   float x1_shift = X_h1_HS1_Cal_front->GetBinCenter(X_h1_HS1_Cal_front->GetMaximumBin());
+//   float x2_shift = X_h1_HS2_Cal_front->GetBinCenter(X_h1_HS2_Cal_front->GetMaximumBin());
+  float x1_shift = X_h1_HS1_Cal_back->GetBinCenter(X_h1_HS1_Cal_back->GetMaximumBin());  //----> trust more the back side
+  float x2_shift = X_h1_HS2_Cal_back->GetBinCenter(X_h1_HS2_Cal_back->GetMaximumBin());
   
   float average_x_shift = (x1_shift + x2_shift) / 2.;
+  average_x_shift = x2_shift; //---- use only hodoscope 1
   
-  float y1_shift = Y_h1_HS1_Cal_front->GetBinCenter(Y_h1_HS1_Cal_front->GetMaximumBin());
-  float y2_shift = Y_h1_HS2_Cal_front->GetBinCenter(Y_h1_HS2_Cal_front->GetMaximumBin());
+//   float y1_shift = Y_h1_HS1_Cal_front->GetBinCenter(Y_h1_HS1_Cal_front->GetMaximumBin());
+//   float y2_shift = Y_h1_HS2_Cal_front->GetBinCenter(Y_h1_HS2_Cal_front->GetMaximumBin());
+  float y1_shift = Y_h1_HS1_Cal_back->GetBinCenter(Y_h1_HS1_Cal_back->GetMaximumBin());
+  float y2_shift = Y_h1_HS2_Cal_back->GetBinCenter(Y_h1_HS2_Cal_back->GetMaximumBin());
   
   float average_y_shift = (y1_shift + y2_shift) / 2.;
+  average_y_shift = y2_shift; //---- use only hodoscope 1
   
+  
+  HodoscopeMap hodoMap;
+  std::pair<float, float> real_shift = hodoMap.GetCloser(average_x_shift, average_y_shift);
+
+  std::cout << " -------------------- " << std::endl;
+  std::cout << " Table position shift " << std::endl;
+  std::cout << " average_x_shift = " << average_x_shift << std::endl;
+  std::cout << " average_y_shift = " << average_y_shift << std::endl;
+  std::cout << " -- " << std::endl;
+  std::cout << " real_x_shift = " << real_shift.first << std::endl;
+  std::cout << " real_y_shift = " << real_shift.second << std::endl;
   
   //--- now fill the new tree
   std::cout << " ============= " << std::endl;
   std::cout << " now filling the new tree ..." << std::endl;
+  
+  float energy_back  = Energy_Cal_back->GetBinCenter(Energy_Cal_back->GetMaximumBin());
+  float energy_front = Energy_Cal_front->GetBinCenter(Energy_Cal_front->GetMaximumBin());
+  std::cout << " Energy = " << energy_back << " , " << energy_front << std::endl;
+  
+  float real_energy = 0;
+  //---- transform in GeV
+  real_energy =  energy_front / 100.; //---- 50 GeV --> 5000 adc
+  //---- round to beam energy
+  float beamEnergies[6] = {10, 20, 50, 100, 150, 200};
+  float min_dEnergy = 10000;
+  int min_dEnergy_index = -1;
+  for (int iEnergy=0; iEnergy<6; iEnergy++) {
+   float temp_dEnergy = fabs(beamEnergies[iEnergy] - real_energy) ;
+   if (temp_dEnergy < min_dEnergy) {
+    min_dEnergy = temp_dEnergy;
+    min_dEnergy_index = iEnergy;
+   }
+  }
+  std::cout << " Energy [GeV] = " << real_energy << " --> " << beamEnergies[min_dEnergy_index] << std::endl;
   
   
   for (int i=0; i<nEntries; i++) {
@@ -449,8 +503,14 @@ int main(int argc, char**argv){
    
    H4tree->GetEntry(i);
    
-   tbspill -> SetTableX (table_x - average_x_shift);
-   tbspill -> SetTableY (table_y - average_y_shift);
+   ///---- update position
+   tbspill -> SetTableX (real_shift.first);
+   tbspill -> SetTableY (real_shift.second);   
+//    tbspill -> SetTableX (table_x - average_x_shift);
+//    tbspill -> SetTableY (table_y - average_y_shift);
+   
+   ///---- update momentum -> beam energy
+   tbspill -> SetMomentum(beamEnergies[min_dEnergy_index]);
    
    outtree->Fill(); 
   }

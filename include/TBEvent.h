@@ -82,6 +82,7 @@ class TBSpill : public TObject {
 
   void SetTableX(float tableX) { _tableX = tableX; }
   void SetTableY(float tableY) { _tableY = tableY; }
+  void SetMomentum(float nomMomentum) { _nomMomentum = nomMomentum;}
   
   void Dump() const;
   /// index 0:n-1 

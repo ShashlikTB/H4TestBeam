@@ -10,9 +10,24 @@ Automatic script to add Hodoscope information
 Add Table position and energy information
 ====
 
-    ./bin/AddInformation -i ../DAQ/rec_capture_1098_reco_beam.root -o rec_capture_1098_reco_beam_table_energy.root
+    ./bin/AddInformation -i ../DAQ/rec_capture_1098_reco_beam.root -o rec_capture_1098_reco_beam_table_energy.root    
+    ./bin/AddInformation -i ../DAQ/rec_capture_1102_reco_beam.root -o rec_capture_1102_reco_beam_table_energy.root
+    ./bin/AddInformation -i ../DAQ/rec_capture_1163_reco_beam.root -o rec_capture_1163_reco_beam_table_energy.root
+    ./bin/AddInformation -i ../DAQ/rec_capture_1164_reco_beam.root -o rec_capture_1164_reco_beam_table_energy.root
+    ./bin/AddInformation -i ../DAQ/rec_capture_1100_reco_beam.root -o rec_capture_1100_reco_beam_table_energy.root
+    ./bin/AddInformation -i ../DAQ/rec_capture_1101_reco_beam.root -o rec_capture_1101_reco_beam_table_energy.root
+    ./bin/AddInformation -i ../DAQ/rec_capture_1102_reco_beam.root -o rec_capture_1102_reco_beam_table_energy.root
+    ./bin/AddInformation -i ../DAQ/rec_capture_1081_reco_beam.root -o rec_capture_1081_reco_beam_table_energy.root
 
     ./bin/PlotHodoAndShashlik -i rec_capture_1098_reco_beam_table_energy.root
+    ./bin/PlotHodoAndShashlik -i rec_capture_1102_reco_beam_table_energy.root
+    ./bin/PlotHodoAndShashlik -i rec_capture_1163_reco_beam_table_energy.root
+    ./bin/PlotHodoAndShashlik -i rec_capture_1164_reco_beam_table_energy.root
+    ./bin/PlotHodoAndShashlik -i rec_capture_1100_reco_beam_table_energy.root
+    ./bin/PlotHodoAndShashlik -i rec_capture_1101_reco_beam_table_energy.root
+    ./bin/PlotHodoAndShashlik -i rec_capture_1102_reco_beam_table_energy.root
+    ./bin/PlotHodoAndShashlik -i rec_capture_1081_reco_beam_table_energy.root
+
     
 Plot Hodoscope information
 ====
@@ -90,5 +105,13 @@ test
 
     ./bin/AddHodoInfo -s ../DAQ/rec_capture_1098_reco.root  -b ../DAQ/hodoscope/1098/?.root,../DAQ/hodoscope/1098/??.root,../DAQ/hodoscope/1098/???.root  -o  ../DAQ/rec_capture_1098_reco_beam.root
     
+    ./bin/AddHodoInfo -s ../DAQ/rec_capture_1081_reco.root  -b ../DAQ/hodoscope/1081/?.root,../DAQ/hodoscope/1081/??.root,../DAQ/hodoscope/1081/???.root  -o  ../DAQ/rec_capture_1081_reco_beam.root
     
+    ./bin/AddHodoInfo -s ../DAQ/rec_capture_1164_reco.root  -b ../DAQ/hodoscope/1164/?.root,../DAQ/hodoscope/1164/??.root,../DAQ/hodoscope/1164/???.root  -o  ../DAQ/rec_capture_1164_reco_beam.root
+
+    ./bin/AddHodoInfo -s ../DAQ/rec_capture_1100_reco.root  -b ../DAQ/hodoscope/1100/?.root,../DAQ/hodoscope/1100/??.root,../DAQ/hodoscope/1100/???.root  -o  ../DAQ/rec_capture_1100_reco_beam.root
+
+    ./bin/AddHodoInfo -s ../DAQ/rec_capture_1101_reco.root  -b ../DAQ/hodoscope/1101/?.root,../DAQ/hodoscope/1101/??.root,../DAQ/hodoscope/1101/???.root  -o  ../DAQ/rec_capture_1101_reco_beam.root
+    
+    ./bin/AddHodoInfo -s ../DAQ/rec_capture_1102_reco.root  -b ../DAQ/hodoscope/1102/?.root,../DAQ/hodoscope/1102/??.root,../DAQ/hodoscope/1102/???.root  -o  ../DAQ/rec_capture_1102_reco_beam.root
     

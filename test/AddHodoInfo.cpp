@@ -251,10 +251,12 @@ int main(int argc, char**argv){
   ULong64_t start_event_beam;
 //   TTreeFormula* TTF = new TTreeFormula("ttf0","spillNumber==1 && evtNumber==1",H4tree_beam);
 //   std::cout << " TTreeFormula " << std::endl;   
-  
+   
   for (int iBeam=0; iBeam<nEntries_beam; iBeam++) {
    H4tree_beam->GetEntry(iBeam);  
 //    if (TTF->EvalInstance() == 1) {
+//    std::cout << "  spillNumber " << spillNumber << " evtNumber =  " << evtNumber << std::endl;
+    
    if (spillNumber==1 && evtNumber==1) {
     std::cout << " found: start_event_beam = " << start_event_beam << std::endl;
     start_event_beam = evtTime[0];
