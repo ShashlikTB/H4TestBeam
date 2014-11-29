@@ -34,41 +34,98 @@ void CaloCluster::doCalorimeterReconstruction( std::vector<TBRecHit>* rechits, i
  std::map < float, std::pair<float, float> > map_of_calo_clusters;
  float max;
  int channelID;
- for (Int_t j = 0; j < rechits->size(); j++){
-  TBRecHit &hit=rechits->at(j);
-  //   ped = hit.Pedestal();
-  //   sig = hit.NoiseRMS();
-  max = hit.AMax();
-  //   maxTime = hit.TRise();
-  channelID = hit.GetChannelID();
-  
-  if (max<0.1) continue; //---- very low threshold, just to remove noisy noise
-  
-  int moduleID,fiberID;
-  _mapper->ChannelID2ModuleFiber(channelID,moduleID,fiberID);  // get module and fiber IDs
-  
-  double x,y;
-  if (fiberLevel == 0) _mapper->ModuleXY(moduleID,x,y);
-  else                 _mapper->FiberXY(fiberID, x, y);
-  
-  //---- only the wanted face (front [1] or back [-1])
-  if (moduleID<0 && face>0) {
-   continue;
+ 
+ //---- module level
+ if (fiberLevel == 0) {
+  for (Int_t j = 0; j < rechits->size(); j++){
+   TBRecHit &hit=rechits->at(j);
+   //   ped = hit.Pedestal();
+   //   sig = hit.NoiseRMS();
+   max = hit.AMax();
+   //   maxTime = hit.TRise();
+   channelID = hit.GetChannelID();
+   
+   if (max<0.1) continue; //---- very low threshold, just to remove noisy noise
+   
+   int moduleID,fiberID;
+   _mapper->ChannelID2ModuleFiber(channelID,moduleID,fiberID);  // get module and fiber IDs
+   
+   double x,y;
+   if (fiberLevel == 0) _mapper->ModuleXY(moduleID,x,y);
+   else                 _mapper->FiberXY(fiberID, x, y);
+   
+   //---- only the wanted face (front [1] or back [-1])
+   if (moduleID<0 && face>0) {
+    continue;
+   }
+   if (moduleID>0 && face<0) {
+    continue;
+   }
+   
+   std::pair<float, float> xy_pair;
+   xy_pair.first = x;
+   xy_pair.second = y;
+   
+   //---- check if that module was already saved
+   //---- if yes, then sum the energy
+   float old_energy = 0;
+   for(std::map < float, std::pair<float, float> >::iterator iterator = map_of_calo_clusters.begin(); iterator != map_of_calo_clusters.end(); iterator++) {    
+    if (iterator->second.second == y && iterator->second.first == x ) {
+     float temp_energy = iterator->first;
+     map_of_calo_clusters.erase(temp_energy);
+     old_energy = -temp_energy;
+     break; //---- not possible more than one time per module by construction
+    }
+   }
+   
+   max = max + old_energy;
+   map_of_calo_clusters[-max] = xy_pair;
   }
-  if (moduleID>0 && face<0) {
-   continue;
-  }
   
-  std::pair<float, float> xy_pair;
-  xy_pair.first = x;
-  xy_pair.second = y;
+  std::cout << " size = " << map_of_calo_clusters.size() << std::endl;
   
-  map_of_calo_clusters[-max] = xy_pair;
- }     
+ }
  
  
+ //---- fiber level
+ if (fiberLevel == 1) {
+  
+  for (Int_t j = 0; j < rechits->size(); j++){
+   TBRecHit &hit=rechits->at(j);
+   //   ped = hit.Pedestal();
+   //   sig = hit.NoiseRMS();
+   max = hit.AMax();
+   //   maxTime = hit.TRise();
+   channelID = hit.GetChannelID();
+   
+   if (max<0.1) continue; //---- very low threshold, just to remove noisy noise
+   
+   int moduleID,fiberID;
+   _mapper->ChannelID2ModuleFiber(channelID,moduleID,fiberID);  // get module and fiber IDs
+   
+   double x,y;
+   if (fiberLevel == 0) _mapper->ModuleXY(moduleID,x,y);
+   else                 _mapper->FiberXY(fiberID, x, y);
+   
+   //---- only the wanted face (front [1] or back [-1])
+   if (moduleID<0 && face>0) {
+    continue;
+   }
+   if (moduleID>0 && face<0) {
+    continue;
+   }
+   
+   std::pair<float, float> xy_pair;
+   xy_pair.first = x;
+   xy_pair.second = y;
+   
+   map_of_calo_clusters[-max] = xy_pair;
+  }
+  
+ }
+  
  //---- do clustering ----
- //  int num_clusters = 0;
+  int num_clusters = 0;
  float x_cluster_logE = 0;
  float y_cluster_logE = 0;
  float weight_cluster = 0;
@@ -85,15 +142,19 @@ void CaloCluster::doCalorimeterReconstruction( std::vector<TBRecHit>* rechits, i
    y_cluster_max = (ii->second.second); //---- seed position X   
    float energy_temp = - ii->first;
    energy_cluster = energy_cluster + energy_temp;
+   num_clusters++;
   }
   else {
    if (DR(ii->second.first, x_cluster_max, ii->second.second, y_cluster_max) < maxDR) {
     float energy_temp = - ii->first;
     energy_cluster = energy_cluster + energy_temp;
-    //   num_clusters++;
+    num_clusters++;
    }
   }
  }
+
+ std::cout << " num_clusters = " << num_clusters << " energy_cluster = " << energy_cluster << std::endl;
+ num_clusters = 0;
  
  //---- then calculate position 
  //  std::cout<< " new cluster " << std::endl;
@@ -107,10 +168,13 @@ void CaloCluster::doCalorimeterReconstruction( std::vector<TBRecHit>* rechits, i
      x_cluster_logE = x_cluster_logE + (ii->second.first)  * wi ;
      y_cluster_logE = y_cluster_logE + (ii->second.second) * wi ;
      weight_cluster = weight_cluster + wi;
+     num_clusters++;
     }
    }
   }
  }
+
+ std::cout << " after num_clusters = " << num_clusters << std::endl;
  
  float x_cluster_final = 0;
  float y_cluster_final = 0;

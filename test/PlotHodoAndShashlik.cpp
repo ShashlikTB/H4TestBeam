@@ -273,10 +273,12 @@ int main(int argc, char**argv){
  int doFiber = 0;
  float table_x = 200; //---- mm
  float table_y = 350; //---- mm
+ 
+ float w0 = 5.0;
  //---- configuration
  
  int c;
- while ((c = getopt (argc, argv, "i:m:f:x:y:")) != -1)
+ while ((c = getopt (argc, argv, "i:m:f:x:y:w:")) != -1)
   switch (c)
   {
    case 'i': //---- input
@@ -294,9 +296,14 @@ int main(int argc, char**argv){
    case 'y':
     table_y =  atof(optarg);
     break;
+   case 'w':
+    w0 =  atof(optarg);
+    break;
+    
+    
     
    case '?':
-    if (optopt == 'i' || optopt == 'm' || optopt == 'f' || optopt == 'x' || optopt == 'y')
+    if (optopt == 'i' || optopt == 'm' || optopt == 'f' || optopt == 'x' || optopt == 'y' || optopt == 'w')
      fprintf (stderr, "Option -%c requires an argument.\n", optopt);
     else if (isprint (optopt))
      fprintf (stderr, "Unknown option `-%c'.\n", optopt);
@@ -445,6 +452,7 @@ int main(int argc, char**argv){
 //   Mapper *mapper = Mapper::Instance();
   
   CaloCluster* caloCluster = new CaloCluster();
+  caloCluster->setW0(w0);
   
   for (int i=0; i<nEntries; i++) {
    
