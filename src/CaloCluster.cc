@@ -82,7 +82,7 @@ void CaloCluster::doCalorimeterReconstruction( std::vector<TBRecHit>* rechits, i
    map_of_calo_clusters[-max] = xy_pair;
   }
   
-  std::cout << " size = " << map_of_calo_clusters.size() << std::endl;
+//   std::cout << " size = " << map_of_calo_clusters.size() << std::endl;
   
  }
  
@@ -153,7 +153,7 @@ void CaloCluster::doCalorimeterReconstruction( std::vector<TBRecHit>* rechits, i
   }
  }
 
- std::cout << " num_clusters = " << num_clusters << " energy_cluster = " << energy_cluster << std::endl;
+//  std::cout << " num_clusters = " << num_clusters << " energy_cluster = " << energy_cluster << std::endl;
  num_clusters = 0;
  
  //---- then calculate position 
@@ -174,7 +174,7 @@ void CaloCluster::doCalorimeterReconstruction( std::vector<TBRecHit>* rechits, i
   }
  }
 
- std::cout << " after num_clusters = " << num_clusters << std::endl;
+//  std::cout << " after num_clusters = " << num_clusters << std::endl;
  
  float x_cluster_final = 0;
  float y_cluster_final = 0;
