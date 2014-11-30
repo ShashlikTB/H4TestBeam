@@ -243,10 +243,15 @@ int main(int argc, char**argv){
   TBEvent* tbevent = new TBEvent();
   
   
-  TBranch *branch_event = H4tree->GetBranch("tbevent");
-  branch_event->SetAddress(&tbevent);
-  TBranch *branch_spill = H4tree->GetBranch("tbspill");
-  branch_spill->SetAddress(&tbspill);
+//   TBranch *branch_event = H4tree->GetBranch("tbevent");
+//   branch_event->SetAddress(&tbevent);
+//   TBranch *branch_spill = H4tree->GetBranch("tbspill");
+//   branch_spill->SetAddress(&tbspill);
+  
+  H4tree->SetBranchAddress("tbevent", &tbevent);
+  H4tree->SetBranchAddress("tbspill", &tbspill);
+  
+  
   
   TH1F *X_h1_HS1_Cal_front  = new TH1F("X_h1_HS1_Cal_front", "X Hodoscope 1 vs Cal front ", 256, -32, 32);
   TH1F *X_h1_HS2_Cal_front  = new TH1F("X_h1_HS2_Cal_front", "X Hodoscope 2 vs Cal front ", 256, -32, 32);

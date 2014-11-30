@@ -214,18 +214,23 @@ int main(int argc, char**argv){
   TBEvent* tbevent = new TBEvent();
   std::vector<TBRecHit> *rechits = new vector<TBRecHit>;
   
-  TBranch *branch_reco;
+//   TBranch *branch_reco;
   bool haverechits = false;
   if(H4tree_shashlik->GetListOfBranches()->FindObject("tbrechits")) {
    std::cout << "found rechits" << std::endl;
-   branch_reco = H4tree_shashlik->GetBranch("tbrechits");
-   branch_reco->SetAddress(&rechits);  
+//    branch_reco = H4tree_shashlik->GetBranch("tbrechits");
+//    branch_reco->SetAddress(&rechits);  
+   H4tree_shashlik->SetBranchAddress("tbrechits", &rechits);
    haverechits = true;
   }
-  TBranch *branch_event = H4tree_shashlik->GetBranch("tbevent");
-  branch_event->SetAddress(&tbevent);
-  TBranch *branch_spill = H4tree_shashlik->GetBranch("tbspill");
-  branch_spill->SetAddress(&tbspill);
+  
+  H4tree_shashlik->SetBranchAddress("tbevent", &tbevent);
+  H4tree_shashlik->SetBranchAddress("tbspill", &tbspill);
+  
+//   TBranch *branch_event = H4tree_shashlik->GetBranch("tbevent");
+//   branch_event->SetAddress(&tbevent);
+//   TBranch *branch_spill = H4tree_shashlik->GetBranch("tbspill");
+//   branch_spill->SetAddress(&tbspill);
 
   
   TBSpill tbspill2;

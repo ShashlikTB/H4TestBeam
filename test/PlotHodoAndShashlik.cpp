@@ -271,6 +271,8 @@ int main(int argc, char**argv){
  std::string input_file;
  int maxEvents = -1;
  int doFiber = 0;
+ float table_x_reference = 200; //---- mm
+ float table_y_reference = 350; //---- mm
  float table_x = 200; //---- mm
  float table_y = 350; //---- mm
  
@@ -334,7 +336,7 @@ int main(int argc, char**argv){
   
   std::cout << " input files:" << std::endl;
   for (int i=0; i<input_files_vector.size(); i++) {
-   std::cout << " beam: " << input_files_vector.at(i) << std::endl;
+   std::cout << "  >> file: " << input_files_vector.at(i) << std::endl;
   }
   
   //---- configuration (end)
@@ -358,10 +360,15 @@ int main(int argc, char**argv){
   TBSpill* tbspill = new TBSpill();
   TBEvent* tbevent = new TBEvent();
   
-  TBranch *branch_event = H4tree->GetBranch("tbevent");
-  branch_event->SetAddress(&tbevent);
-  TBranch *branch_spill = H4tree->GetBranch("tbspill");
-  branch_spill->SetAddress(&tbspill);
+//   TBranch *branch_event = H4tree->GetBranch("tbevent");
+//   branch_event->SetAddress(&tbevent);
+//   TBranch *branch_spill = H4tree->GetBranch("tbspill");
+//   branch_spill->SetAddress(&tbspill);
+  
+  H4tree->SetBranchAddress("tbevent", &tbevent);
+  H4tree->SetBranchAddress("tbspill", &tbspill);
+
+  
   
   TApplication* gMyRootApp = new TApplication("My ROOT Application", &argc, argv);
   
@@ -454,6 +461,8 @@ int main(int argc, char**argv){
   CaloCluster* caloCluster = new CaloCluster();
   caloCluster->setW0(w0);
   
+  
+  ///---- loop ----
   for (int i=0; i<nEntries; i++) {
    
    if ((i%1000)==0) {
@@ -462,16 +471,24 @@ int main(int argc, char**argv){
    
    H4tree->GetEntry(i);
    
-   if (i == 0) {
-    float table_x_shift = tbspill->GetTableX();
-    float table_y_shift = tbspill->GetTableY();
-    
-    table_x = table_x - table_x_shift;
-    table_y = table_y - table_y_shift;
+
+   float table_x_shift = tbspill->GetTableX();
+   float table_y_shift = tbspill->GetTableY();
+   
+   if ( ((table_x_reference - table_x_shift) != table_x) || (i == 0) ) {
     std::cout << " Table: " << std::endl;
-    std::cout << "   x = " << table_x << " mm " << std::endl;
-    std::cout << "   y = " << table_y << " mm " << std::endl;
+    std::cout << "   x = " << table_x_reference - table_x_shift << " mm " << std::endl;
+    std::cout << "   y = " << table_y_reference - table_y_shift << " mm " << std::endl;
    }
+   
+   table_x = table_x_reference - table_x_shift;
+   table_y = table_y_reference - table_y_shift;
+   
+//    if (i == 0) {
+//     std::cout << " Table: " << std::endl;
+//     std::cout << "   x = " << table_x << " mm " << std::endl;
+//     std::cout << "   y = " << table_y << " mm " << std::endl;
+//    }
    
    
    
@@ -620,7 +637,7 @@ int main(int argc, char**argv){
     //---- Y
     for (int iCluster = 0; iCluster < pos_fibers_Y1.size(); iCluster++) {
      for (int iCalo = 0; iCalo < caloCluster_position_Y_front.size(); iCalo++) {
-      //       std::cout << " caloCluster_position_Y_front.at(" << iCalo << "), pos_fibers_Y1.at(" << iCluster << ")  = " << caloCluster_position_Y_front.at(iCalo) << "," <<  pos_fibers_Y1.at(iCluster) << std::endl;
+//             std::cout << " caloCluster_position_Y_front.at(" << iCalo << "), pos_fibers_Y1.at(" << iCluster << ")  = " << caloCluster_position_Y_front.at(iCalo) << "," <<  pos_fibers_Y1.at(iCluster) << std::endl;
       hHS_HS1_Cal_front_Y->Fill(caloCluster_position_Y_front.at(iCalo), pos_fibers_Y1.at(iCluster));
       Y_hHS_HS1_Cal_front->Fill(caloCluster_position_Y_front.at(iCalo) - pos_fibers_Y1.at(iCluster), i);
       Y_h1_HS1_Cal_front->Fill(caloCluster_position_Y_front.at(iCalo) - pos_fibers_Y1.at(iCluster));
