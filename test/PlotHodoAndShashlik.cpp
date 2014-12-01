@@ -264,11 +264,14 @@ int main(int argc, char**argv){
   
   TApplication* gMyRootApp = new TApplication("My ROOT Application", &argc, argv);
   
-  TCanvas* cc_Energy_front = new TCanvas ("cc_Energy_front","",800,600);
-  TCanvas* cc_Energy_back  = new TCanvas ("cc_Energy_back", "",800,600);
+  TCanvas* cc_Energy_front = new TCanvas ("cc_Energy_front","",800,400);
+  TCanvas* cc_Energy_back  = new TCanvas ("cc_Energy_back", "",800,400);
   
   TH1F *h_energy_front  = new TH1F("h_energy_front", "front log ei/etot", 100, 0, 15);
   TH1F *h_energy_back   = new TH1F("h_energy_back",  "back  log ei/etot", 100, 0, 15);
+
+  TH2F *h_energy_front_size  = new TH2F("h_energy_front_size", "front log ei/etot vs cluster size", 100, 0, 15,17,0,17);
+  TH2F *h_energy_back_size   = new TH2F("h_energy_back_size",  "back  log ei/etot vs cluster size", 100, 0, 15,17,0,17);
   
   
   
@@ -410,8 +413,10 @@ int main(int argc, char**argv){
    caloCluster_Energy_front.push_back( caloCluster->getEnergy() );
    caloCluster_Energies_front = caloCluster->getCaloClusterComponents();
    
+//    std::cout << " caloCluster_Energies_front.size()= " << caloCluster_Energies_front.size() << std::endl;
    for (int iComponent = 0; iComponent<caloCluster_Energies_front.size(); iComponent++) {
     h_energy_front->Fill(-log(caloCluster_Energies_front.at(iComponent) / caloCluster_Energy_front.at(0)));
+    h_energy_front_size->Fill(-log(caloCluster_Energies_front.at(iComponent) / caloCluster_Energy_front.at(0)),caloCluster_Energies_front.size());
    }
    
    
@@ -431,6 +436,7 @@ int main(int argc, char**argv){
    
    for (int iComponent = 0; iComponent<caloCluster_Energies_back.size(); iComponent++) {
     h_energy_back->Fill(-log(caloCluster_Energies_back.at(iComponent) / caloCluster_Energy_front.at(0)));
+    h_energy_back_size->Fill(-log(caloCluster_Energies_back.at(iComponent) / caloCluster_Energy_front.at(0)),caloCluster_Energies_back.size());
    }
    
    
@@ -835,13 +841,24 @@ int main(int argc, char**argv){
   
   
   //---- energy distribution
-  cc_Energy_front->cd();
-  cc_Energy_front->SetGrid();  
+  cc_Energy_front->Divide(2,1);
+  cc_Energy_front->cd(1)->SetGrid();  
   h_energy_front->Draw();
-
-  cc_Energy_back->cd();
-  cc_Energy_back->SetGrid();  
+  h_energy_front->GetXaxis()->SetTitle("-log(E_{i}/E_{tot})");
+  cc_Energy_front->cd(2)->SetGrid();  
+  h_energy_front_size->Draw("colz");
+  h_energy_front_size->GetXaxis()->SetTitle("-log(E_{i}/E_{tot})");
+  h_energy_front_size->GetYaxis()->SetTitle("cluster size");
+  
+  
+  cc_Energy_back->Divide(2,1);
+  cc_Energy_back->cd(1)->SetGrid();  
   h_energy_back->Draw();
+  h_energy_back->GetXaxis()->SetTitle("-log(E_{i}/E_{tot})");
+  cc_Energy_back->cd(2)->SetGrid();  
+  h_energy_back_size->Draw("colz");
+  h_energy_back_size->GetXaxis()->SetTitle("-log(E_{i}/E_{tot})");
+  h_energy_back_size->GetYaxis()->SetTitle("cluster size");
   
   
   gMyRootApp->Run(); 
