@@ -166,10 +166,12 @@ int main(int argc, char**argv){
  int doFiber = 0;
  float table_x = 200; //---- mm
  float table_y = 350; //---- mm
+ 
+ float w0 = 5.0;
  //---- configuration
  
  int c;
- while ((c = getopt (argc, argv, "i:o:m:f:")) != -1)
+ while ((c = getopt (argc, argv, "i:o:m:f:w:")) != -1)
   switch (c)
   {
    case 'i': //---- input
@@ -184,9 +186,12 @@ int main(int argc, char**argv){
    case 'f':
     doFiber =  atoi(optarg);
     break;
+   case 'w':
+    w0 =  atof(optarg);
+    break;
     
    case '?':
-    if (optopt == 'i' || optopt == 'o' || optopt == 'm' || optopt == 'f')
+    if (optopt == 'i' || optopt == 'o' || optopt == 'm' || optopt == 'f' || optopt == 'w')
      fprintf (stderr, "Option -%c requires an argument.\n", optopt);
     else if (isprint (optopt))
      fprintf (stderr, "Unknown option `-%c'.\n", optopt);
@@ -252,7 +257,6 @@ int main(int argc, char**argv){
   H4tree->SetBranchAddress("tbspill", &tbspill);
   
   
-  
   TH1F *X_h1_HS1_Cal_front  = new TH1F("X_h1_HS1_Cal_front", "X Hodoscope 1 vs Cal front ", 256, -32, 32);
   TH1F *X_h1_HS2_Cal_front  = new TH1F("X_h1_HS2_Cal_front", "X Hodoscope 2 vs Cal front ", 256, -32, 32);
   TH1F *X_h1_HS1_Cal_back   = new TH1F("X_h1_HS1_Cal_back",  "X Hodoscope 1 vs Cal back " , 256, -32, 32);
@@ -299,6 +303,7 @@ int main(int argc, char**argv){
 //   Mapper *mapper = Mapper::Instance();
   
   CaloCluster* caloCluster = new CaloCluster();
+  caloCluster->setW0(w0);
   
   for (int i=0; i<nEntries; i++) {
    
@@ -447,21 +452,21 @@ int main(int argc, char**argv){
   
 
   //---- calculate the shifts in x and y
-//   float x1_shift = X_h1_HS1_Cal_front->GetBinCenter(X_h1_HS1_Cal_front->GetMaximumBin());
-//   float x2_shift = X_h1_HS2_Cal_front->GetBinCenter(X_h1_HS2_Cal_front->GetMaximumBin());
-  float x1_shift = X_h1_HS1_Cal_back->GetBinCenter(X_h1_HS1_Cal_back->GetMaximumBin());  //----> trust more the back side
-  float x2_shift = X_h1_HS2_Cal_back->GetBinCenter(X_h1_HS2_Cal_back->GetMaximumBin());
+  float x1_shift = X_h1_HS1_Cal_front->GetBinCenter(X_h1_HS1_Cal_front->GetMaximumBin());  //----> trust more the front side
+  float x2_shift = X_h1_HS2_Cal_front->GetBinCenter(X_h1_HS2_Cal_front->GetMaximumBin());
+//   float x1_shift = X_h1_HS1_Cal_back->GetBinCenter(X_h1_HS1_Cal_back->GetMaximumBin());  //----> trust more the back side
+//   float x2_shift = X_h1_HS2_Cal_back->GetBinCenter(X_h1_HS2_Cal_back->GetMaximumBin());
   
   float average_x_shift = (x1_shift + x2_shift) / 2.;
-  average_x_shift = x2_shift; //---- use only hodoscope 1
+  average_x_shift = x2_shift; //---- use only hodoscope 2
   
-//   float y1_shift = Y_h1_HS1_Cal_front->GetBinCenter(Y_h1_HS1_Cal_front->GetMaximumBin());
-//   float y2_shift = Y_h1_HS2_Cal_front->GetBinCenter(Y_h1_HS2_Cal_front->GetMaximumBin());
-  float y1_shift = Y_h1_HS1_Cal_back->GetBinCenter(Y_h1_HS1_Cal_back->GetMaximumBin());
-  float y2_shift = Y_h1_HS2_Cal_back->GetBinCenter(Y_h1_HS2_Cal_back->GetMaximumBin());
+  float y1_shift = Y_h1_HS1_Cal_front->GetBinCenter(Y_h1_HS1_Cal_front->GetMaximumBin());
+  float y2_shift = Y_h1_HS2_Cal_front->GetBinCenter(Y_h1_HS2_Cal_front->GetMaximumBin());
+//   float y1_shift = Y_h1_HS1_Cal_back->GetBinCenter(Y_h1_HS1_Cal_back->GetMaximumBin());
+//   float y2_shift = Y_h1_HS2_Cal_back->GetBinCenter(Y_h1_HS2_Cal_back->GetMaximumBin());
   
   float average_y_shift = (y1_shift + y2_shift) / 2.;
-  average_y_shift = y2_shift; //---- use only hodoscope 1
+  average_y_shift = y2_shift; //---- use only hodoscope 2
   
   
   HodoscopeMap hodoMap;
