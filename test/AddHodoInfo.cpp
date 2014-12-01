@@ -393,7 +393,9 @@ int main(int argc, char**argv){
      Beam_eventNumber_old = Beam_eventNumber_old+1;
     }
     else {   
-     std::cout << " merged[spill:" << spillNumber << "]: Shashlik_eventNumber:Beam_evtNumber-1 = " << Shashlik_eventNumber << " : " << evtNumber-1 << std::endl;
+     if ((i%100)==0) {
+      std::cout << " merged[spill:" << spillNumber << "]: Shashlik_eventNumber:Beam_evtNumber-1 = " << Shashlik_eventNumber << " : " << evtNumber-1 << std::endl;
+     }
      Beam_eventNumber_old = evtNumber;
      //---- if the beam moved to the next spill, fill the tree but not set hodoscope data
      //---- then the default values will appear, and we can filter a posteriori if needed

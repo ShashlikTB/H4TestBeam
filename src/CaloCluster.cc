@@ -134,6 +134,9 @@ void CaloCluster::doCalorimeterReconstruction( std::vector<TBRecHit>* rechits, i
  float x_cluster_max = -1000;
  float y_cluster_max = -1000;
  
+ 
+ _vector_energies.clear();
+ 
  //---- first calculate cluster energy
  for( std::map < float, std::pair<float, float> >::iterator ii=map_of_calo_clusters.begin(); ii!=map_of_calo_clusters.end(); ii++) {
   //   std::cout << " energy = " << - ii->first << std::endl;
@@ -142,12 +145,14 @@ void CaloCluster::doCalorimeterReconstruction( std::vector<TBRecHit>* rechits, i
    y_cluster_max = (ii->second.second); //---- seed position X   
    float energy_temp = - ii->first;
    energy_cluster = energy_cluster + energy_temp;
+   _vector_energies.push_back(energy_temp);
    num_clusters++;
   }
   else {
    if (DR(ii->second.first, x_cluster_max, ii->second.second, y_cluster_max) < maxDR) {
     float energy_temp = - ii->first;
     energy_cluster = energy_cluster + energy_temp;
+    _vector_energies.push_back(energy_temp);
     num_clusters++;
    }
   }
@@ -163,6 +168,7 @@ void CaloCluster::doCalorimeterReconstruction( std::vector<TBRecHit>* rechits, i
    //   std::cout << " energy = " << - ii->first << std::endl;
    if (DR(ii->second.first, x_cluster_max, ii->second.second, y_cluster_max) < maxDR) {
     float energy_temp = - ii->first;
+    _vector_energies.push_back(energy_temp);
     float wi = (_w0 + log(energy_temp/energy_cluster));
     if (wi > 0) {
      x_cluster_logE = x_cluster_logE + (ii->second.first)  * wi ;

@@ -4,8 +4,9 @@ Add Hodoscope information
 Automatic script to add Hodoscope information
 
         
-    ls ../DAQ/rec_capture_*_reco.root | sed s:../DAQ/rec_capture_:: | sed s/_reco.root// | awk '{print "./bin/AddHodoInfo -s ../DAQ/rec_capture_"$1"_reco.root  -b ../DAQ/hodoscope/"$1"/?.root,../DAQ/hodoscope/"$1"/??.root,../DAQ/hodoscope/"$1"/???.root  -o  ../DAQ/rec_capture_"$1"_reco_beam.root"}'
-
+    ls ../DAQ/rec_capture_*_reco.root      | sed s:../DAQ/rec_capture_:: | sed s/_reco.root// | awk '{print "./bin/AddHodoInfo -s ../DAQ/rec_capture_"$1"_reco.root  -b ../DAQ/hodoscope/"$1"/?.root,../DAQ/hodoscope/"$1"/??.root,../DAQ/hodoscope/"$1"/???.root  -o  ../DAQ/rec_capture_"$1"_reco_beam.root"}'
+    ls ../DAQ/rec_capture_*_reco_beam.root | sed s:../DAQ/rec_capture_:: | sed s/_reco_beam.root// | awk '{print "./bin/AddInformation -i ../DAQ/rec_capture_"$1"_reco_beam.root  -o rec_capture_"$1"_reco_beam_table_energy.root"}'
+    ls ../DAQ/rec_capture_*_reco_beam.root | sed s:../DAQ/rec_capture_:: | sed s/_reco_beam.root// | awk '{print "./bin/AddInformation -i ../DAQ/rec_capture_"$1"_reco_beam.root  -o rec_capture_"$1"_reco_beam_table_energy.root  -f 1"}'
     
 Add Table position and energy information
 ====
@@ -40,6 +41,17 @@ Add Table position and energy information
 
     ./bin/PlotHodoAndShashlik -i rec_capture_1110_reco_beam_table_energy.root,rec_capture_1111_reco_beam_table_energy.root
     
+    ./bin/PlotHodoAndShashlik -i rec_capture_1026_reco_beam_table_energy.root,rec_capture_1012_reco_beam_table_energy.root,rec_capture_1013_reco_beam_table_energy.root
+    
+    ./bin/PlotHodoAndShashlik -i rec_capture_1020_reco_beam_table_energy.root
+    ./bin/PlotHodoAndShashlik -i rec_capture_1026_reco_beam_table_energy.root
+    ./bin/PlotHodoAndShashlik -i rec_capture_1012_reco_beam_table_energy.root
+    ./bin/PlotHodoAndShashlik -i rec_capture_1013_reco_beam_table_energy.root
+
+    ./bin/PlotHodoAndShashlik -i rec_capture_1024_reco_beam_table_energy.root
+    ./bin/PlotHodoAndShashlik -i rec_capture_1025_reco_beam_table_energy.root
+    ./bin/PlotHodoAndShashlik -i rec_capture_1017_reco_beam_table_energy.root
+         
     
 Plot Hodoscope information
 ====

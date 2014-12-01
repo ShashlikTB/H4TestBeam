@@ -153,117 +153,9 @@ float DR (float x1, float x2, float y1, float y2) {
 
 
 
-/*
 
-//---- Reconstruct Calorimeter clusters
-void doCalorimeterReconstruction( Mapper* mapper,  std::vector<TBRecHit>* rechits, std::vector<float>& caloCluster_position_X, std::vector<float>& caloCluster_position_Y, std::vector<float>& caloCluster_Energy, int face, float maxDR, int fiberLevel = 0) {
-  
- //----      adc              X      Y
- std::map < float, std::pair<float, float> > map_of_calo_clusters;
- float max;
- int channelID;
- for (Int_t j = 0; j < rechits->size(); j++){
-  TBRecHit &hit=rechits->at(j);
-//   ped = hit.Pedestal();
-//   sig = hit.NoiseRMS();
-  max = hit.AMax();
-//   maxTime = hit.TRise();
-  channelID = hit.GetChannelID();
-  
-  if (max<0.1) continue; //---- very low threshold, just to remove noisy noise
-  
-  int moduleID,fiberID;
-  mapper->ChannelID2ModuleFiber(channelID,moduleID,fiberID);  // get module and fiber IDs
-  
-  double x,y;
-  if (fiberLevel == 0) mapper->ModuleXY(moduleID,x,y);
-  else                 mapper->FiberXY(fiberID, x, y);
-  
-  //---- only the wanted face (front [1] or back [-1])
-  if (moduleID<0 && face>0) {
-   continue;
-  }
-  if (moduleID>0 && face<0) {
-   continue;
-  }
-  
-  std::pair<float, float> xy_pair;
-  xy_pair.first = x;
-  xy_pair.second = y;
-  
-  map_of_calo_clusters[-max] = xy_pair;
- }     
- 
- //---- dump the map into the std::vector
-//  for( std::map < float, std::pair<float, float> >::iterator ii=map_of_calo_clusters.begin(); ii!=map_of_calo_clusters.end(); ii++) {
-//   caloCluster_Energy.push_back( ii->first );
-//   caloCluster_position_X.push_back( ii->second.first );
-//   caloCluster_position_Y.push_back( ii->second.second );
-//  }
 
- 
- 
- //---- do clustering ----
-//  int num_clusters = 0;
- float x_cluster_logE = 0;
- float y_cluster_logE = 0;
- float weight_cluster = 0;
- float energy_cluster = 0;
- 
- float x_cluster_max = -1000;
- float y_cluster_max = -1000;
- 
- //---- first calculate cluster energy
- for( std::map < float, std::pair<float, float> >::iterator ii=map_of_calo_clusters.begin(); ii!=map_of_calo_clusters.end(); ii++) {
-//   std::cout << " energy = " << - ii->first << std::endl;
-  if (x_cluster_max == -1000) {
-   x_cluster_max = (ii->second.first); //---- seed position X
-   y_cluster_max = (ii->second.second); //---- seed position X   
-   float energy_temp = - ii->first;
-   energy_cluster = energy_cluster + energy_temp;
-  }
-  else {
-   if (DR(ii->second.first, x_cluster_max, ii->second.second, y_cluster_max) < maxDR) {
-    float energy_temp = - ii->first;
-    energy_cluster = energy_cluster + energy_temp;
-    //   num_clusters++;
-   }
-  }
- }
- 
- //---- then calculate position 
-//  std::cout<< " new cluster " << std::endl;
-//  float w0 = 3.8;
- float w0 = 5.0;
- if (energy_cluster > 0) {
-  for( std::map < float, std::pair<float, float> >::iterator ii=map_of_calo_clusters.begin(); ii!=map_of_calo_clusters.end(); ii++) {
-   //   std::cout << " energy = " << - ii->first << std::endl;
-   if (DR(ii->second.first, x_cluster_max, ii->second.second, y_cluster_max) < maxDR) {
-    float energy_temp = - ii->first;
-    float wi = (w0 + log(energy_temp/energy_cluster));
-    if (wi > 0) {
-     x_cluster_logE = x_cluster_logE + (ii->second.first)  * wi ;
-     y_cluster_logE = y_cluster_logE + (ii->second.second) * wi ;
-     weight_cluster = weight_cluster + wi;
-    }
-   }
-  }
- }
 
- float x_cluster_final = 0;
- float y_cluster_final = 0;
- 
- if (weight_cluster != 0) {
-  x_cluster_final = x_cluster_logE / weight_cluster;
-  y_cluster_final = y_cluster_logE / weight_cluster;
-
-  caloCluster_Energy.push_back( energy_cluster );
-  caloCluster_position_X.push_back( x_cluster_final );
-  caloCluster_position_Y.push_back( y_cluster_final );
- }
- 
-//  std::cout << " num_clusters = " << num_clusters << std::endl;
-} */
   
 
 int main(int argc, char**argv){
@@ -371,6 +263,16 @@ int main(int argc, char**argv){
   
   
   TApplication* gMyRootApp = new TApplication("My ROOT Application", &argc, argv);
+  
+  TCanvas* cc_Energy_front = new TCanvas ("cc_Energy_front","",800,600);
+  TCanvas* cc_Energy_back  = new TCanvas ("cc_Energy_back", "",800,600);
+  
+  TH1F *h_energy_front  = new TH1F("h_energy_front", "front log ei/etot", 100, 0, 15);
+  TH1F *h_energy_back   = new TH1F("h_energy_back",  "back  log ei/etot", 100, 0, 15);
+  
+  
+  
+  
   
   TCanvas* cc_X = new TCanvas ("cc_X","",800,600);
   TCanvas* cc_Y = new TCanvas ("cc_Y","",800,600);
@@ -499,25 +401,37 @@ int main(int argc, char**argv){
    std::vector<float> caloCluster_position_X_front;
    std::vector<float> caloCluster_position_Y_front;
    std::vector<float> caloCluster_Energy_front;
+   std::vector<float> caloCluster_Energies_front;
    
    caloCluster->doCalorimeterReconstruction( rechits, 1, 30, doFiber);
    
    caloCluster_position_X_front.push_back( caloCluster->getPositionX() );
    caloCluster_position_Y_front.push_back( caloCluster->getPositionY() );
    caloCluster_Energy_front.push_back( caloCluster->getEnergy() );
+   caloCluster_Energies_front = caloCluster->getCaloClusterComponents();
+   
+   for (int iComponent = 0; iComponent<caloCluster_Energies_front.size(); iComponent++) {
+    h_energy_front->Fill(-log(caloCluster_Energies_front.at(iComponent) / caloCluster_Energy_front.at(0)));
+   }
+   
    
    
    std::vector<float> caloCluster_position_X_back;
    std::vector<float> caloCluster_position_Y_back;
    std::vector<float> caloCluster_Energy_back;
+   std::vector<float> caloCluster_Energies_back;;
    
-   
+     
    caloCluster->doCalorimeterReconstruction( rechits, -1, 30, doFiber);
    
    caloCluster_position_X_back.push_back( caloCluster->getPositionX() );
    caloCluster_position_Y_back.push_back( caloCluster->getPositionY() );
    caloCluster_Energy_back.push_back( caloCluster->getEnergy() );
+   caloCluster_Energies_back = caloCluster->getCaloClusterComponents();
    
+   for (int iComponent = 0; iComponent<caloCluster_Energies_back.size(); iComponent++) {
+    h_energy_back->Fill(-log(caloCluster_Energies_back.at(iComponent) / caloCluster_Energy_front.at(0)));
+   }
    
    
    //---- modular level DR = 5 mm
@@ -762,10 +676,16 @@ int main(int argc, char**argv){
   TF1* fgaus = new TF1("fgaus","gaus(0)+pol2(3)",-10,10);
   fgaus->SetParameter(0,10);
   fgaus->SetParameter(1,0.0);
+  fgaus->SetParLimits(1,-10,10);
   fgaus->SetParameter(2,0.5);
+  fgaus->SetParLimits(2,0.1,3.0);
+  
   
   fgaus->SetParameter(4,0.0);
   fgaus->SetParameter(5,0.0);
+  
+  std::cout << " =================================== " << std::endl;
+  std::cout << " >>> X <<<" << std::endl; 
   
   cc_DX->Divide(4,2);
   cc_DX->cd(1)->SetGrid();
@@ -810,7 +730,6 @@ int main(int argc, char**argv){
   X_h1_HS2_Cal_back->Fit("fgaus","R");
   
   
-  
 
   cc_X->Divide(2,2);
   
@@ -840,6 +759,8 @@ int main(int argc, char**argv){
   
   
  
+  std::cout << " =================================== " << std::endl;
+  std::cout << " >>> Y <<<" << std::endl; 
   
   cc_DY->Divide(4,2);
   cc_DY->cd(1)->SetGrid();
@@ -910,6 +831,18 @@ int main(int argc, char**argv){
   hHS_HS2_Cal_back_Y->GetXaxis()->SetTitle("Calo back");
   hHS_HS2_Cal_back_Y->GetYaxis()->SetTitle("Y2");
   fxy->Draw("same");
+  
+  
+  
+  //---- energy distribution
+  cc_Energy_front->cd();
+  cc_Energy_front->SetGrid();  
+  h_energy_front->Draw();
+
+  cc_Energy_back->cd();
+  cc_Energy_back->SetGrid();  
+  h_energy_back->Draw();
+  
   
   gMyRootApp->Run(); 
   
