@@ -222,7 +222,7 @@ int main(int argc, char**argv){
   
   std::cout << " input files:" << std::endl;
   for (int i=0; i<input_files_vector.size(); i++) {
-   std::cout << " beam: " << input_files_vector.at(i) << std::endl;
+   std::cout << " input: " << input_files_vector.at(i) << std::endl;
   }
   
   //---- configuration (end)
