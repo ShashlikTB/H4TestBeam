@@ -3,11 +3,11 @@ Trees location
 
 Hodoscope and Shashlik merged 
 
-    /tmp/amassiro/eos/cms/store/group/comm_ecal/upgrade/testbeam/H4_Fall2014/LYSO/Merged
+    /eos/cms/store/group/comm_ecal/upgrade/testbeam/H4_Fall2014/LYSO/Merged
 
 Hodoscope and Shashlik merged, table position and energy added by automatic script
 
-    /tmp/amassiro/eos/cms/store/group/comm_ecal/upgrade/testbeam/H4_Fall2014/LYSO/Merged_and_table_and_energy
+    /eos/cms/store/group/comm_ecal/upgrade/testbeam/H4_Fall2014/LYSO/Merged_and_table_and_energy
 
 
     

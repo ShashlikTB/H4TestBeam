@@ -18,6 +18,44 @@ void CaloCluster::Reset () {
 }
 
 
+void CaloCluster::setInterCalibrationConstants(std::string nameFile){   
+  std::ifstream file (nameFile.c_str()); 
+  std::string buffer;
+  int num;
+  float value;
+  
+  std::cout << " InterCalibration Constants : " << nameFile << std::endl;
+  if(!file.is_open()){
+   std::cerr << "** ERROR: Can't open '" << nameFile << "' for input InterCalibration Constants" << std::endl;
+  }
+  else {
+   while(!file.eof()) {
+    getline(file,buffer);
+    if (buffer != "" && buffer.at(0) != '#'){ ///---> save from empty line at the end!
+     std::stringstream line( buffer );      
+     line >> num; 
+     line >> value; 
+     _intercalibration_constants[num] = value;
+     std::cout << " " << num << " :: " << value << std::endl;
+    } 
+   }
+  }
+ 
+}
+ 
+ 
+
+
+
+
+void CaloCluster::setRecHits(std::vector<TBRecHit>* rechits){
+ _rechits.clear();
+ for (Int_t j = 0; j < rechits->size(); j++){
+  _rechits.push_back(rechits->at(j));
+ }
+}
+
+
 
 //---- distance definition in calorimeter position
 float CaloCluster::DR (float x1, float x2, float y1, float y2) {
@@ -25,11 +63,7 @@ float CaloCluster::DR (float x1, float x2, float y1, float y2) {
 }
 
 
-
-
-
-//---- Reconstruct Calorimeter clusters
-void CaloCluster::doCalorimeterReconstruction( std::vector<TBRecHit>* rechits, int face, float maxDR, int fiberLevel) { 
+void CaloCluster::doCalorimeterReconstruction(int face, float maxDR, int fiberLevel){
  //----      adc              X      Y
  std::map < float, std::pair<float, float> > map_of_calo_clusters;
  float max;
@@ -37,8 +71,8 @@ void CaloCluster::doCalorimeterReconstruction( std::vector<TBRecHit>* rechits, i
  
  //---- module level
  if (fiberLevel == 0) {
-  for (Int_t j = 0; j < rechits->size(); j++){
-   TBRecHit &hit=rechits->at(j);
+  for (Int_t j = 0; j < _rechits.size(); j++){
+   TBRecHit &hit=_rechits.at(j);
    //   ped = hit.Pedestal();
    //   sig = hit.NoiseRMS();
    max = hit.AMax();
@@ -49,6 +83,8 @@ void CaloCluster::doCalorimeterReconstruction( std::vector<TBRecHit>* rechits, i
    
    int moduleID,fiberID;
    _mapper->ChannelID2ModuleFiber(channelID,moduleID,fiberID);  // get module and fiber IDs
+   
+//    std::cout << " moduleID = " << moduleID << std::endl;
    
    double x,y;
    if (fiberLevel == 0) _mapper->ModuleXY(moduleID,x,y);
@@ -61,6 +97,13 @@ void CaloCluster::doCalorimeterReconstruction( std::vector<TBRecHit>* rechits, i
    if (moduleID>0 && face<0) {
     continue;
    }
+   
+   //---- apply module intercalibration
+   if (_intercalibration_constants.find( moduleID ) != _intercalibration_constants.end()) {
+    max = max * _intercalibration_constants[moduleID];
+   }
+      
+   
    
    std::pair<float, float> xy_pair;
    xy_pair.first = x;
@@ -82,7 +125,7 @@ void CaloCluster::doCalorimeterReconstruction( std::vector<TBRecHit>* rechits, i
    map_of_calo_clusters[-max] = xy_pair;
   }
   
-//   std::cout << " size = " << map_of_calo_clusters.size() << std::endl;
+  //   std::cout << " size = " << map_of_calo_clusters.size() << std::endl;
   
  }
  
@@ -90,8 +133,8 @@ void CaloCluster::doCalorimeterReconstruction( std::vector<TBRecHit>* rechits, i
  //---- fiber level
  if (fiberLevel == 1) {
   
-  for (Int_t j = 0; j < rechits->size(); j++){
-   TBRecHit &hit=rechits->at(j);
+  for (Int_t j = 0; j < _rechits.size(); j++){
+   TBRecHit &hit=_rechits.at(j);
    //   ped = hit.Pedestal();
    //   sig = hit.NoiseRMS();
    max = hit.AMax();
@@ -123,9 +166,9 @@ void CaloCluster::doCalorimeterReconstruction( std::vector<TBRecHit>* rechits, i
   }
   
  }
-  
+ 
  //---- do clustering ----
-  int num_clusters = 0;
+ int num_clusters = 0;
  float x_cluster_logE = 0;
  float y_cluster_logE = 0;
  float weight_cluster = 0;
@@ -135,7 +178,7 @@ void CaloCluster::doCalorimeterReconstruction( std::vector<TBRecHit>* rechits, i
  float y_cluster_max = -1000;
  
  
-//  std::cout << " _vector_energies.size() = " << _vector_energies.size() << std::endl;
+ //  std::cout << " _vector_energies.size() = " << _vector_energies.size() << std::endl;
  _vector_energies.clear();
  
  //---- first calculate cluster energy
@@ -158,8 +201,8 @@ void CaloCluster::doCalorimeterReconstruction( std::vector<TBRecHit>* rechits, i
    }
   }
  }
-
-//  std::cout << " num_clusters = " << num_clusters << " energy_cluster = " << energy_cluster << std::endl;
+ 
+ //  std::cout << " num_clusters = " << num_clusters << " energy_cluster = " << energy_cluster << std::endl;
  num_clusters = 0;
  
  //---- then calculate position 
@@ -179,8 +222,8 @@ void CaloCluster::doCalorimeterReconstruction( std::vector<TBRecHit>* rechits, i
    }
   }
  }
-
-//  std::cout << " after num_clusters = " << num_clusters << std::endl;
+ 
+ //  std::cout << " after num_clusters = " << num_clusters << std::endl;
  
  float x_cluster_final = 0;
  float y_cluster_final = 0;
@@ -195,6 +238,15 @@ void CaloCluster::doCalorimeterReconstruction( std::vector<TBRecHit>* rechits, i
  }
  
  //  std::cout << " num_clusters = " << num_clusters << std::endl;
+}
+
+
+
+
+//---- Reconstruct Calorimeter clusters
+void CaloCluster::doCalorimeterReconstruction( std::vector<TBRecHit>* rechits, int face, float maxDR, int fiberLevel) { 
+ setRecHits(rechits);
+ doCalorimeterReconstruction(face, maxDR, fiberLevel);
 } 
 
 

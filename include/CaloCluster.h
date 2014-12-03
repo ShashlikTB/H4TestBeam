@@ -11,6 +11,11 @@
 #include "TBRecHit.h"
 
 
+#include <iostream>
+#include <fstream>
+#include <sstream>
+
+
 class CaloCluster {
  
 public:
@@ -33,10 +38,13 @@ public:
  
  float DR (float x1, float x2, float y1, float y2);  
  void doCalorimeterReconstruction( std::vector<TBRecHit>* rechits, int face, float maxDR, int fiberLevel = 0);
+ void doCalorimeterReconstruction(int face, float maxDR, int fiberLevel = 0);
  
+ void setRecHits(std::vector<TBRecHit>* rechits);
  void setW0(float w0) { _w0 = w0; };
  void setMapperEpoch(ULong64_t timestamp) { _mapper->SetEpoch(timestamp); };
  
+ void setInterCalibrationConstants(std::string nameFile);
  
  
  
@@ -47,6 +55,9 @@ private:
  float _energy;
   
  std::vector <float> _vector_energies;
+ std::vector<TBRecHit> _rechits;
+
+ std::map <int, float> _intercalibration_constants;
  
  Mapper* _mapper;
  

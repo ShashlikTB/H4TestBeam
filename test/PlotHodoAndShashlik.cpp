@@ -365,7 +365,9 @@ int main(int argc, char**argv){
   
   CaloCluster* caloCluster = new CaloCluster();
   caloCluster->setW0(w0);
+  caloCluster->setInterCalibrationConstants("data/InterCalibrationConstants.txt");
   
+
   
   ///---- loop ----
   for (int i=0; i<nEntries; i++) {
