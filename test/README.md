@@ -167,4 +167,11 @@ test
     ./bin/AddHodoInfo -s ../DAQ/rec_capture_1111_reco.root  -b ../DAQ/hodoscope/1111/?.root,../DAQ/hodoscope/1111/??.root,../DAQ/hodoscope/1111/???.root  -o  ../DAQ/rec_capture_1111_reco_beam.root
     ./bin/AddHodoInfo -s ../DAQ/rec_capture_1112_reco.root  -b ../DAQ/hodoscope/1112/?.root,../DAQ/hodoscope/1112/??.root,../DAQ/hodoscope/1112/???.root  -o  ../DAQ/rec_capture_1112_reco_beam.root
     
+ 
+ 
+Transform intercalibration constants
+====
+
+    for (int i=0; i<32; i++) {if (i<16) {std::cout << i+1 << "   " << cc2[i] << std::endl;} else {std::cout << -(i+1-16) << "   " << cc2[i] << std::endl;}}
+
     
