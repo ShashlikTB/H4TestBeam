@@ -366,11 +366,17 @@ int main(int argc, char**argv){
 
    
    for (unsigned int iEnergy = 0; iEnergy<caloCluster_Energy_back.size(); iEnergy++) {
-    Energy_Cal_back->Fill(caloCluster_Energy_back.at(iEnergy));
-//     std::cout << " caloCluster_Energy_back.at(" << iEnergy << ") = " << caloCluster_Energy_back.at(iEnergy) << std::endl;
+    //---- remove "noise" peak at zero -> 5 GeV threshold
+    if (caloCluster_Energy_back.at(iEnergy) / 100. > 5 ) {
+     Energy_Cal_back->Fill(caloCluster_Energy_back.at(iEnergy));
+     //     std::cout << " caloCluster_Energy_back.at(" << iEnergy << ") = " << caloCluster_Energy_back.at(iEnergy) << std::endl;
+    }
    }
    for (unsigned int iEnergy = 0; iEnergy<caloCluster_Energy_front.size(); iEnergy++) {
-    Energy_Cal_front->Fill(caloCluster_Energy_front.at(iEnergy));
+    //---- remove "noise" peak at zero -> 5 GeV threshold
+    if (caloCluster_Energy_front.at(iEnergy) / 100. > 5 ) {
+     Energy_Cal_front->Fill(caloCluster_Energy_front.at(iEnergy));
+    }
    }
    
    

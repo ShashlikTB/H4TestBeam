@@ -264,8 +264,8 @@ int main(int argc, char**argv){
   
   TApplication* gMyRootApp = new TApplication("My ROOT Application", &argc, argv);
   
-  TCanvas* cc_Energy_front = new TCanvas ("cc_Energy_front","",800,400);
-  TCanvas* cc_Energy_back  = new TCanvas ("cc_Energy_back", "",800,400);
+  TCanvas* cc_Energy_front = new TCanvas ("cc_Energy_front","",800,800);
+  TCanvas* cc_Energy_back  = new TCanvas ("cc_Energy_back", "",800,800);
   
   TH1F *h_energy_front  = new TH1F("h_energy_front", "front log ei/etot", 100, 0, 15);
   TH1F *h_energy_back   = new TH1F("h_energy_back",  "back  log ei/etot", 100, 0, 15);
@@ -273,7 +273,14 @@ int main(int argc, char**argv){
   TH2F *h_energy_front_size  = new TH2F("h_energy_front_size", "front log ei/etot vs cluster size", 100, 0, 15,17,0,17);
   TH2F *h_energy_back_size   = new TH2F("h_energy_back_size",  "back  log ei/etot vs cluster size", 100, 0, 15,17,0,17);
   
+  TH1F *Energy_Cal_back   = new TH1F("Energy_Cal_back",  "Energy Cal back " , 200, 0, 200);
+  TH1F *Energy_Cal_front  = new TH1F("Energy_Cal_front", "Energy Cal front" , 200, 0, 200);
+  Energy_Cal_back->SetLineColor(kBlue);
+  Energy_Cal_front->SetLineColor(kBlue);
+
   
+  TH1F *Energy_Beam   = new TH1F("Energy_Beam",  "Energy Beam " , 200, 0, 200);
+  Energy_Beam->SetLineColor(kRed);
   
   
   
@@ -398,11 +405,14 @@ int main(int argc, char**argv){
 //    }
    
    
+   Energy_Beam->Fill(tbspill->GetMomentum());
+
    
    
    //---- calorimeter data
    if (i==0) caloCluster->setMapperEpoch(tbevent->GetTimeStamp());
-
+   
+   
    std::vector<float> caloCluster_position_X_front;
    std::vector<float> caloCluster_position_Y_front;
    std::vector<float> caloCluster_Energy_front;
@@ -420,6 +430,7 @@ int main(int argc, char**argv){
     h_energy_front->Fill(-log(caloCluster_Energies_front.at(iComponent) / caloCluster_Energy_front.at(0)));
     h_energy_front_size->Fill(-log(caloCluster_Energies_front.at(iComponent) / caloCluster_Energy_front.at(0)),caloCluster_Energies_front.size());
    }
+   Energy_Cal_front->Fill(caloCluster_Energy_front.at(0));
    
    
    
@@ -440,6 +451,7 @@ int main(int argc, char**argv){
     h_energy_back->Fill(-log(caloCluster_Energies_back.at(iComponent) / caloCluster_Energy_front.at(0)));
     h_energy_back_size->Fill(-log(caloCluster_Energies_back.at(iComponent) / caloCluster_Energy_front.at(0)),caloCluster_Energies_back.size());
    }
+   Energy_Cal_back->Fill(caloCluster_Energy_back.at(0));
    
    
    //---- modular level DR = 5 mm
@@ -843,7 +855,7 @@ int main(int argc, char**argv){
   
   
   //---- energy distribution
-  cc_Energy_front->Divide(2,1);
+  cc_Energy_front->Divide(2,2);
   cc_Energy_front->cd(1)->SetGrid();  
   h_energy_front->Draw();
   h_energy_front->GetXaxis()->SetTitle("-log(E_{i}/E_{tot})");
@@ -851,9 +863,13 @@ int main(int argc, char**argv){
   h_energy_front_size->Draw("colz");
   h_energy_front_size->GetXaxis()->SetTitle("-log(E_{i}/E_{tot})");
   h_energy_front_size->GetYaxis()->SetTitle("cluster size");
+  cc_Energy_front->cd(3)->SetGrid();  
+  Energy_Cal_front->Draw();
+  Energy_Beam->Draw("same");
+  Energy_Cal_front->GetXaxis()->SetTitle("cluster energy [GeV]");
   
   
-  cc_Energy_back->Divide(2,1);
+  cc_Energy_back->Divide(2,2);
   cc_Energy_back->cd(1)->SetGrid();  
   h_energy_back->Draw();
   h_energy_back->GetXaxis()->SetTitle("-log(E_{i}/E_{tot})");
@@ -861,6 +877,11 @@ int main(int argc, char**argv){
   h_energy_back_size->Draw("colz");
   h_energy_back_size->GetXaxis()->SetTitle("-log(E_{i}/E_{tot})");
   h_energy_back_size->GetYaxis()->SetTitle("cluster size");
+  cc_Energy_back->cd(3)->SetGrid();  
+  Energy_Cal_back->Draw();
+  Energy_Beam->Draw("same");
+  Energy_Cal_back->GetXaxis()->SetTitle("cluster energy [GeV]");
+  
   
   
   gMyRootApp->Run(); 

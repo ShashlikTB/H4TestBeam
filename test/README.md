@@ -63,7 +63,12 @@ Add Table position and energy information
     
     ./bin/PlotHodoAndShashlik -i rec_capture_1026_reco_beam_table_energy.root,rec_capture_1012_reco_beam_table_energy.root,rec_capture_1013_reco_beam_table_energy.root,rec_capture_1081_reco_beam_table_energy.root   -f 1   -w 4.8
     ./bin/PlotHodoAndShashlik -i rec_capture_1026_reco_beam_table_energy.root,rec_capture_1012_reco_beam_table_energy.root,rec_capture_1013_reco_beam_table_energy.root,rec_capture_1081_reco_beam_table_energy.root   -f 0   -w 3.35
-    
+
+    ./bin/PlotHodoAndShashlik -i rec_capture_1081_reco_beam_table_energy.root   -f 0   -w 3.35
+    ./bin/PlotHodoAndShashlik -i rec_capture_1026_reco_beam_table_energy.root   -f 0   -w 3.35
+    ./bin/PlotHodoAndShashlik -i rec_capture_1012_reco_beam_table_energy.root   -f 0   -w 3.35
+    ./bin/PlotHodoAndShashlik -i rec_capture_1013_reco_beam_table_energy.root   -f 0   -w 3.35
+
     ./bin/PlotHodoAndShashlik -i rec_capture_1020_reco_beam_table_energy.root
     ./bin/PlotHodoAndShashlik -i rec_capture_1026_reco_beam_table_energy.root
     ./bin/PlotHodoAndShashlik -i rec_capture_1012_reco_beam_table_energy.root
