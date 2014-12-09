@@ -69,12 +69,15 @@ Add Table position and energy information
 
     50 GeV
     ./bin/PlotHodoAndShashlik -i rec_capture_1081_reco_beam_table_energy.root   -f 0   -w 3.35
+    ./bin/PlotHodoAndShashlik -i Merged_and_table_and_energy/rec_capture_1081_reco_beam_table_energy.root   -f 0   -w 3.35
     
     100 GeV
     ./bin/PlotHodoAndShashlik -i rec_capture_1026_reco_beam_table_energy.root   -f 0   -w 3.35
+    ./bin/PlotHodoAndShashlik -i Merged_and_table_and_energy/rec_capture_1026_reco_beam_table_energy.root   -f 0   -w 3.35
     
     100 GeV
     ./bin/PlotHodoAndShashlik -i rec_capture_1012_reco_beam_table_energy.root   -f 0   -w 3.35
+    ./bin/PlotHodoAndShashlik -i Merged_and_table_and_energy/rec_capture_1012_reco_beam_table_energy.root   -f 0   -w 3.35
     
     100 GeV
     ./bin/PlotHodoAndShashlik -i rec_capture_1013_reco_beam_table_energy.root   -f 0   -w 3.35
@@ -189,4 +192,10 @@ Transform intercalibration constants
 
     for (int i=0; i<32; i++) {if (i<16) {std::cout << i+1 << "   " << cc2[i] << std::endl;} else {std::cout << -(i+1-16) << "   " << cc2[i] << std::endl;}}
 
+    
+    
+    r99t test/rootLogon.C
+    TChain* tree = new TChain("t1041");
+    tree->Add("Merged_and_table_and_energy/rec_capture_*_reco_beam_table_energy.root");
+    
     
