@@ -47,6 +47,10 @@ Add Table position and energy information
     ./bin/AddInformation -i ../DAQ/rec_capture_1111_reco_beam.root -o rec_capture_1111_reco_beam_table_energy.root
     ./bin/AddInformation -i ../DAQ/rec_capture_1112_reco_beam.root -o rec_capture_1112_reco_beam_table_energy.root
 
+      
+Plot beam and calorimeter information
+====
+
     
     ./bin/PlotHodoAndShashlik -i rec_capture_1098_reco_beam_table_energy.root
     ./bin/PlotHodoAndShashlik -i rec_capture_1102_reco_beam_table_energy.root
@@ -192,10 +196,17 @@ Transform intercalibration constants
 
     for (int i=0; i<32; i++) {if (i<16) {std::cout << i+1 << "   " << cc2[i] << std::endl;} else {std::cout << -(i+1-16) << "   " << cc2[i] << std::endl;}}
 
-    
+
+Check beam energy
+====
     
     r99t test/rootLogon.C
     TChain* tree = new TChain("t1041");
     tree->Add("Merged_and_table_and_energy/rec_capture_*_reco_beam_table_energy.root");
+    tree->Draw("tbspill.GetMomentum()")
     
     
+    ls Merged_and_table_and_energy/rec_capture_*_reco_beam_table_energy.root | tr "_" " " |  awk '{print "r99t -q test/rootLogon.C Merged_and_table_and_energy/rec_capture_"$7"_reco_beam_table_energy.root  test/GetBeamInformation.C\\("$7"\\) "}'
+    ls Merged_and_table_and_energy/rec_capture_*_reco_beam_table_energy.root | tr "_" " " |  awk '{print "root -l -q test/rootLogon.C Merged_and_table_and_energy/rec_capture_"$7"_reco_beam_table_energy.root  test/GetBeamInformation.C\\("$7"\\) "}' | /bin/sh
+    
+
