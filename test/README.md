@@ -95,6 +95,12 @@ Plot beam and calorimeter information
     ./bin/PlotHodoAndShashlik -i rec_capture_1025_reco_beam_table_energy.root
     ./bin/PlotHodoAndShashlik -i rec_capture_1017_reco_beam_table_energy.root
          
+
+Calculate position resolution
+====
+
+    ./bin/PositionResolution -i Merged_and_table_and_energy/rec_capture_1012_reco_beam_table_energy.root   -f 0   -w 3.35
+    
     
 Plot Hodoscope information
 ====
