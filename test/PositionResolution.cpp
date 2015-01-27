@@ -578,30 +578,46 @@ int main(int argc, char**argv){
   fgaus->SetParameter(4,0.0);
   fgaus->SetParameter(5,0.0);
   
-  
+  float s_X_1_front;
+  float s_Y_1_front;
+  float s_R_1_front;
+  float s_X_2_front;
+  float s_Y_2_front;
+  float s_R_2_front;
 
+  float s_X_1_back;
+  float s_Y_1_back;
+  float s_R_1_back;
+  float s_X_2_back;
+  float s_Y_2_back;
+  float s_R_2_back;
+  
   cc_X->Divide(2,2);
   
   cc_X->cd(1)->SetGrid();
   hHS_HS1_Cal_front_X->Draw();
   hHS_HS1_Cal_front_X->GetXaxis()->SetTitle("calo - hodoscope");
   hHS_HS1_Cal_front_X->Fit("fgaus","R");
+  s_X_1_front = fgaus->GetParameter(2);
   
   cc_X->cd(2)->SetGrid();
   hHS_HS2_Cal_front_X->Draw();
   hHS_HS2_Cal_front_X->GetXaxis()->SetTitle("calo - hodoscope");
   hHS_HS2_Cal_front_X->Fit("fgaus","R");
-
+  s_X_2_front = fgaus->GetParameter(2);
+  
   cc_X->cd(3)->SetGrid();
   hHS_HS1_Cal_back_X->Draw();
   hHS_HS1_Cal_back_X->GetXaxis()->SetTitle("calo - hodoscope");
   hHS_HS1_Cal_back_X->Fit("fgaus","R");
-
+  s_X_1_back = fgaus->GetParameter(2);
+  
   cc_X->cd(4)->SetGrid();
   hHS_HS2_Cal_back_X->Draw();
   hHS_HS2_Cal_back_X->GetXaxis()->SetTitle("calo - hodoscope");
   hHS_HS2_Cal_back_X->Fit("fgaus","R");
-
+  s_X_2_back = fgaus->GetParameter(2);
+  
   
   cc_Y->Divide(2,2);
   
@@ -609,21 +625,25 @@ int main(int argc, char**argv){
   hHS_HS1_Cal_front_Y->Draw();
   hHS_HS1_Cal_front_Y->GetXaxis()->SetTitle("calo - hodoscope");
   hHS_HS1_Cal_front_Y->Fit("fgaus","R");
+  s_Y_1_front = fgaus->GetParameter(2);
   
   cc_Y->cd(2)->SetGrid();
   hHS_HS2_Cal_front_Y->Draw();
   hHS_HS2_Cal_front_Y->GetXaxis()->SetTitle("calo - hodoscope");
   hHS_HS2_Cal_front_Y->Fit("fgaus","R");
+  s_Y_2_front = fgaus->GetParameter(2);
   
   cc_Y->cd(3)->SetGrid();
   hHS_HS1_Cal_back_Y->Draw();
   hHS_HS1_Cal_back_Y->GetXaxis()->SetTitle("calo - hodoscope");
   hHS_HS1_Cal_back_Y->Fit("fgaus","R");
+  s_Y_1_back = fgaus->GetParameter(2);
   
   cc_Y->cd(4)->SetGrid();
   hHS_HS2_Cal_back_Y->Draw();
   hHS_HS2_Cal_back_Y->GetXaxis()->SetTitle("calo - hodoscope");
   hHS_HS2_Cal_back_Y->Fit("fgaus","R");
+  s_Y_2_back = fgaus->GetParameter(2);
   
   
   cc_R->Divide(2,2);
@@ -643,6 +663,7 @@ int main(int argc, char**argv){
   hHS_HS1_Cal_front_R->Fit("fgaus","R");
   hHS_HS1_Cal_front_R->Fit("fgaus","R");
   hHS_HS1_Cal_front_R->Fit("fgaus","R");
+  s_R_1_front = fgaus->GetParameter(2);
   
   cc_R->cd(2)->SetGrid();
   hHS_HS2_Cal_front_R->Draw();
@@ -650,6 +671,7 @@ int main(int argc, char**argv){
   hHS_HS2_Cal_front_R->Fit("fgaus","R");
   hHS_HS2_Cal_front_R->Fit("fgaus","R");
   hHS_HS2_Cal_front_R->Fit("fgaus","R");
+  s_R_2_front = fgaus->GetParameter(2);
   
   cc_R->cd(3)->SetGrid();
   hHS_HS1_Cal_back_R->Draw();
@@ -657,6 +679,7 @@ int main(int argc, char**argv){
   hHS_HS1_Cal_back_R->Fit("fgaus","R");
   hHS_HS1_Cal_back_R->Fit("fgaus","R");
   hHS_HS1_Cal_back_R->Fit("fgaus","R");
+  s_R_1_back = fgaus->GetParameter(2);
   
   cc_R->cd(4)->SetGrid();
   hHS_HS2_Cal_back_R->Draw();
@@ -664,6 +687,30 @@ int main(int argc, char**argv){
   hHS_HS2_Cal_back_R->Fit("fgaus","R");
   hHS_HS2_Cal_back_R->Fit("fgaus","R");
   hHS_HS2_Cal_back_R->Fit("fgaus","R");
+  s_R_2_back = fgaus->GetParameter(2);
+  
+  
+  ofstream myfile;
+  myfile.open ("position_resolution.txt",  std::ofstream::app);
+  myfile << Energy_Beam << "   ";
+  myfile << "  " << s_X_1_front;
+  myfile << "  " << s_Y_1_front;
+  myfile << "  " << s_R_1_front;
+  myfile << "  " << s_X_2_front;
+  myfile << "  " << s_Y_2_front;
+  myfile << "  " << s_R_2_front;
+  myfile << "  " ;
+  myfile << "  " << s_X_1_back;
+  myfile << "  " << s_Y_1_back;
+  myfile << "  " << s_R_1_back;
+  myfile << "  " << s_X_2_back;
+  myfile << "  " << s_Y_2_back;
+  myfile << "  " << s_R_2_back;
+  myfile << std::endl;
+  myfile.close(); 
+  
+  
+  
   
   gMyRootApp->Run(); 
   
