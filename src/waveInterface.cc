@@ -265,8 +265,6 @@ void waveInterface::makeButtons()  {
   gClient->GetColorByName("white", white);
 
   _actionFrame = new TGHorizontalFrame(_buttonFrame); 
-
-
   
 
   _loadBN = new TGTextButton(_actionFrame, "&Load File");
@@ -321,7 +319,6 @@ void waveInterface::makeButtons()  {
   _FMain->AddFrame(_spectrumFrame, new TGLayoutHints(kLHintsExpandX | kLHintsExpandY)); 
   _FMain->AddFrame(_buttonFrame, new TGLayoutHints(kLHintsExpandX,10,10,10,1)); 
 
-
 }
 
 
@@ -370,9 +367,6 @@ void waveInterface::addHistogramPane() {
     _FMain->Resize(); 
   }
   
-
-
-
 }
 
 
@@ -400,16 +394,12 @@ void waveInterface::updateChannelSelection() {
   }
   std::cout << std::endl; 
 
-
-      
-  
-
 } 
 
 void waveInterface::updateBoardSelection(Int_t brd) {
 
   std::cout << "Updating board selection" << std::endl; 
-  std::cout << "Chose Board: " << brd << std::endl; 
+  std::cout << "Choose Board: " << brd << std::endl; 
 
   TGRadioButton *btn; 
   for (Int_t i = 0; i < _boardList.GetEntries(); i++) { 
