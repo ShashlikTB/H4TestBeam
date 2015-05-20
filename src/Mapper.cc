@@ -37,7 +37,7 @@ void Mapper::SetEpoch(unsigned long ts){  // redundant data here, clean this up
     MakeMaps();
   }
  else if (ts>=TBEvent::H4TB_MAP5 && FIBERMAP!=FIBERMAP_MAY1815){
-   FIBERMAP=FIBERMAP_NOVEMBER0114;
+   FIBERMAP=FIBERMAP_MAY1815;
    MakeMaps();
  }
 

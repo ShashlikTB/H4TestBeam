@@ -20,6 +20,7 @@ testChannelMap(TBEvent().H4TB_MAP1,"H4TB_MAP1")  # October 29 2014
 testChannelMap(TBEvent().H4TB_MAP2,"H4TB_MAP2")  # October 30 2014
 testChannelMap(TBEvent().H4TB_MAP3,"H4TB_MAP3")  # October 31 2014
 testChannelMap(TBEvent().H4TB_MAP4,"H4TB_MAP4")  # November 01 2014
+testChannelMap(TBEvent().H4TB_MAP5,"H4TB_MAP5")  # May 18 2015
 
 
 
