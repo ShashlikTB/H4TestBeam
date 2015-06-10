@@ -89,13 +89,13 @@ void Hodoscope::FillHodo(){
  
  for(unsigned int i=0;i<_nAdcChannels;++i){
   
-  if(_adcBoard[i]==0x08030001 || _adcBoard[i]==0x08030002){
+  if(_adcBoard[i]==0x08020001 || _adcBoard[i]==0x08020002){
    
    int pos = -1; // here is where the real hodoscope mapping is done
-   if (_adcBoard[i]==0x08030001){
+   if (_adcBoard[i]==0x08020001){
     pos = (_adcChannel[i]<2) ? hodoY2 : hodoX2;
    }
-   else if (_adcBoard[i]==0x08030002){
+   else if (_adcBoard[i]==0x08020002){
     pos = (_adcChannel[i]<2) ? hodoY1 : hodoX1;
    }
    std::vector<int> *fiberorder = (bool)( _adcChannel[i]&0b1) ? &_fiberOrderB : &_fiberOrderA;
