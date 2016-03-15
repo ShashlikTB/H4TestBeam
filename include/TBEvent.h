@@ -6,6 +6,7 @@
 #include "Hodoscope.h"
 #include "Mapper.h"
 #include <vector>
+#include <algorithm>
 
 using std::vector;
 
@@ -164,46 +165,50 @@ class TBEvent : public TObject {
   static const ULong64_t PULSESHAPE_T3=635435712000000000L;  
   static const ULong64_t PULSESHAPE_T4=635437953000000000L;  
 
-
+  // event flags
+  static const UInt_t F_OVERFLOW=1;
+  static const UInt_t F_NOTIME=2;
+  static const UInt_t F_FRAGMENT=4;
   TBEvent();
 
   ~TBEvent(){};
   
-  
   void Reset();    // clear data
 
   // getters (tbd - return (const) references, not copies, where appopriate)
-  Int_t NPadeChan() const {return padeChannel.size();}
+  Int_t NPadeChan() const {return padeChannel.size();}  // total number of channels
+  Int_t NPadeChan(UInt_t boardID); // number of channels associated w/ boardID
   PadeChannel GetPadeChan(const int idx) const {return padeChannel[idx];}
   PadeChannel GetLastPadeChan() const {return padeChannel.back();}
   Hodoscope GetHSChan() {return hodoscope;}
-  //WCChannel GetWCChan(const int idx) {return wc[idx];}
-  //Int_t GetWCHits() const {return wc.size();}
-  //vector<WCChannel> GetWChitsX(Int_t wc, Int_t *min=0, Int_t* max=0) const;
-  //vector<WCChannel> GetWChitsY(Int_t wc, Int_t *min=0, Int_t* max=0) const;
   static TBRun GetRunPeriod(ULong64_t padeTime);
   TBRun GetRunPeriod() const;
   ULong64_t GetTimeStamp();  // time stamp from 1st PADE channel
-
-
+  UInt_t GetFlags() const {return _flags;}
+  /// check if data is present for boardID
+  /// return index of first channel for this board
+  int FindBoard(UInt_t boardID); 
+  Int_t GetTime() {return _time;}
+  
   // setters
+  void SetFlags(UInt_t flags) {_flags=flags;}
+  void AddFlags(UInt_t flags) {_flags|=flags;}
+  void SetTime(Int_t time) {_time=time;}
   void SetPadeChannel(const PadeChannel p, Int_t i) {padeChannel[i]=p;}
   void FillPadeChannel(ULong64_t ts, UShort_t transfer_size, 
 		       UShort_t  board_id, UInt_t hw_counter, 
-		       UInt_t ch_number,  UInt_t eventnum, Int_t *wform, Bool_t isLaser=false);
-  // void AddWCHit(UChar_t num, UChar_t wire, UShort_t count);
-//   void SetHodoScopeData(Int_t spillNumber, Int_t eventNum, Int_t * adcChannel, Int_t *adcData);
+		       UInt_t ch_number,  UInt_t eventnum, Int_t *wform,
+		       Bool_t isLaser=false, UInt_t flags=0);
   void SetHodoScopeData   (Int_t runNumber, Int_t spillNumber, Int_t eventNum,  unsigned int *adcData,  unsigned int *adcBoard,  unsigned int * adcChannel, Int_t nAdcChannels);
   void SetWireChambersData(Int_t runNumber, Int_t spillNumber, Int_t eventNum,  unsigned int *tdcData,  unsigned int *tdcBoard,  unsigned int * tdcChannel, Int_t nTdcChannels);
   
   void SetHodoScope (Hodoscope inhodoscope) { hodoscope = inhodoscope; }
-
+  void SortPadeChannels(){std::sort(padeChannel.begin(),padeChannel.end());}
   private:
   std::vector<PadeChannel> padeChannel;
-  // vector<WCChannel> wc; //replace w/ hodoscope data
-//   std::vector<Hodoscope> hodoscope;  // the hodoscope data
   Hodoscope hodoscope;  // the hodoscope data
- 
+  UInt_t _flags;
+  Int_t _time;  /// event time in useconds from 1st in spill (-1 is unknown)
 };
 
 

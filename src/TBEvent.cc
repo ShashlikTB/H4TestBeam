@@ -13,18 +13,18 @@
 using namespace std;
 
 
-TBEvent::TBEvent(){
+TBEvent::TBEvent() :_flags(0){
 }
 
 void TBEvent::Reset(){
   padeChannel.clear();
-  //wc.clear();
+  _flags=0;
 }
 
 
 void TBEvent::FillPadeChannel(ULong64_t ts, UShort_t transfer_size, 
 			      UShort_t  board_id, UInt_t hw_counter, 
-			      UInt_t ch_number,  UInt_t eventnum, Int_t *wform, Bool_t isLaser){
+			      UInt_t ch_number,  UInt_t eventnum, Int_t *wform, Bool_t isLaser, UInt_t flags){
 
   Mapper *mapper=Mapper::Instance(ts);
   //  mapper->SetEpoch(ts);
@@ -34,6 +34,8 @@ void TBEvent::FillPadeChannel(ULong64_t ts, UShort_t transfer_size,
   }
   PadeChannel pc;  // todo make constructor w/ fill inputs
   pc.Fill(ts, transfer_size, board_id, hw_counter, ch_number, eventnum, wform, isLaser);
+  pc.SetFlags(flags);
+  //if (flags>0) pc.Dump();
   padeChannel.push_back(pc);
 }
 
@@ -174,4 +176,19 @@ ULong64_t TBEvent::GetTimeStamp(){
   return pc.GetTimeStamp();
 }
 
+
+int TBEvent::FindBoard(UInt_t boardID){
+  for (int idx=0; idx<NPadeChan(); idx++){
+    if (padeChannel[idx].GetBoardID()==boardID) return idx;
+  }
+  return -1;
+}
+
+Int_t TBEvent::NPadeChan(UInt_t boardID){
+  int count=0;
+  for (int idx=0; idx<NPadeChan(); idx++){
+    if (padeChannel[idx].GetBoardID()==boardID) count++;
+  }
+  return count;
+}
 

@@ -23,7 +23,8 @@ void PadeChannel::Dump() const{
        << _hw_counter << " ch#: " <<  _ch_number << " event#: " 
        << _eventnum << endl << "samples=> " << (hex);
   for (int i=0; i<N_PADE_SAMPLES; i++) cout << _wform[i] << " ";
-  cout << (dec) << endl << "status:" << _status << endl;
+  cout << endl << "status:" << _status
+       << " flags:" << _flags << (dec) << endl;
 }
 
 
@@ -38,6 +39,7 @@ void PadeChannel::Fill(ULong64_t ts, UShort_t transfer_size,
   _eventnum = eventnum;
   _max=0;
   _status=0;
+  _time=0;
   if (isLaser) _status|=kLaser;
   
   // range to search for signal peaks
@@ -45,7 +47,7 @@ void PadeChannel::Fill(ULong64_t ts, UShort_t transfer_size,
   int tmax=70;
   
   // This handles the start of testbeam2 data where the first
-  // 32 waveform samples are not valid wave data.  No porch was present in April 2014
+  // 32 shorts are not valid wave data.  No porch was present in April 2014
   if (_ts>TBEvent::END_TBEAM1 && _ts<TBEvent::START_PORCH15) { // shift wform array by 32 counts
     for (int i=0; i<N_PADE_DATA-32; i++) wform[i]=wform[i+32];
     for (int i=N_PADE_DATA-32; i<N_PADE_DATA; i++) wform[i]=wform[N_PADE_DATA-33];
@@ -53,9 +55,13 @@ void PadeChannel::Fill(ULong64_t ts, UShort_t transfer_size,
     _status|=kPorch32;
   } // The current porch is 15 samples
   else if (_ts>=TBEvent::START_PORCH15){
-    for (int i=0; i<N_PADE_DATA-15; i++) wform[i]=wform[i+15];
-    for (int i=N_PADE_DATA-15; i<N_PADE_DATA; i++) wform[i]=wform[N_PADE_DATA-16];
-    N_PADE_SAMPLES=N_PADE_DATA-15;
+    if (eventnum==0) {
+      _time=0;
+    }
+    else _time = wform[0]<<16 | wform[1];
+    for (int i=0; i<N_PADE_DATA-16; i++) wform[i]=wform[i+16];
+    for (int i=N_PADE_DATA-16; i<N_PADE_DATA; i++) wform[i]=wform[N_PADE_DATA-17];
+    N_PADE_SAMPLES=N_PADE_DATA-16;
     _status|=kPorch15;
   }
 

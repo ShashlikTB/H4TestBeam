@@ -10,7 +10,7 @@
   const Int_t PADE_SAMPLE_RANGE=4; // +-4 count window b/c above is guesstimate
 
 class PadeChannel : public TObject {
-  ClassDef(PadeChannel,1); 
+  ClassDef(PadeChannel,2); 
  public:
   void Fill(ULong64_t ts, UShort_t transfer_size, 
 	    UShort_t  board_id, UInt_t hw_counter, 
@@ -44,21 +44,34 @@ class PadeChannel : public TObject {
   static PulseFit FitPulse(PadeChannel *pc);
   int GetPorch(ULong64_t ts=0) const;
   void SetAsLaser();
-  
+  UInt_t GetTime() const {return _time;} /// time since 1st trigger in useconds
+  UInt_t GetFlags() const {return _flags;}
+  void SetFlags(UInt_t flags) {_flags=flags;}
 
+  bool operator < (const PadeChannel& str) const{
+    return _board_id*100+_ch_number < str._board_id*100+str._ch_number;
+  }
+  
   static const Int_t N_PADE_DATA=120;     ///< fixed in FW
   static const Int_t N_PADE_PORCH=15;     ///< diagnostic info in data payload
   static Int_t N_PADE_SAMPLES;
   static const Int_t PADE_PED_SAMPLES=20;
 
-  /// PadeChannel flags
-  enum Flags {
+  /// PadeChannel data format flags
+  enum Formats {
     kPorch0=0,   ///< no porch
     kPorch15=1,  ///< 15 sample porch
     kPorch32=2,  ///< 32 sample porch 
-    kLaser=16,   ///< Laser data flag
+    kLaser=16    ///< Laser data flag
   };
-
+  /// Pade Channel error flags
+  enum Flags {
+    kNonSequential=1,
+    kPacketCount=1<<1,
+    kSamples=1<<2,
+    kSaturated=1<<3   
+  };
+  
   // private:
   ULong64_t     _ts;
   UShort_t      _transfer_size;
@@ -67,11 +80,13 @@ class PadeChannel : public TObject {
   UInt_t        _ch_number;
   UInt_t        _eventnum;
   UShort_t      _wform[N_PADE_DATA];
-  UInt_t        _max;    // max ADC sample
+  UInt_t        _max;    /// max ADC sample
   Float_t       _ped;
   Float_t       _pedsigma;
-  Int_t         _peak;   // sample number for peak
+  Int_t         _peak;   /// sample number for peak
   UShort_t      _status;
+  UInt_t        _flags;
+  UInt_t        _time; /// time since first trigger in useconds
 };
 
 

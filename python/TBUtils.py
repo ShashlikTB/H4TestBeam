@@ -43,6 +43,7 @@ def LoadLibs(tblib,*libs):
 class Logger():
     def __init__(self,max=1):
         self.warnings={}
+        self.info={}
         self.RED='\033[91m'
         self.COL_OFF='\033[0m'
         self.max=max
@@ -54,8 +55,17 @@ class Logger():
         self.stdout = open(self.logfile, 'w') # output socket
     def Info(self,*arg):
         msg="Info: "+ccat(*arg)+"\n"
+        if msg in self.info: self.info[msg]=self.info[msg]+1
+        else: self.info[msg]=1
         sys.stdout.write(msg)   
-        if (self.logfile !=""): self.stdout.write("Info: "+msg+"\n")  
+        if (self.logfile !=""): self.stdout.write(msg+"\n")
+    def Info1(self,*arg):
+        msg="Info: "+ccat(*arg)+"\n"
+        if msg in self.info: self.info[msg]=self.info[msg]+1
+        else: self.info[msg]=1
+        if self.info[msg]<=self.max: 
+            sys.stdout.write(msg)   
+            if (self.logfile !=""): self.stdout.write("Info: "+msg+"\n")
     def Warn(self,*arg):
         msg="Warning: "+ccat(*arg)+"\n"
         if msg in self.warnings: self.warnings[msg]=self.warnings[msg]+1
@@ -138,7 +148,7 @@ def ParsePadeBoardHeader(padeline):
     boardID=int(padeline[5])
     status=int(padeline[7],16)
     trgStatus=int(padeline[9],16)
-    events=int(padeline[13],16)
+    events=int(padeline[13],16)+1
     memReg=int(padeline[16],16)
     trigPtr=int(padeline[19],16)
     pTemp=int(padeline[21],16)

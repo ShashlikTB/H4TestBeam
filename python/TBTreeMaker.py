@@ -5,6 +5,7 @@
 # 4/30/2014: BH big cleanup and new command line args
 # 7/1/2014: BH - read table positions file, if present
 # 10/24/2014: BH - rewrite for H4 testbeam
+# 9/3/2015: BH - add option to process a fixed number of spills
 ###############################################################################
 
 import os, re, glob, sys, getopt, commands
@@ -32,6 +33,7 @@ def usage():
     print "       A PADE file must be provided, Beam data is optional"
     print "      -n max_events  : Maximum (requested) number of events to read"
     print "                       Always reads at least 1 spill"
+    print "      -s max_spills  : Maximum number of spills to process"
     print "      -o DIR         : Output dir, instead of default = location of input file" 
     print "      -f             : Overwrite existing root files"
     print "      -l             : Copy logger messages to [root file basename].log"
@@ -61,10 +63,12 @@ def fillTree(tree, eventDict, tbspill):
 	return ndrop
 
 
-
-def filler(padeDat, beamDat, NEventLimit=NMAX, forceFlag=False, outDir=""):
+# main work is done here, look though the data file find spills and events, then fill the tree
+# after processing each spill
+def filler(padeDat, beamDat, NEventLimit=NMAX, NSpillLimit=NMAX,
+           forceFlag=False, outDir=""):
     global NPADES
-    print padeDat, beamDat, NEventLimit, forceFlag
+    #print padeDat, beamDat, NEventLimit, NSPillLimit, forceFlag
     #=======================================================================# 
     #  Declare an element of the event class for our event                  #
     #=======================================================================#
@@ -163,7 +167,7 @@ def filler(padeDat, beamDat, NEventLimit=NMAX, forceFlag=False, outDir=""):
             if nSpills>0 and not skipToNextSpill:  # if we processed a good spill, fill the tree
                 ndrop=fillTree(BeamTree,eventDict,tbspill)
                 if not ndrop==0: logger.Warn(ndrop,"incomplete events dropped from tree, spill",nSpills)
-            if (nEventsTot>=NEventLimit): break
+            if (nEventsTot>=NEventLimit or nSpills==NSpillLimit): break
 
             tbspill.Reset();
             logger.Info(padeline)
@@ -474,10 +478,11 @@ def filler(padeDat, beamDat, NEventLimit=NMAX, forceFlag=False, outDir=""):
 
 if __name__ == '__main__': 
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "n:P:B:o:flv")
+        opts, args = getopt.getopt(sys.argv[1:], "n:s:P:B:o:flv")
     except getopt.GetoptError as err: usage()
 
     NEventLimit=NMAX
+    NSpillLimit=NMAX
     PadeFile=""
     BeamFile=""
     forceFlag=False
@@ -486,6 +491,7 @@ if __name__ == '__main__':
     outDir=""
     for o, a in opts:
         if o == "-n": NEventLimit=int(a)
+        elif o == "-s" : NSpillLimit=int(a)
         elif o == "-P": PadeFile=a
         elif o == "-B": BeamFile=a
         elif o == "-o": outDir=a
@@ -506,7 +512,7 @@ if __name__ == '__main__':
     LoadLibs("TBLIB","libTB.so")
     print "lib loaded"
     
-    filler(PadeFile,BeamFile,NEventLimit,forceFlag,outDir)
+    filler(PadeFile,BeamFile,NEventLimit,NSpillLimit,forceFlag,outDir)
 
     print "Exiting" 
     exit(0)
