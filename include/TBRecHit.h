@@ -33,7 +33,7 @@ class TBRecHit : public TObject {
     kZSP=128,           ///< signal is below ZSP threshold
     kMonitor=256,       ///< monitor for laser pulse, no calorimeter connection
     kCalibrated=512,    ///< set if calibration applied
-    kUnknown=2<<31      ///< set for weirdness
+    kUnknown=2<<29      ///< set for weirdness
   };
   /// Constructor
   TBRecHit(PadeChannel *pc=0, Float_t zsp=0, UInt_t options=0);
