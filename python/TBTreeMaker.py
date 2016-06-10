@@ -9,7 +9,6 @@
 ###############################################################################
 
 import os, re, glob, sys, getopt, commands
-#import cProfile, pstats, StringIO
 from ROOT import *
 from string import split
 from array import array
@@ -18,8 +17,7 @@ from datetime import *
 
 ##### Parameter block #####
 
-DEBUG_LEVEL = 0   # set to 0 for normal running
-#DEBUG_LEVEL = 4   # set to 0 for normal running
+DEBUG_LEVEL = 0   # set to 0 for normal running (0..4)
 NMAX = 1000000    # max events to process.  Note: this is approximate, b/c processing occurs by spill
 NPADES=0      # counted from spill headers
 MASTERID = 0  # now read from spill headers
@@ -162,7 +160,7 @@ def filler(padeDat, beamDat, NEventLimit=NMAX, NSpillLimit=NMAX,
 
         ###########################################################
         ############### Reading spill header information ##########
-
+        if "this spill is fake" in padeline: continue
         if "starting spill" in padeline:   # new spill condition
             if nSpills>0 and not skipToNextSpill:  # if we processed a good spill, fill the tree
                 ndrop=fillTree(BeamTree,eventDict,tbspill)
@@ -487,7 +485,7 @@ if __name__ == '__main__':
     BeamFile=""
     forceFlag=False
     logToFile=False
-    verbose=false
+    verbose=False
     outDir=""
     for o, a in opts:
         if o == "-n": NEventLimit=int(a)
