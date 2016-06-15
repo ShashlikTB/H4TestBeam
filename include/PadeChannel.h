@@ -34,11 +34,12 @@ class PadeChannel : public TObject {
   Int_t __DATASIZE() const {return N_PADE_DATA;}
   void GetXYZ(double &x, double &y, double &z);
   /// Return pedesdal and its sigma.  
-  /** This method does the calculation.  The first 10 wave form samples are used.**/
+  /** This method does the calculation.  The first 10 waveform samples are used.**/
   void GetPedestal(double &ped, double &stdev);
   Double_t GetPedestal() {return _ped;}
   Double_t GetPedSigma() {return _pedsigma;}
   Double_t GetAmplitude() {return _max-_ped;}
+  Double_t GetWaveRMS();  /// caculate RMS over entire waveform, useful for noise measurements
   void GetHist(TH1F* h);
   Bool_t LaserData(){return _status & kLaser;}
   static PulseFit FitPulse(PadeChannel *pc);

@@ -81,6 +81,16 @@ void PadeChannel::Fill(ULong64_t ts, UShort_t transfer_size,
   _pedsigma=s;
 }
 
+// calculate RMS amplitude over entire waveform
+Double_t PadeChannel::GetWaveRMS(){
+  int nsamples=N_PADE_DATA;
+  if (_status&kPorch32) nsamples=N_PADE_DATA-32; // latest FW has 32 sample "porch"
+  double sum2=0;
+  for (int i=0; i<nsamples; i++) sum2+=(_wform[i]-_ped)*(_wform[i]-_ped);
+  return TMath::Sqrt(sum2/nsamples);
+}
+
+
 void PadeChannel::GetHist(TH1F *h){
   TString ti;
   ti.Form("Event %d : Board %d, channel %d;Sample;ADC Counts",

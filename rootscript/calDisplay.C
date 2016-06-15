@@ -16,8 +16,9 @@ const int MAXADC=4095;
 // inputs data file and event in file to display (default is to integrate all)
 void calDisplay(TString fdat, int ndisplay=-1){
 
-  bool DO_TIMING=false;  // more for experts
-
+  bool DO_TIMING=true;  // more for experts
+  bool DO_MAXLOCATION=false;
+  
   gStyle->SetOptStat(0);
 
   TFile *f = new TFile(fdat);
@@ -26,62 +27,56 @@ void calDisplay(TString fdat, int ndisplay=-1){
     return;
   }
   
-  Bool_t singleEvent=ndisplay>=0;
+  Bool_t singleEvent=(ndisplay>=0);
   Mapper *mapper=Mapper::Instance();
 
-  // Histograms of ADC counts
-  TH2F *hModU=new TH2F("hModU","Modules UpSteam RO;X [mm]; Y [mm]",
+  // Peak heights = Peak-Pedestal
+  TH2F *hModU=new TH2F("hModU","Modules UpSteam;X [mm]; Y [mm]",
 		       4,MIN_EDGE_X,MAX_EDGE_X,4,MIN_EDGE_Y,MAX_EDGE_Y);
-  TH2F *hModD=new TH2F("hModD","Modules DownStream RO;X [mm]; Y [mm]",
+  TH2F *hModD=new TH2F("hModD","Modules DownStream;X [mm]; Y [mm]",
 		       4,MIN_EDGE_X,MAX_EDGE_X,4,MIN_EDGE_Y,MAX_EDGE_Y);
-  TH2F *hChanU=new TH2F("hChanU","Channels UpStream RO;X [mm]; Y [mm]",
+  TH2F *hChanU=new TH2F("hChanU","Channels UpStream;X [mm]; Y [mm]",
 			8,MIN_EDGE_X,MAX_EDGE_X,8,MIN_EDGE_Y,MAX_EDGE_Y);
-  TH2F *hChanD=new TH2F("hChanD","Channels DownStream RO;X [mm]; Y [mm]",
-			8,MIN_EDGE_X,MAX_EDGE_X,8,MIN_EDGE_Y,MAX_EDGE_Y);
-
-
-  TH2F *hModUmax=new TH2F("hModUmax","Maximum Deposition Modules UpSteam RO;X [mm]; Y [mm]",
-		       4,MIN_EDGE_X,MAX_EDGE_X,4,MIN_EDGE_Y,MAX_EDGE_Y);
-  TH2F *hModDmax=new TH2F("hModDmax","Maximum Deposition Modules DownStream RO;X [mm]; Y [mm]",
-		       4,MIN_EDGE_X,MAX_EDGE_X,4,MIN_EDGE_Y,MAX_EDGE_Y);
-  TH2F *hChanUmax=new TH2F("hChanUmax","Maximum Deposition Channels UpStream RO;X [mm]; Y [mm]",
-			8,MIN_EDGE_X,MAX_EDGE_X,8,MIN_EDGE_Y,MAX_EDGE_Y);
-  TH2F *hChanDmax=new TH2F("hChanDmax","Maximum Deposition Channels DownStream RO;X [mm]; Y [mm]",
+  TH2F *hChanD=new TH2F("hChanD","Channels DownStream;X [mm]; Y [mm]",
 			8,MIN_EDGE_X,MAX_EDGE_X,8,MIN_EDGE_Y,MAX_EDGE_Y);
 
+  // Location of maximum hit
+  TH2F *hModUmax=new TH2F("hModUmax","Maximum Deposition Modules UpSteam;X [mm]; Y [mm]",
+			  4,MIN_EDGE_X,MAX_EDGE_X,4,MIN_EDGE_Y,MAX_EDGE_Y);
+  TH2F *hModDmax=new TH2F("hModDmax","Maximum Deposition Modules DownStream;X [mm]; Y [mm]",
+			  4,MIN_EDGE_X,MAX_EDGE_X,4,MIN_EDGE_Y,MAX_EDGE_Y);
+  TH2F *hChanUmax=new TH2F("hChanUmax","Maximum Deposition Channels UpStream;X [mm]; Y [mm]",
+			   8,MIN_EDGE_X,MAX_EDGE_X,8,MIN_EDGE_Y,MAX_EDGE_Y);
+  TH2F *hChanDmax=new TH2F("hChanDmax","Maximum Deposition Channels DownStream;X [mm]; Y [mm]",
+			   8,MIN_EDGE_X,MAX_EDGE_X,8,MIN_EDGE_Y,MAX_EDGE_Y);
 
-  TH2F *hModUmaxW=new TH2F("hModUmaxW","Weighter Maximum Deposition Modules UpSteam RO;X [mm]; Y [mm]",
-		       4,MIN_EDGE_X,MAX_EDGE_X,4,MIN_EDGE_Y,MAX_EDGE_Y);
-  TH2F *hModDmaxW=new TH2F("hModDmaxW","Weighted Maximum Deposition Modules DownStream RO;X [mm]; Y [mm]",
-		       4,MIN_EDGE_X,MAX_EDGE_X,4,MIN_EDGE_Y,MAX_EDGE_Y);
-  TH2F *hChanUmaxW=new TH2F("hChanUmaxW","Weighted Maximum Deposition Channels UpStream RO;X [mm]; Y [mm]",
-			8,MIN_EDGE_X,MAX_EDGE_X,8,MIN_EDGE_Y,MAX_EDGE_Y);
-  TH2F *hChanDmaxW=new TH2F("hChanDmaxW","Weighted Maximum Deposition Channels DownStream RO;X [mm]; Y [mm]",
-			8,MIN_EDGE_X,MAX_EDGE_X,8,MIN_EDGE_Y,MAX_EDGE_Y);
+  //  Location of maximum hit (Energy weighted)
+  TH2F *hModUmaxW=new TH2F("hModUmaxW","Weighter Maximum Deposition Modules UpSteam;X [mm]; Y [mm]",
+			   4,MIN_EDGE_X,MAX_EDGE_X,4,MIN_EDGE_Y,MAX_EDGE_Y);
+  TH2F *hModDmaxW=new TH2F("hModDmaxW","Weighted Maximum Deposition Modules DownStream;X [mm]; Y [mm]",
+			   4,MIN_EDGE_X,MAX_EDGE_X,4,MIN_EDGE_Y,MAX_EDGE_Y);
+  TH2F *hChanUmaxW=new TH2F("hChanUmaxW","Weighted Maximum Deposition Channels UpStream;X [mm]; Y [mm]",
+			    8,MIN_EDGE_X,MAX_EDGE_X,8,MIN_EDGE_Y,MAX_EDGE_Y);
+  TH2F *hChanDmaxW=new TH2F("hChanDmaxW","Weighted Maximum Deposition Channels DownStream;X [mm]; Y [mm]",
+			    8,MIN_EDGE_X,MAX_EDGE_X,8,MIN_EDGE_Y,MAX_EDGE_Y);
 
 
-  hModU->SetMinimum(0);
-  hModD->SetMinimum(0);
-  hChanU->SetMinimum(0);
-  hChanD->SetMinimum(0);
+  hModU->SetMinimum(0); hModD->SetMinimum(0);
+  hChanU->SetMinimum(0); hChanD->SetMinimum(0);
   hChanU->GetXaxis()->SetNdivisions(8,0);
   hChanU->GetYaxis()->SetNdivisions(8,0);
   hChanD->GetXaxis()->SetNdivisions(8,0);
   hChanD->GetYaxis()->SetNdivisions(8,0);
 
-  hModUmax->SetMinimum(0);
-  hModDmax->SetMinimum(0);
-  hChanUmax->SetMinimum(0);
-  hChanDmax->SetMinimum(0);
+  hModUmax->SetMinimum(0); hModDmax->SetMinimum(0);
+  hChanUmax->SetMinimum(0); hChanDmax->SetMinimum(0);
   hChanUmax->GetXaxis()->SetNdivisions(8,0);
   hChanUmax->GetYaxis()->SetNdivisions(8,0);
   hChanDmax->GetXaxis()->SetNdivisions(8,0);
   hChanDmax->GetYaxis()->SetNdivisions(8,0);
 
-  hModUmaxW->SetMinimum(0);
-  hModDmaxW->SetMinimum(0);
-  hChanUmaxW->SetMinimum(0);
-  hChanDmaxW->SetMinimum(0);
+  hModUmaxW->SetMinimum(0); hModDmaxW->SetMinimum(0);
+  hChanUmaxW->SetMinimum(0); hChanDmaxW->SetMinimum(0);
   hChanUmaxW->GetXaxis()->SetNdivisions(8,0);
   hChanUmaxW->GetYaxis()->SetNdivisions(8,0);
   hChanDmaxW->GetXaxis()->SetNdivisions(8,0);
@@ -105,11 +100,11 @@ void calDisplay(TString fdat, int ndisplay=-1){
     hChanUmaxW->SetMaximum(MAXADC);
   }
   
-  // histograms of timing 
-  TH2F * hModD_time = (TH2F*)hModU->Clone("hModD_time");
+  // Location of peak in time samples
+  TH2F * hModD_time = (TH2F*)hModD->Clone("hModD_time");
   TH2F * hModU_time = (TH2F*)hModU->Clone("hModU_time");
-  TH2F * hChanD_time = (TH2F*)hModU->Clone("hChanD_time");
-  TH2F * hChanU_time = (TH2F*)hModU->Clone("hChanU_time");
+  TH2F * hChanD_time = (TH2F*)hChanD->Clone("hChanD_time");
+  TH2F * hChanU_time = (TH2F*)hChanU->Clone("hChanU_time");
 
   TBEvent *event = new TBEvent();
   TTree *t1041 = (TTree*)f->Get("t1041");
@@ -117,6 +112,7 @@ void calDisplay(TString fdat, int ndisplay=-1){
   bevent->SetAddress(&event);
   bool haverechits=false;
   vector<TBRecHit> *rechits=0;
+  // Use RECO branch = pulse fits if available
   if(t1041->GetListOfBranches()->FindObject("tbrechits")) {
     cout <<"found rechits"<<endl;
     t1041->SetBranchAddress("tbrechits",&rechits);
@@ -131,6 +127,7 @@ void calDisplay(TString fdat, int ndisplay=-1){
   }
   
   int nEntries=0;
+  int npadeCh=0;
   for (Int_t i=start; i<end; i++) {
     t1041->GetEntry(i);
     if (i==0) mapper->SetEpoch(event->GetTimeStamp());
@@ -148,13 +145,14 @@ void calDisplay(TString fdat, int ndisplay=-1){
     float c_d_maxX = -99;
     float c_d_maxY = -99;
 
-    for (Int_t j = 0; j < event->NPadeChan(); j++){
-      if (haverechits && j>=(int)rechits->size()) break;
-
+    // loop over PADE channels
+    npadeCh=event->NPadeChan();
+    for (Int_t j = 0; j < npadeCh; j++){
       double ped,sig, max, maxTime;
       int channelID;
 
       if (haverechits){
+	if (j>=(int)rechits->size()) break;
 	TBRecHit &hit=rechits->at(j);
 	ped=hit.Pedestal();
 	sig=hit.NoiseRMS();
@@ -162,29 +160,30 @@ void calDisplay(TString fdat, int ndisplay=-1){
 	maxTime=hit.TRise();
 	channelID=hit.GetChannelID();
       }
-      else{
+      else {
 	PadeChannel pch = event->GetPadeChan(j);
 	pch.GetPedestal(ped,sig);
 	max = pch.GetMax()-ped;
+	//cout << "max " << max << endl;
 	maxTime = pch.GetPeak();
+	//cout << "maxTime " << maxTime << endl;
 	channelID=pch.GetChannelID();   // boardID*100+channelNum in PADE
       }
 
-      if (max<0) continue;
+      //if (max<0) continue;
 
       int moduleID,fiberID;
       mapper->ChannelID2ModuleFiber(channelID,moduleID,fiberID);  // get module and fiber IDs
 
+      //       cout << "Printint Fiber ID and Module ID: ##########" << endl;
+      //       cout << "Module ID: " << moduleID << endl;
+      //       cout << "Fiber ID: " << fiberID << endl;
+      //       cout << "####################" << endl;
 
-
-
-//       cout << "Printint Fiber ID and Module ID: ##########" << endl;
-//       cout << "Module ID: " << moduleID << endl;
-//       cout << "Fiber ID: " << fiberID << endl;
-//       cout << "####################" << endl;
-
-      double x,y;
+      double x,y;  
       mapper->ModuleXY(moduleID,x,y);
+      // cout << moduleID << " " << x << " " << y << endl;
+      // module-level plots
       if (moduleID<0) {
 	hModU->Fill(x, y, max);
 	hModU_time->Fill(x, y, maxTime);
@@ -204,6 +203,7 @@ void calDisplay(TString fdat, int ndisplay=-1){
 	}
       }
       
+      // fiber-level plots
       mapper->FiberXY(fiberID, x, y);
       if (moduleID<0) {
 	hChanU->Fill(x, y, max);
@@ -226,53 +226,47 @@ void calDisplay(TString fdat, int ndisplay=-1){
 
     }
 
-    if( m_u_maxX > -99 && m_u_maxY > -99 && m_u_maxADC > 0)
-    { 
-	hModUmax->Fill(m_u_maxX, m_u_maxY); 
-	hModUmaxW->Fill(m_u_maxX, m_u_maxY, m_u_maxADC); 
+    if( m_u_maxX > -99 && m_u_maxY > -99 && m_u_maxADC > 0) { 
+      hModUmax->Fill(m_u_maxX, m_u_maxY); 
+      hModUmaxW->Fill(m_u_maxX, m_u_maxY, m_u_maxADC); 
 
     }
 
-    if( m_d_maxX > -99 && m_d_maxY > -99 && m_d_maxADC > 0)
-    { 
-	hModDmax->Fill(m_d_maxX, m_d_maxY); 
-	hModDmaxW->Fill(m_d_maxX, m_d_maxY, m_d_maxADC); 
+    if( m_d_maxX > -99 && m_d_maxY > -99 && m_d_maxADC > 0){ 
+      hModDmax->Fill(m_d_maxX, m_d_maxY); 
+      hModDmaxW->Fill(m_d_maxX, m_d_maxY, m_d_maxADC); 
     }
 
-    if( c_u_maxX > -99 && c_u_maxY > -99 && c_u_maxADC > 0)
-    {
-	hChanUmax->Fill(c_u_maxX, c_u_maxY); 
-	hChanUmaxW->Fill(c_u_maxX, c_u_maxY, c_u_maxADC); 
-
+    if( c_u_maxX > -99 && c_u_maxY > -99 && c_u_maxADC > 0) {
+      hChanUmax->Fill(c_u_maxX, c_u_maxY); 
+      hChanUmaxW->Fill(c_u_maxX, c_u_maxY, c_u_maxADC); 
     }
 
-    if( c_d_maxX > -99 && c_d_maxY > -99 && c_d_maxADC > 0)
-    {
-	hChanDmax->Fill(c_d_maxX, c_d_maxY);
-	hChanDmaxW->Fill(c_d_maxX, c_d_maxY, c_d_maxADC);
+    if( c_d_maxX > -99 && c_d_maxY > -99 && c_d_maxADC > 0) {
+      hChanDmax->Fill(c_d_maxX, c_d_maxY);
+      hChanDmaxW->Fill(c_d_maxX, c_d_maxY, c_d_maxADC);
     }
     
-
     nEntries++;
   }
 
-  hModD->Scale(1./nEntries);
-  hModU->Scale(1./nEntries);
+  hModD->Scale(1./nEntries/4);
+  hModU->Scale(1./nEntries/4);
   hChanD->Scale(1./nEntries);
   hChanU->Scale(1./nEntries);
   
-  hModD_time->Scale(1./nEntries);
-  hModU_time->Scale(1./nEntries);
+  hModD_time->Scale(1./nEntries/4);
+  hModU_time->Scale(1./nEntries/4);
   hChanD_time->Scale(1./nEntries);
   hChanU_time->Scale(1./nEntries);
 
-  hModDmax->Scale(1./nEntries);
-  hModUmax->Scale(1./nEntries);
+  hModDmax->Scale(1./nEntries/4);
+  hModUmax->Scale(1./nEntries/4);
   hChanDmax->Scale(1./nEntries);
   hChanUmax->Scale(1./nEntries);
 
-  hModDmaxW->Scale(1./nEntries);
-  hModUmaxW->Scale(1./nEntries);
+  hModDmaxW->Scale(1./nEntries/4);
+  hModUmaxW->Scale(1./nEntries/4);
   hChanDmaxW->Scale(1./nEntries);
   hChanUmaxW->Scale(1./nEntries);
 
@@ -287,12 +281,12 @@ void calDisplay(TString fdat, int ndisplay=-1){
   mapper->GetChannelMap(hmChanD,1);
 
 
-  TCanvas *c1=new TCanvas("c1","Average Peak Height",800,800);
+  TCanvas *c1=new TCanvas("c1","Average Peak Height",900,900);
   c1->Divide(2,2);
 
   c1->cd(1);
   hModD->Draw("colz");
-  hmModD->Draw("text same");
+  //hmModD->Draw("text same");
   c1->cd(2);
   hModU->Draw("colz");
   hmModU->Draw("text same");
@@ -305,55 +299,61 @@ void calDisplay(TString fdat, int ndisplay=-1){
   c1->SaveAs("plot/cal_peak.png");
   
 
-// Peak time distributions
+  // Peak time distributions
   if (DO_TIMING) {
-    TCanvas * c2 = new TCanvas("c2", "Average Peak Timing", 800, 800);
+    TCanvas * c2 = new TCanvas("c2", "Average Peak Timing", 900, 900);
     c2->Divide(2, 2);
 
     c2->cd(1);
     hModD_time->Draw("colz");
+    hmModD->Draw("text same");
     c2->cd(2);
     hModU_time->Draw("colz");
+    hmModU->Draw("text same");
     c2->cd(3)->SetGrid();
     hChanD_time->Draw("colz");
+    hmChanD->Draw("text same");
     c2->cd(4)->SetGrid();
     hChanU_time->Draw("colz");
+    hmChanU->Draw("text same");
     //  drawChannelMap(c2);
     c2->Update();
     c2->SaveAs("plot/cal_time.png");
   }
 
-  TCanvas *c3=new TCanvas("c3","Local of Maximum Deposition of Each Event",800,800);
-  c3->Divide(2,2);
+  if (DO_MAXLOCATION){
+    TCanvas *c3=new TCanvas("c3","Location of Maximum Signal",900,900);
+    c3->Divide(2,2);
 
-  c3->cd(1);
-  hModDmax->Draw("colz");
-  hmModD->Draw("text same");
-  c3->cd(2);
-  hModUmax->Draw("colz");
-  hmModU->Draw("text same");
-  c3->cd(3)->SetGrid();
-  hChanDmax->Draw("colz");
-  hmChanD->Draw("text same");
-  c3->cd(4)->SetGrid();
-  hChanUmax->Draw("colz");
-  hmChanU->Draw("text same");
-  c3->SaveAs("plot/cal_peak_max.png");
+    c3->cd(1);
+    hModDmax->Draw("colz");
+    hmModD->Draw("text same");
+    c3->cd(2);
+    hModUmax->Draw("colz");
+    hmModU->Draw("text same");
+    c3->cd(3)->SetGrid();
+    hChanDmax->Draw("colz");
+    hmChanD->Draw("text same");
+    c3->cd(4)->SetGrid();
+    hChanUmax->Draw("colz");
+    hmChanU->Draw("text same");
+    c3->SaveAs("plot/cal_peak_max.png");
 
-  TCanvas *c4=new TCanvas("c4","Weighted Maximum Peak Height of Each Event",800,800);
-  c4->Divide(2,2);
+    TCanvas *c4=new TCanvas("c4","Energy-weighted Location of Maximum Signal",900,900);
+    c4->Divide(2,2);
 
-  c4->cd(1);
-  hModDmaxW->Draw("colz");
-  hmModD->Draw("text same");
-  c4->cd(2);
-  hModUmaxW->Draw("colz");
-  hmModU->Draw("text same");
-  c4->cd(3)->SetGrid();
-  hChanDmaxW->Draw("colz");
-  hmChanD->Draw("text same");
-  c4->cd(4)->SetGrid();
-  hChanUmaxW->Draw("colz");
-  hmChanU->Draw("text same");
-  c4->SaveAs("plot/cal_peak_maxW.png");
+    c4->cd(1);
+    hModDmaxW->Draw("colz");
+    hmModD->Draw("text same");
+    c4->cd(2);
+    hModUmaxW->Draw("colz");
+    hmModU->Draw("text same");
+    c4->cd(3)->SetGrid();
+    hChanDmaxW->Draw("colz");
+    hmChanD->Draw("text same");
+    c4->cd(4)->SetGrid();
+    hChanUmaxW->Draw("colz");
+    hmChanU->Draw("text same");
+    c4->SaveAs("plot/cal_peak_maxW.png");
+  }
 }

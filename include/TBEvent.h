@@ -148,9 +148,10 @@ class TBEvent : public TObject {
   static const ULong64_t H4TB_MAP4=635504663348032610L;   // 4th data configuration 01-Nov-2014
   static const ULong64_t H4TB_MAP5=635530000000000000L;   // 5th data configuration 08-May-2015
   static const ULong64_t H4TB_MAP6=635678514000000000L;   // 6th data configuration 21-May-2015
+  static const ULong64_t H4TB_MAP7=636011699058128660L;   // 7th data configuration 09-Jun-2016
 
 
-  /// Times when change in pulse shapes occur
+  /// Times when a change in pulse shapes occur
   /** Times of changes in PADE configuration that caused changes in pulse shapes:
       31-Jul-2014 23:45 
       11-Aug-2014 11:10

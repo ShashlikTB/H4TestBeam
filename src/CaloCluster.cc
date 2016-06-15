@@ -50,7 +50,7 @@ void CaloCluster::setInterCalibrationConstants(std::string nameFile){
 
 void CaloCluster::setRecHits(std::vector<TBRecHit>* rechits){
  _rechits.clear();
- for (Int_t j = 0; j < rechits->size(); j++){
+ for (UInt_t j = 0; j < rechits->size(); j++){
   _rechits.push_back(rechits->at(j));
  }
 }
@@ -71,7 +71,7 @@ void CaloCluster::doCalorimeterReconstruction(int face, float maxDR, int fiberLe
  
  //---- module level
  if (fiberLevel == 0) {
-  for (Int_t j = 0; j < _rechits.size(); j++){
+  for (UInt_t j = 0; j < _rechits.size(); j++){
    TBRecHit &hit=_rechits.at(j);
    //   ped = hit.Pedestal();
    //   sig = hit.NoiseRMS();
@@ -133,7 +133,7 @@ void CaloCluster::doCalorimeterReconstruction(int face, float maxDR, int fiberLe
  //---- fiber level
  if (fiberLevel == 1) {
   
-  for (Int_t j = 0; j < _rechits.size(); j++){
+  for (UInt_t j = 0; j < _rechits.size(); j++){
    TBRecHit &hit=_rechits.at(j);
    //   ped = hit.Pedestal();
    //   sig = hit.NoiseRMS();
