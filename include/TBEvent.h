@@ -167,9 +167,11 @@ class TBEvent : public TObject {
   static const ULong64_t PULSESHAPE_T4=635437953000000000L;  
 
   // event flags
-  static const UInt_t F_OVERFLOW=1;
+  /// Pade Channel error flags
+  static const UInt_t F_SATURATED=1;  /// flag for ADC saturation 0xFFF 
   static const UInt_t F_NOTIME=2;
   static const UInt_t F_FRAGMENT=4;
+  static const UInt_t F_CORRUPT=8;   /// flag for data corruption ADC>0xFFF
   TBEvent();
 
   ~TBEvent(){};
@@ -185,21 +187,21 @@ class TBEvent : public TObject {
   static TBRun GetRunPeriod(ULong64_t padeTime);
   TBRun GetRunPeriod() const;
   ULong64_t GetTimeStamp();  // time stamp from 1st PADE channel
-  UInt_t GetFlags() const {return _flags;}
+  UInt_t GetErrorFlags() const {return _flags;}
   /// check if data is present for boardID
   /// return index of first channel for this board
   int FindBoard(UInt_t boardID); 
   Int_t GetTime() {return _time;}
   
   // setters
-  void SetFlags(UInt_t flags) {_flags=flags;}
-  void AddFlags(UInt_t flags) {_flags|=flags;}
+  void SetErrorFlags(UInt_t flags) {_flags=flags;}
+  void AddErrorFlags(UInt_t flags) {_flags|=flags;}
   void SetTime(Int_t time) {_time=time;}
   void SetPadeChannel(const PadeChannel p, Int_t i) {padeChannel[i]=p;}
-  void FillPadeChannel(ULong64_t ts, UShort_t transfer_size, 
+  UInt_t FillPadeChannel(ULong64_t ts, UShort_t transfer_size, 
 		       UShort_t  board_id, UInt_t hw_counter, 
 		       UInt_t ch_number,  UInt_t eventnum, Int_t *wform,
-		       Bool_t isLaser=false, UInt_t flags=0);
+		       Bool_t isLaser=false);
   void SetHodoScopeData   (Int_t runNumber, Int_t spillNumber, Int_t eventNum,  unsigned int *adcData,  unsigned int *adcBoard,  unsigned int * adcChannel, Int_t nAdcChannels);
   void SetWireChambersData(Int_t runNumber, Int_t spillNumber, Int_t eventNum,  unsigned int *tdcData,  unsigned int *tdcBoard,  unsigned int * tdcChannel, Int_t nTdcChannels);
   

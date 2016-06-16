@@ -131,7 +131,8 @@ void calDisplay(TString fdat, int ndisplay=-1){
   for (Int_t i=start; i<end; i++) {
     t1041->GetEntry(i);
     if (i==0) mapper->SetEpoch(event->GetTimeStamp());
-
+    if (event->GetErrorFlags()>0) continue;
+    
     float m_u_maxADC = 0;
     float m_u_maxX = -99;
     float m_u_maxY = -99;

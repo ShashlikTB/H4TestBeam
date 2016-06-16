@@ -12,7 +12,7 @@
 class PadeChannel : public TObject {
   ClassDef(PadeChannel,2); 
  public:
-  void Fill(ULong64_t ts, UShort_t transfer_size, 
+  UInt_t Fill(ULong64_t ts, UShort_t transfer_size, 
 	    UShort_t  board_id, UInt_t hw_counter, 
 	    UInt_t ch_number,  UInt_t eventnum, Int_t *wform, Bool_t isLaser=false);
   void Reset();
@@ -70,7 +70,8 @@ class PadeChannel : public TObject {
     kNonSequential=1,
     kPacketCount=1<<1,
     kSamples=1<<2,
-    kSaturated=1<<3   
+    kSaturated=1<<3,
+    kCorrupt=1<<4
   };
   
   // private:

@@ -15,15 +15,15 @@
 const int MAXADC=4095;
 
 // inputs data file and event in file to display (default is to integrate all)
-void waveViewer(TString fdat, Int_t board=-1, Int_t channel=-1){
+void waveViewer(TString fdat, Int_t board=-1, Int_t channel=-1, UInt_t minADC=-1, UInt_t maxADC=0xFFFF){
   TFile *f = new TFile(fdat);
   if (f->IsZombie()){
     cout << "Cannot open file: " << fdat << endl;
     return;
   }
   cout << "Viewing file: "<< fdat << endl;
-  return;
 
+  int nevents=0;
   TBEvent *event = new TBEvent();
   TTree *t1041 = (TTree*)f->Get("t1041"); 
   TBranch *bevent = t1041->GetBranch("tbevent");
@@ -33,24 +33,30 @@ void waveViewer(TString fdat, Int_t board=-1, Int_t channel=-1){
   PulseFit fit;
   TH1F *hw=new TH1F("hw","waveform",
 		    PadeChannel::N_PADE_SAMPLES,0,PadeChannel::N_PADE_SAMPLES);
+
   for (Int_t i=0; i<t1041->GetEntriesFast(); i++) {
     t1041->GetEntry(i);
     for (Int_t j=0; j<event->NPadeChan(); j++){
       PadeChannel pch=event->GetPadeChan(j);
-      if (board>0 && (int)pch.GetBoardID()!=board) continue;
-      if (channel>0 && (int)pch.GetChannelID()!=channel) continue;
-      // pch.GetHist(hw);
-      // hw->Draw();
-
-      fit=PadeChannel::FitPulse(&pch);
+      if (board>=0 && (int)pch.GetBoardID()!=board) continue;
+      if (channel>=0 && (int)pch.GetChannelID()!=channel) continue;
+      if (pch.GetMax() < minADC) continue;
+      if (pch.GetMax() > maxADC) continue;
       pch.GetHist(hw);
-      pch.Dump();
+
+      nevents++;
       hw->Draw();
-      fit.func.Draw("same");
+
+      //fit=PadeChannel::FitPulse(&pch);
+      //pch.GetHist(hw);
+      if (pch.GetFlags()) pch.Dump();
+      //hw->Draw();
+      //fit.func.Draw("same");
       c->Update();
       gSystem->Sleep(1000);
     }
   }
+  cout << "Events plotted " << nevents << " / " << t1041->GetEntriesFast() << endl;
 }
 
 

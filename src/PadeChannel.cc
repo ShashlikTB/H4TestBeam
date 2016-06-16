@@ -28,7 +28,7 @@ void PadeChannel::Dump() const{
 }
 
 
-void PadeChannel::Fill(ULong64_t ts, UShort_t transfer_size, 
+UInt_t PadeChannel::Fill(ULong64_t ts, UShort_t transfer_size, 
 		       UShort_t board_id, UInt_t hw_counter, 
 		       UInt_t  ch_number,  UInt_t eventnum, Int_t *wform, Bool_t isLaser){
   _ts = ts;
@@ -40,6 +40,7 @@ void PadeChannel::Fill(ULong64_t ts, UShort_t transfer_size,
   _max=0;
   _status=0;
   _time=0;
+  _flags=0;
   if (isLaser) _status|=kLaser;
   
   // range to search for signal peaks
@@ -68,6 +69,8 @@ void PadeChannel::Fill(ULong64_t ts, UShort_t transfer_size,
   // loop over samples
   for (int i=0; i<N_PADE_DATA; i++) {  
     _wform[i]=wform[i];
+    if (wform[i]==0xFFF) _flags|=kSaturated;
+    if (wform[i]>0xFFF) _flags|=kCorrupt;
     // max/min from start of data (not samples)
     if (i<=tmin || i>tmax) continue; 
     if (_wform[i]>_max) {
@@ -79,6 +82,7 @@ void PadeChannel::Fill(ULong64_t ts, UShort_t transfer_size,
   GetPedestal(p,s);
   _ped=p;
   _pedsigma=s;
+  return _flags;
 }
 
 // calculate RMS amplitude over entire waveform

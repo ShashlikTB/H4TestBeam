@@ -22,21 +22,23 @@ void TBEvent::Reset(){
 }
 
 
-void TBEvent::FillPadeChannel(ULong64_t ts, UShort_t transfer_size, 
+UInt_t TBEvent::FillPadeChannel(ULong64_t ts, UShort_t transfer_size, 
 			      UShort_t  board_id, UInt_t hw_counter, 
-			      UInt_t ch_number,  UInt_t eventnum, Int_t *wform, Bool_t isLaser, UInt_t flags){
-
-  Mapper *mapper=Mapper::Instance(ts);
-  //  mapper->SetEpoch(ts);
-  if (!mapper->validChannel(board_id, ch_number)){ // sanity check 
-    cerr << "Warning: channel ID error, board:channel " 
-	 << board_id << ":" << ch_number << " ts= " << ts << endl;
+			      UInt_t ch_number,  UInt_t eventnum, Int_t *wform, Bool_t isLaser){
+  static bool first=false;  // disable check on board ID for testing
+  if (first) {
+    Mapper *mapper=Mapper::Instance(ts);
+    //  mapper->SetEpoch(ts);
+    if (!mapper->validChannel(board_id, ch_number)){ // sanity check 
+      cerr << "Warning: channel ID error, board:channel " 
+	   << board_id << ":" << ch_number << " ts= " << ts << endl;
+    }
+    first=false;
   }
   PadeChannel pc;  // todo make constructor w/ fill inputs
-  pc.Fill(ts, transfer_size, board_id, hw_counter, ch_number, eventnum, wform, isLaser);
-  pc.SetFlags(flags);
-  //if (flags>0) pc.Dump();
+  UInt_t flags=pc.Fill(ts, transfer_size, board_id, hw_counter, ch_number, eventnum, wform, isLaser);
   padeChannel.push_back(pc);
+  return flags;
 }
 
 

@@ -34,7 +34,9 @@ def usage():
     print "      -s max_spills  : Maximum number of spills to process"
     print "      -o DIR         : Output dir, instead of default = location of input file" 
     print "      -f             : Overwrite existing root files"
+    print "      -F             : Overwrite existing root files and delete any lock file"
     print "      -l             : Copy logger messages to [root file basename].log"
+    print "      -W             : select number of repeated warning messages [default =1]"
     print "      -v             : verbose output"
     print 
     sys.exit()
@@ -52,7 +54,8 @@ def fillTree(tree, eventDict, tbspill):
 			ndrop=ndrop+1
 			continue
 		if not eventDict[ievt].NPadeChan()==NPADES*32: 
-			if DEBUG_LEVEL>0: logger.Warn("Incomplete event, #PADE channels=",eventDict[ievt].NPadeChan(),NPADES)
+			if DEBUG_LEVEL>0: logger.Warn("Incomplete event, #PADE channels=",
+                                                      eventDict[ievt].NPadeChan(),NPADES)
                         ## comment out to allow incomplete events, uncomment when hardware is working
                         ndrop=ndrop+1
                         continue      # only fill w/ complete events
@@ -82,12 +85,12 @@ def filler(padeDat, beamDat, NEventLimit=NMAX, NSpillLimit=NMAX,
     if not outDir=="":
         outFile=outDir+"/"+os.path.basename(outFile)
 
-    if  os.path.isfile(outFile) and not forceFlag:
+    if  os.path.isfile(outFile) and not (forceFlag or ForceFlag):
         logger.Info(outFile,"is present, skip processing. Use -f flag to override")
         return
 
     tmpROOT=outFile+"_tmp"
-    if os.path.isfile(tmpROOT):
+    if os.path.isfile(tmpROOT) and not ForceFlag:
         logger.Fatal(tmpROOT,"is present.  Job already in progress or ended on error.  Remove",tmpROOT,"to continue.")
     fout = TFile(outFile+"_tmp", "recreate")   # write to tmp file, rename at successful close
 
@@ -123,8 +126,9 @@ def filler(padeDat, beamDat, NEventLimit=NMAX, NSpillLimit=NMAX,
     fPade=TBOpen(padeDat)                   # open the PADE data file
     fBeam=0
     if beamDat!="": fBeam=TBOpen(beamDat)
-    else: logger.Warn("No corresponding Beam data file provided")
-
+    else:
+        logger.Warn("No corresponding Beam data file provided")
+        
     eventDict={} # dictionary holds event data for a spill, use event # as key
     padeDict={}  # dictionary holds PADE header data for a spill, use PADE ID as key
 
@@ -442,9 +446,15 @@ def filler(padeDat, beamDat, NEventLimit=NMAX, NSpillLimit=NMAX,
           
         if writeChan:
             isLaser=(pdgId==-22)
-            eventDict[padeEvent].FillPadeChannel(pade_ts, pade_transfer_size, 
-                                                 pade_board_id, pade_hw_counter, 
-                                                 pade_ch_number, padeEvent, samples, isLaser)
+            flags=eventDict[padeEvent].FillPadeChannel(pade_ts, pade_transfer_size, 
+                                                       pade_board_id, pade_hw_counter, 
+                                                       pade_ch_number, padeEvent, samples, isLaser)
+            if flags & PadeChannel.kCorrupt:
+                eventDict[padeEvent].AddErrorFlags(TBEvent.F_CORRUPT)
+                logger.Warn("Data corruption detected, board",pade_board_id,"++ at line",linesread)
+            if flags & PadeChannel.kSaturated:
+                eventDict[padeEvent].AddErrorFlags(TBEvent.F_SATURATED)
+                logger.Warn("ADC saturation, board",pade_board_id,"++ at line",linesread)
             if DEBUG_LEVEL>2: eventDict[padeEvent].GetLastPadeChan().Dump()
 
 
@@ -476,7 +486,7 @@ def filler(padeDat, beamDat, NEventLimit=NMAX, NSpillLimit=NMAX,
 
 if __name__ == '__main__': 
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "n:s:P:B:o:flv")
+        opts, args = getopt.getopt(sys.argv[1:], "n:s:P:B:o:W:fFlv")
     except getopt.GetoptError as err: usage()
 
     NEventLimit=NMAX
@@ -484,6 +494,7 @@ if __name__ == '__main__':
     PadeFile=""
     BeamFile=""
     forceFlag=False
+    ForceFlag=False
     logToFile=False
     verbose=False
     outDir=""
@@ -493,7 +504,9 @@ if __name__ == '__main__':
         elif o == "-P": PadeFile=a
         elif o == "-B": BeamFile=a
         elif o == "-o": outDir=a
+        elif o == "-W": logger.SetMax(int(a))
         elif o == "-f": forceFlag=True
+        elif o == "-F": ForceFlag=True
         elif o == "-l": logToFile=True
         elif o == "-v": verbose=true
 
