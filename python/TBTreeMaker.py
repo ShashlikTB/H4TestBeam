@@ -35,6 +35,7 @@ def usage():
     print "      -o DIR         : Output dir, instead of default = location of input file" 
     print "      -f             : Overwrite existing root files"
     print "      -F             : Overwrite existing root files and delete any lock file"
+    print "      -k             : keep corrupted events (saturated events are always kept)"
     print "      -l             : Copy logger messages to [root file basename].log"
     print "      -W             : select number of repeated warning messages [default =1]"
     print "      -v             : verbose output"
@@ -52,13 +53,16 @@ def fillTree(tree, eventDict, tbspill):
 	for ievt in range(nfill):
 		if not ievt in eventDict:
 			ndrop=ndrop+1
-			continue
+                        logger.Warn("Undefined event, spill number",tbspill.GetSpillNumber() )
+			if dropCorrupt: continue  # drop undefined events (eg missing data from master )
 		if not eventDict[ievt].NPadeChan()==NPADES*32: 
-			if DEBUG_LEVEL>0: logger.Warn("Incomplete event, #PADE channels=",
-                                                      eventDict[ievt].NPadeChan(),NPADES)
+			logger.Warn("Incomplete event, #PADE channels=",
+                                                      eventDict[ievt].NPadeChan())
                         ## comment out to allow incomplete events, uncomment when hardware is working
                         ndrop=ndrop+1
-                        continue      # only fill w/ complete events
+                        if dropCorrupt: continue      # only fill w/ complete events
+                if (eventDict[ievt].GetErrorFlags() & TBEvent.F_CORRUPT):
+                    if dropCorrupt: continue
 		tree[0].SetBranchAddress("tbevent",AddressOf(eventDict[ievt]))
 		tree[0].Fill()
 	return ndrop
@@ -476,8 +480,8 @@ def filler(padeDat, beamDat, NEventLimit=NMAX, NSpillLimit=NMAX,
     print commands.getoutput(ccat('ln -sf',outFile,' latest.root'))
 
     print
-    logger.Info("Summary: nSpills processed= ",nSpills," Total Events Processed= ",nEventsTot)
-    logger.Info("Fraction of events kept:",float(eventsInTree)/nEventsTot*100)
+    logger.Info("Summary: nSpills processed = ",nSpills,"  Total Events Processed= ",nEventsTot)
+    logger.Info("Events written:",eventsInTree,"(",float(eventsInTree)/nEventsTot*100,"% )")
 
     logger.Summary()
     if fakeSpillData: logger.Info("Fake spill data")
@@ -486,7 +490,7 @@ def filler(padeDat, beamDat, NEventLimit=NMAX, NSpillLimit=NMAX,
 
 if __name__ == '__main__': 
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "n:s:P:B:o:W:fFlv")
+        opts, args = getopt.getopt(sys.argv[1:], "n:s:P:B:o:W:fFklv")
     except getopt.GetoptError as err: usage()
 
     NEventLimit=NMAX
@@ -496,6 +500,7 @@ if __name__ == '__main__':
     forceFlag=False
     ForceFlag=False
     logToFile=False
+    dropCorrupt=True
     verbose=False
     outDir=""
     for o, a in opts:
@@ -507,6 +512,7 @@ if __name__ == '__main__':
         elif o == "-W": logger.SetMax(int(a))
         elif o == "-f": forceFlag=True
         elif o == "-F": ForceFlag=True
+        elif o == "-k": dropCorrupt=False   # keep all events
         elif o == "-l": logToFile=True
         elif o == "-v": verbose=true
 

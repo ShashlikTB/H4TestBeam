@@ -287,7 +287,7 @@ void calDisplay(TString fdat, int ndisplay=-1){
 
   c1->cd(1);
   hModD->Draw("colz");
-  //hmModD->Draw("text same");
+  hmModD->Draw("text same");
   c1->cd(2);
   hModU->Draw("colz");
   hmModU->Draw("text same");
