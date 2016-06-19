@@ -21,10 +21,24 @@ void PadeChannel::Dump() const{
   cout << "Header ==> timestamp: " <<  _ts << " size: " 
        << _transfer_size << " board: " << _board_id << " xfer#: " 
        << _hw_counter << " ch#: " <<  _ch_number << " event#: " 
-       << _eventnum << endl << "samples=> " << (hex);
-  for (int i=0; i<N_PADE_SAMPLES; i++) cout << _wform[i] << " ";
+       << _eventnum << endl;
+  int nporch=0;
+  if (_status&kPorch15) nporch=15;
+  else if(_status&kPorch32) nporch=32; 
+  cout << "porch=> " << (hex);
+  for (int i=0; i<nporch; i++) cout << _wform[i] << " ";
+  cout << endl;
+  cout << "samples=> ";
+  for (int i=nporch; i<N_PADE_SAMPLES; i++) cout << _wform[i] << " ";
   cout << endl << "status:" << _status
-       << " flags:" << _flags << (dec) << endl;
+       << " flags:" << _flags;
+  if (!_flags) {
+    cout << (dec) << endl;
+    return;
+  }
+  if (_flags & kSaturated) cout << " kSaturated ";
+  if (_flags & kCorrupt) cout << " kCorrupt ";
+  cout << (dec) << endl;
 }
 
 

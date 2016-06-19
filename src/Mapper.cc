@@ -2,7 +2,7 @@
 
 // default map based on initial 4 PADE cards of July 2014 Test Beam  
 Mapper::Mapper(){  // Private so that it cannot be called
-  FIBERMAP=FIBERMAP_JULY14;
+  FIBERMAP=FIBERMAP_JUN0916;
   // fill maps
   MakeMaps();
 }
