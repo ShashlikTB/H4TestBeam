@@ -57,19 +57,23 @@ padeDat.seek(0,0)  # start of file
 
 nlines=0
 nsleep=0
+run_complete = False
+
 while 1:
     where = padeDat.tell()
     padeline = padeDat.readline()
     # this is a hack to make sure don't try to read a line that is not fully written to the file
     # if not padeline:
-    if float(where)/eof>0.95:
+    if not run_complete and float(where)/eof>0.95:
         time.sleep(SLEEPTIME)
         padeDat.seek(0,2); eof=padeDat.tell()
         padeDat.seek(where)
         nsleep=nsleep+1
-        if nsleep>MAXSLEEP: break
+        if nsleep>MAXSLEEP: run_complete=True
+        print "sleep",nsleep 
         continue
     else:
+        if padeDat.tell() == eof : break
         nsleep=0
         if "starting" in padeline: print padeline
         nlines=nlines+1
@@ -99,7 +103,9 @@ while 1:
         hitsCanvas.Update()
     # continue while loop
 
-    
+print "Run is probably over"
+hit_continue('Hit any key to exit')
+   
 
 
 
