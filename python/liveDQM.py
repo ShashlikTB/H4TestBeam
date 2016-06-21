@@ -40,15 +40,38 @@ UPDATE_RATE=100  # Update every 100 events (per PADE board)
 SLEEPTIME=5 # time to wait before checking for new data
 MAXSLEEP=6  # maximum sleep times before assuming end of run 
 
+
+PED_MAX = 110
+PED_MIN = 90
 MIN_EDGE_X=-28; MIN_EDGE_Y=-28  # detector edges in mm
 MAX_EDGE_X=28;  MAX_EDGE_Y=28
 mapper=Mapper.Instance();
-hitsCanvas=TCanvas("tcHits","Integrated Hits Display")
-
+dqmCanvas=TCanvas("dqm","DQM Display")
+dqmCanvas.Divide(3,2,.01,.01)
+# histogram of each channel's baseline ADC
+hPed   =TH2F("hPed", "Channel Pedestals;Channel Index;Pedestal",64,0,64,
+             20,PED_MIN,PED_MAX)
+# histogram to show which errors occur
+hError =TH1F("hError","Error Flags;;Occurences",5,0,5)
+hError.GetXaxis().SetBinLabel(1,"NonSeq");
+hError.GetXaxis().SetBinLabel(2,"PacketCount");
+hError.GetXaxis().SetBinLabel(3,"Samples");
+hError.GetXaxis().SetBinLabel(4,"Saturated");
+hError.GetXaxis().SetBinLabel(5,"Corrupt");
+hError.GetXaxis().SetLabelSize(.06)
 # histogram to show downstream hits
-hChanD=TH2F("hChanD","Channels DownStream;X [mm]; Y [mm]",
+hChanD=TProfile2D("hChanD","Channels DownStream;X [mm]; Y [mm]",
 	    8,MIN_EDGE_X,MAX_EDGE_X,8,MIN_EDGE_Y,MAX_EDGE_Y)
+#histogram showing the wave form of all channels
+hTotalWave =TProfile2D("hTotalWave", "Waveform vs Channel;Channel Index;Sample",
+                  64,0,64,100,0,100)
+
+hw103 = TH1F()
+hw112 = TH1F()
+
 gStyle.SetOptStat(0)
+
+
 
 ########## main event loop ##########
 padeDat.seek(0,2)
@@ -58,6 +81,9 @@ padeDat.seek(0,0)  # start of file
 nlines=0
 nsleep=0
 run_complete = False
+maxADC103 = 0
+maxADC112 = 0
+lastchannel=-1
 
 while 1:
     where = padeDat.tell()
@@ -85,22 +111,78 @@ while 1:
     for i in range(len(waveform)): samples[i]=int(waveform[i],16)
     pch.Fill(pade_ts, pade_transfer_size, pade_board_id, pade_hw_counter,
              pade_ch_number, padeEvent, samples)
+    # check for data sequence error
+    if (lastchannel==31): lastchannel=-1
+    if (pade_ch_number-lastchannel != 1):
+        pch.AddFlag(PadeChannel.kNonSequential)
+    lastchannel=pade_ch_number
+        
     if pch.GetFlags()>0:
+        if pch.GetFlags() & PadeChannel.kNonSequential: hError.Fill(0)
+        if pch.GetFlags() & PadeChannel.kPacketCount: hError.Fill(1)
+        if pch.GetFlags() & PadeChannel.kSamples: hError.Fill(2)
+        if pch.GetFlags() & PadeChannel.kSaturated: hError.Fill(3)
+        if pch.GetFlags() & PadeChannel.kCorrupt: hError.Fill(4)
         logger.Warn("Data error flagged at line:",nlines)
         pch.Dump()
         if pch.GetFlags()&PadeChannel.kCorrupt : continue
+
     if first:   # first good PADE channel
         mapper.SetEpoch(pch.GetTimeStamp())
         first=False
-    # now get to the plotting
+        
+    # now get to the plotting   
     channelID=pch.GetChannelID()   # boardID*100+channelNum in PADE
     mapper.ChannelXYZ(channelID,x, y, z)
     pch.GetPedestal(ped,sig)
+    
+    #for plots with 0-63 id convention
+    if(pade_board_id == 103):
+        id = pade_ch_number
+    else:
+        id = pade_ch_number+32
+    #Fill Pedestal Hist accounting for over/underflow
+    if ped>PED_MAX:
+        hPed.Fill(id,PED_MAX-.1)
+    elif ped < PED_MIN:
+        hPed.Fill(id,PED_MIN)
+    else:
+        hPed.Fill(id,ped)
+    
+    #finding the waveform with the highest peak
     max = pch.GetMax()-ped
+    if maxADC103 < max and pade_board_id == 103:
+        maxADC103 = max
+        pch.GetHist(hw103)
+    if maxADC112 < max and pade_board_id == 112:
+        maxADC112 = max
+        pch.GetHist(hw112)
+
+    for i in range(len(samples)):
+        hTotalWave.Fill(id,i,samples[i]-ped)
+
     hChanD.Fill(x, y, max)
-    if padeEvent%UPDATE_RATE==0:
+    
+    if pade_board_id==112 and pade_ch_number==31 and (padeEvent+1)%UPDATE_RATE==0:
+        maxADC103 = 0
+        maxADC112 = 0
+        dqmCanvas.cd(1)
         hChanD.Draw("colz")
-        hitsCanvas.Update()
+        dqmCanvas.Update()
+        dqmCanvas.cd(2)
+        hTotalWave.Draw("colz")
+        dqmCanvas.Update()
+        dqmCanvas.cd(3)
+        hPed.Draw("colz")
+        dqmCanvas.Update()
+        dqmCanvas.cd(4)
+        hError.Draw("sames")
+        dqmCanvas.Update()
+        dqmCanvas.cd(5)
+        hw103.Draw("sames")
+        dqmCanvas.cd(6)
+        hw112.Draw("sames")
+        dqmCanvas.Update()
     # continue while loop
 
 print "Run is probably over"

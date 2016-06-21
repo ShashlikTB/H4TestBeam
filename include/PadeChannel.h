@@ -48,6 +48,7 @@ class PadeChannel : public TObject {
   UInt_t GetTime() const {return _time;} /// time since 1st trigger in useconds
   UInt_t GetFlags() const {return _flags;}
   void SetFlags(UInt_t flags) {_flags=flags;}
+  void AddFlag(UInt_t flag) {_flags|=flag;}
 
   bool operator < (const PadeChannel& str) const{
     return _board_id*100+_ch_number < str._board_id*100+str._ch_number;
