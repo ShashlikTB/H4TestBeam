@@ -252,7 +252,7 @@ def filler(padeDat, beamDat, NEventLimit=NMAX, NSpillLimit=NMAX,
         
         # check for non-sequential events
         if newEvent and (padeEvent-lastEvent)>1:
-			logger.Warn("Nonsequential event #, delta=",padeEvent-lastEvent,
+			logger.Warn("Nonsequential event #, board",pade_board_id,"++delta=",padeEvent-lastEvent,
 						"this event",padeEvent,"last event",lastEvent,
                         "Board:",pade_board_id,"channel:",pade_ch_number,
                         "padeSpill",padeSpill['number'])
