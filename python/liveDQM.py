@@ -4,7 +4,7 @@
 # Usage: python liveDQM.py PADE_DATA.txt.(.bz2)
 # Created 6/28/2016 B.Hirosky: Initial release
 
-import sys, time
+import sys, time, os, getopt
 from array import array
 from ROOT import *
 from TBUtils import *
@@ -12,6 +12,17 @@ from TBUtils import *
 if len(sys.argv)<2:
     print "No PADE data file given"
     sys.exit()
+
+nsleep=0
+while 1:
+    if not os.path.exists(sys.argv[1]):
+        print "Waiting for file"
+        time.sleep(1)
+        nsleep=nsleep+1
+        if nsleep==50: 
+            print sys.argv[1],"not found"
+            sys.exit()
+    else: break
 
 try:
     padeDat=TBOpen(sys.argv[1])
@@ -37,15 +48,16 @@ sig=Double()
 logger=Logger(1000)
 first=True
 UPDATE_RATE=100  # Update every 100 events (per PADE board)
-SLEEPTIME=5 # time to wait before checking for new data
-MAXSLEEP=6  # maximum sleep times before assuming end of run 
+SLEEPTIME=8      # seconds to wait before checking file for new data
+MAXSLEEP=10      # maximum sleep cycles before assuming end of run 
 
-
+DRAW_COPY = True
 PED_MAX = 110
 PED_MIN = 90
 MIN_EDGE_X=-28; MIN_EDGE_Y=-28  # detector edges in mm
 MAX_EDGE_X=28;  MAX_EDGE_Y=28
 mapper=Mapper.Instance();
+
 dqmCanvas=TCanvas("dqm","DQM Display")
 dqmCanvas.Divide(3,2,.01,.01)
 # histogram of each channel's baseline ADC
@@ -62,6 +74,7 @@ hError.GetXaxis().SetLabelSize(.06)
 # histogram to show downstream hits
 hChanD=TProfile2D("hChanD","Channels DownStream;X [mm]; Y [mm]",
 	    8,MIN_EDGE_X,MAX_EDGE_X,8,MIN_EDGE_Y,MAX_EDGE_Y)
+hmModD=TH2I();
 #histogram showing the wave form of all channels
 hTotalWave =TProfile2D("hTotalWave", "Waveform vs Channel;Channel Index;Sample",
                   64,0,64,100,0,100)
@@ -85,25 +98,33 @@ maxADC103 = 0
 maxADC112 = 0
 lastchannel=-1
 
+
 while 1:
+    # this is a hack to make sure don't try to 
+    # read a line that is not fully written to the file
+    if run_complete and padeDat.tell()==eof: break
     where = padeDat.tell()
-    padeline = padeDat.readline()
-    # this is a hack to make sure don't try to read a line that is not fully written to the file
-    # if not padeline:
-    if not run_complete and float(where)/eof>0.95:
+    if run_complete or eof-where>800: # require some lines to start reading
+        padeline = padeDat.readline()
+    elif not run_complete:
         time.sleep(SLEEPTIME)
-        padeDat.seek(0,2); eof=padeDat.tell()
+        padeDat.seek(0,2)
+        eof=padeDat.tell()  # check for file update
         padeDat.seek(where)
         nsleep=nsleep+1
         if nsleep>MAXSLEEP: run_complete=True
         print "sleep",nsleep 
         continue
-    else:
-        if padeDat.tell() == eof : break
-        nsleep=0
-        if "starting" in padeline: print padeline
-        nlines=nlines+1
-        if len(padeline)<DATALEN or len(padeline.split()) != NFIELDS: continue
+    nsleep=0
+    if "starting" in padeline: 
+        print padeline
+        if DRAW_COPY:
+            hChanD.Reset()
+            hTotalWave.Reset()
+            hPed.Reset()
+    nlines=nlines+1
+    if len(padeline)<DATALEN or len(padeline.split()) != NFIELDS: continue
+
     # parse PADE channel data
     (pade_ts,pade_transfer_size,pade_board_id, pade_hw_counter,
      pade_ch_number,padeEvent,waveform) = ParsePadeData(padeline)
@@ -129,6 +150,7 @@ while 1:
 
     if first:   # first good PADE channel
         mapper.SetEpoch(pch.GetTimeStamp())
+        mapper.GetModuleMap(hmModD,1);
         first=False
         
     # now get to the plotting   
@@ -166,15 +188,28 @@ while 1:
     if pade_board_id==112 and pade_ch_number==31 and (padeEvent+1)%UPDATE_RATE==0:
         maxADC103 = 0
         maxADC112 = 0
-        dqmCanvas.cd(1)
-        hChanD.Draw("colz")
-        dqmCanvas.Update()
-        dqmCanvas.cd(2)
-        hTotalWave.Draw("colz")
-        dqmCanvas.Update()
-        dqmCanvas.cd(3)
-        hPed.Draw("colz")
-        dqmCanvas.Update()
+        if(DRAW_COPY):
+            dqmCanvas.cd(1)
+            hChanD.DrawCopy("colz")
+            hmModD.Draw("text same");
+            dqmCanvas.Update()
+            dqmCanvas.cd(2)
+            hTotalWave.DrawCopy("colz")
+            dqmCanvas.Update()
+            dqmCanvas.cd(3)
+            hPed.DrawCopy("colz")
+            dqmCanvas.Update()
+        else:
+            dqmCanvas.cd(1)
+            hChanD.Draw("colz")
+            dqmCanvas.Update()
+            dqmCanvas.cd(2)
+            hTotalWave.Draw("colz")
+            dqmCanvas.Update()
+            dqmCanvas.cd(3)
+            hPed.Draw("colz")
+            dqmCanvas.Update()
+
         dqmCanvas.cd(4)
         hError.Draw("sames")
         dqmCanvas.Update()
@@ -186,7 +221,9 @@ while 1:
     # continue while loop
 
 print "Run is probably over"
-hit_continue('Hit any key to exit')
+time.sleep(25)
+dqmCanvas.Print(padeDatFile+"_DQM.png")
+#hit_continue('Hit any key to exit')
    
 
 
