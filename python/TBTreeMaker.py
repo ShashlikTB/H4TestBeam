@@ -21,7 +21,7 @@ DEBUG_LEVEL = 0   # set to 0 for normal running (0..4)
 NMAX = 1000000    # max events to process.  Note: this is approximate, b/c processing occurs by spill
 NPADES=0      # counted from spill headers
 MASTERID = 0  # now read from spill headers
-MAXPERSPILL=1000  # do not process more that this many events per spill ( mem overwrite issue )
+MAXPERSPILL=1400  # do not process more that this many events per spill ( mem overwrite issue )
 logger=Logger(1)  # instantiate a logger, w/ 1 repetition of messages
 ###########################
 
@@ -47,22 +47,26 @@ def usage():
 def fillTree(tree, eventDict, tbspill):  
 	global NPADES
 	ndrop=0                 # counter for incomlpete events that get dropped
-	if len(eventDict)==0: return
+        if len(eventDict)==0: return
 	nfill=min(len(eventDict),MAXPERSPILL)
 	tree[0].SetBranchAddress("tbspill",AddressOf(tbspill))
 	for ievt in range(nfill):
 		if not ievt in eventDict:
-			ndrop=ndrop+1
                         logger.Warn("Undefined event, spill number",tbspill.GetSpillNumber() )
-			if dropCorrupt: continue  # drop undefined events (eg missing data from master )
+			if dropCorrupt:
+                            ndrop=ndrop+1
+                            continue  # drop undefined events (eg missing data from master )
 		if not eventDict[ievt].NPadeChan()==NPADES*32: 
 			logger.Warn("Incomplete event, #PADE channels=",
                                                       eventDict[ievt].NPadeChan())
-                        ## comment out to allow incomplete events, uncomment when hardware is working
                         ndrop=ndrop+1
-                        if dropCorrupt: continue      # only fill w/ complete events
+                        if dropCorrupt:
+                            ndrop=ndrop+1
+                            continue      # only fill w/ complete events
                 if (eventDict[ievt].GetErrorFlags() & TBEvent.F_CORRUPT):
-                    if dropCorrupt: continue
+                    if dropCorrupt:
+                        ndrop=ndrop+1
+                        continue
 		tree[0].SetBranchAddress("tbevent",AddressOf(eventDict[ievt]))
 		tree[0].Fill()
 	return ndrop
