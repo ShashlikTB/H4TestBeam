@@ -121,7 +121,7 @@ def ParsePadeData(padeline):
     try:
         padeline=padeline.split()
         pade_ts=long(padeline[0])
-        pade_transfer_size=int(padeline[1],16)<<8+int(padeline[2],16)
+        pade_transfer_size=int(padeline[1]+padeline[2],16)
         pade_board_id=int(padeline[3],16)
         pade_hw_counter=int(padeline[4]+padeline[5]+padeline[6],16)
         pade_ch_number=int(padeline[7],16)
