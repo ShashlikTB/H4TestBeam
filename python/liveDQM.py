@@ -125,7 +125,7 @@ MAX_EDGE_X=28;  MAX_EDGE_Y=28
 mapper=Mapper.Instance();
 
 dqmCanvas=TCanvas("dqm","DQM Display")
-dqmCanvas.Divide(3,2,.01,.01)
+dqmCanvas.Divide(4,2,.01,.01)
 # histogram of each channel's baseline ADC
 hPed   =TH2F("hPed", "Channel Pedestals;Channel Index;Pedestal",64,0,64,
              20,PED_MIN,PED_MAX)
@@ -145,9 +145,14 @@ hmModD=TH2I();
 #histogram showing the wave form of all channels
 hTotalWave =TProfile2D("hTotalWave", "Waveform vs Channel;Channel Index;Sample",
                   64,0,64,100,0,100)
-
+# store maximum waveforms in update cycle
 hw103 = TH1F()
 hw112 = TH1F()
+# time between triggers
+httrig=TH1I("httrig","Time between triggers;us;Events",90,1000,10000);
+# events per spill
+hntrig=TH1I("hntrig","Events per spill;;Frequency",100,0,2000);
+
 
 gStyle.SetOptStat(0)
 
@@ -214,13 +219,14 @@ while 1:
     
     # check for event sequence error (skipped events)
     if pade_ch_number==0 and padeEvent==0: # new board condition
+        if pade_board_id==112: hntrig.Fill(lastEvent)
         lastEvent=-1
     if pade_ch_number==0:
+        if pade_board_id==103 and padeEvent>0: httrig.Fill(pch.GetTime())
         if (padeEvent-lastEvent!=1):
             hError.Fill(5)
     if pade_ch_number==31:
         lastEvent=padeEvent
-            
         
     # check for channel sequence error (partial events)
     if (lastchannel==31): lastchannel=-1
@@ -301,6 +307,10 @@ while 1:
             hw112.Draw()
             dqmCanvas.cd(4)
             hError.Draw()
+            dqmCanvas.cd(7)
+            httrig.Draw()
+            dqmCanvas.cd(8)
+            hntrig.Draw()
             dqmCanvas.Update()
             maxADC112=0 
     # continue while loop
