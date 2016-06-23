@@ -52,17 +52,18 @@ def fillTree(tree, eventDict, tbspill):
 	tree[0].SetBranchAddress("tbspill",AddressOf(tbspill))
 	for ievt in range(nfill):
 		if not ievt in eventDict:
-                        logger.Warn("Undefined event, spill number",tbspill.GetSpillNumber() )
-			if dropCorrupt:
-                            ndrop=ndrop+1
-                            continue  # drop undefined events (eg missing data from master )
-		if not eventDict[ievt].NPadeChan()==NPADES*32: 
-			logger.Warn("Incomplete event, #PADE channels=",
-                                                      eventDict[ievt].NPadeChan())
+                    # redundant missing event message
+                    logger.Warn("Undefined event++: spill number",tbspill.GetSpillNumber() )
+		    if dropCorrupt:
                         ndrop=ndrop+1
-                        if dropCorrupt:
-                            ndrop=ndrop+1
-                            continue      # only fill w/ complete events
+                        continue  # drop undefined events (eg missing data from master )
+		if not eventDict[ievt].NPadeChan()==NPADES*32: 
+		    logger.Warn("Incomplete event++: #PADE channels=",
+                                eventDict[ievt].NPadeChan())
+                    ndrop=ndrop+1
+                    if dropCorrupt:
+                        ndrop=ndrop+1
+                        continue      # only fill w/ complete events
                 if (eventDict[ievt].GetErrorFlags() & TBEvent.F_CORRUPT):
                     if dropCorrupt:
                         ndrop=ndrop+1
@@ -159,7 +160,7 @@ def filler(padeDat, beamDat, NEventLimit=NMAX, NSpillLimit=NMAX,
         padeline=fPade.readline().rstrip()
         if not padeline:                                             # end of file
             ndrop=fillTree(BeamTree,eventDict,tbspill)          
-            if not ndrop==0: logger.Warn(ndrop,"incomplete events dropped from tree, spill",nSpills)
+            if not ndrop==0: logger.Warn("incomplete events dropped from spill","++",nSpills)
             break
         linesread=linesread+1
 
@@ -176,7 +177,7 @@ def filler(padeDat, beamDat, NEventLimit=NMAX, NSpillLimit=NMAX,
         if "starting spill" in padeline:   # new spill condition
             if nSpills>0 and not skipToNextSpill:  # if we processed a good spill, fill the tree
                 ndrop=fillTree(BeamTree,eventDict,tbspill)
-                if not ndrop==0: logger.Warn(ndrop,"incomplete events dropped from tree, spill",nSpills)
+                if not ndrop==0: logger.Warn("incomplete events dropped from spill","++",nSpills)
             if (nEventsTot>=NEventLimit or nSpills==NSpillLimit): break
 
             tbspill.Reset();
@@ -252,11 +253,11 @@ def filler(padeDat, beamDat, NEventLimit=NMAX, NSpillLimit=NMAX,
         
         # check for non-sequential events
         if newEvent and (padeEvent-lastEvent)>1:
-			logger.Warn("Nonsequential event #, board",pade_board_id,"++delta=",padeEvent-lastEvent,
-						"this event",padeEvent,"last event",lastEvent,
+	    logger.Warn("Nonsequential event number++: board",pade_board_id,"++delta=",padeEvent-lastEvent,
+			"this event",padeEvent,"last event",lastEvent,
                         "Board:",pade_board_id,"channel:",pade_ch_number,
                         "padeSpill",padeSpill['number'])
-			if DEBUG_LEVEL>0: logger.Info("line number",linesread)
+	    if DEBUG_LEVEL>0: logger.Info("line number",linesread)
         # if for some strange reason PADE events are not ordered (negative delta!) then skip that event      
         elif ((padeEvent-lastEvent) < 0):
 			logger.Warn("Nonsequential event #, delta is negative!")
