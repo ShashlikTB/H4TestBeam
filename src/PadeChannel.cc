@@ -215,6 +215,7 @@ PulseFit PadeChannel::FitPulse(PadeChannel *pc){
       result.tRiseValue = i - 1.0;
     }
   }
+  if(result.aMaxValue<=1e-3) result.aMaxValue = 1e-3;
   func->SetParameters( result.pedestal, result.aMaxValue, result.tRiseValue );
   // Limit range of timing within first 80 samples. We want to avoid
   // arbitrary amplitude with very late timing (out of range) in pure
@@ -243,6 +244,7 @@ PulseFit PadeChannel::FitPulse(PadeChannel *pc){
   result.ndof       = func->GetNDF();
 
   // recalculated chi2 using samples around the peak only
+  if(result.aMaxValue<=1e-3) result.aMaxValue = 1e-3;
   func->SetParameters( result.pedestal, result.aMaxValue, result.tRiseValue );
   func->SetParLimits(0,  1.e+0, 1.e+4);
   func->SetParLimits(1,  0.e+0, 1.e+4);
