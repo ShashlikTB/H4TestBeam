@@ -165,6 +165,7 @@ class TBEvent : public TObject {
   static const ULong64_t PULSESHAPE_T2=635433522000000000L;  
   static const ULong64_t PULSESHAPE_T3=635435712000000000L;  
   static const ULong64_t PULSESHAPE_T4=635437953000000000L;  
+  static const ULong64_t PULSESHAPE_T5=636029280000000000L;  
 
   // event flags
   /// Pade Channel error flags

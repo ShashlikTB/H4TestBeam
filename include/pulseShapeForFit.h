@@ -44,6 +44,8 @@ double funcPulseA(double *x, double *par);
 double funcPulseB(double *x, double *par);
 double funcPulseC(double *x, double *par);
 double funcPulseD(double *x, double *par);
+double funcPulseE(double *x, double *par);
+double funcPulseF(double *x, double *par);
 
 double funcPulseLaserA(double *x, double *par);
 double funcPulseLaserB(double *x, double *par);

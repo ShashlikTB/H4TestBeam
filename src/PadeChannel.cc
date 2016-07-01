@@ -170,8 +170,8 @@ PulseFit PadeChannel::FitPulse(PadeChannel *pc){
       funcL1 = new TF1("funcL1", funcPulseLaserB, 0.0, 120.0, 3);
       funcL2 = new TF1("funcL2", funcPulseLaserB, 0.0, 120.0, 3);
     }else{
-      funcB1 = new TF1("funcB1", funcPulseB, 0.0, 120.0, 3);
-      funcB2 = new TF1("funcB2", funcPulseB, 0.0, 120.0, 3);
+      funcB1 = new TF1("funcB1", funcPulseE, 0.0, 120.0, 3);
+      funcB2 = new TF1("funcB2", funcPulseF, 0.0, 120.0, 3);
       funcL1 = new TF1("funcL1", funcPulseLaserB, 0.0, 120.0, 3);
       funcL2 = new TF1("funcL2", funcPulseLaserB, 0.0, 120.0, 3);
     }
@@ -192,8 +192,15 @@ PulseFit PadeChannel::FitPulse(PadeChannel *pc){
   bool chanOdd = false;
   int brd = pc->GetChannelIndex() / 32;
   int chn = (pc->GetChannelIndex() % 32) / 4;
-  if(brd==3 && (chn==2 || chn==3 || chn==6 || chn==7)) chanOdd = true;
 
+  
+  if(pc->GetTimeStamp()<=TBEvent::PULSESHAPE_T4){
+    if(brd==3 && (chn==2 || chn==3 || chn==6 || chn==7)) chanOdd = true;
+  }else{
+    if(brd==3) chanOdd = true;
+  }
+
+  
   TF1 *func;
   if(chanOdd){
     pc->LaserData() ? func=funcL2 : func=funcB2;
@@ -213,7 +220,7 @@ PulseFit PadeChannel::FitPulse(PadeChannel *pc){
   // arbitrary amplitude with very late timing (out of range) in pure
   // noise events
   func->SetParLimits(0,  1.e+0, 1.e+4);
-  func->SetParLimits(1, -1.e+4, 1.e+4);
+  func->SetParLimits(1,  0.e+0, 1.e+4);
   func->SetParLimits(2,  5.e+0, 8.e+1);
 
   // One can enable option "E" for the fitter
@@ -238,7 +245,7 @@ PulseFit PadeChannel::FitPulse(PadeChannel *pc){
   // recalculated chi2 using samples around the peak only
   func->SetParameters( result.pedestal, result.aMaxValue, result.tRiseValue );
   func->SetParLimits(0,  1.e+0, 1.e+4);
-  func->SetParLimits(1, -1.e+4, 1.e+4);
+  func->SetParLimits(1,  0.e+0, 1.e+4);
   func->SetParLimits(2, result.tRiseValue-1.0 , result.tRiseValue+1.0);
   //  func->FixParameter(0, result.pedestal);
   //  func->FixParameter(1, result.aMaxValue);
